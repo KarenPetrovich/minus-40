@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>Минус 40</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "surface-bright": "#f8f9f9",
+                    "tertiary": "#1b1e1f",
+                    "on-tertiary-fixed-variant": "#444748",
+                    "primary": "#181f21",
+                    "surface-container-highest": "#e1e3e3",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-container": "#416a65",
+                    "surface-tint": "#586062",
+                    "error": "#ba1a1a",
+                    "secondary-container": "#bde8e2",
+                    "outline": "#747879",
+                    "inverse-primary": "#c1c8ca",
+                    "surface-container-high": "#e7e8e8",
+                    "surface-variant": "#e1e3e3",
+                    "tertiary-container": "#303333",
+                    "surface": "#f8f9f9",
+                    "surface-container": "#edeeee",
+                    "outline-variant": "#c3c7c8",
+                    "tertiary-fixed-dim": "#c4c7c7",
+                    "surface-dim": "#d9dada",
+                    "on-primary-container": "#959c9f",
+                    "on-primary-fixed": "#161d1f",
+                    "on-surface": "#191c1c",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed-variant": "#41484a",
+                    "inverse-surface": "#2e3131",
+                    "on-background": "#191c1c",
+                    "secondary-fixed": "#c0ebe5",
+                    "inverse-on-surface": "#f0f1f1",
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "secondary": "#3d6561",
+                    "surface-container-low": "#f3f4f4",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed-variant": "#244d49",
+                    "primary-container": "#2d3436",
+                    "on-secondary-fixed": "#00201d",
+                    "on-tertiary-fixed": "#191c1d",
+                    "background": "#f8f9f9",
+                    "primary-fixed-dim": "#c1c8ca",
+                    "on-tertiary-container": "#989b9b",
+                    "primary-fixed": "#dde4e6",
+                    "on-surface-variant": "#434749",
+                    "secondary-fixed-dim": "#a4cfc9",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed": "#e1e3e3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "gutter": "1rem",
+                    "container-padding": "1rem",
+                    "stack-gap": "0.75rem",
+                    "section-margin": "2rem"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Inter"],
+                    "data-mono": ["Inter"],
+                    "display-weight": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "data-mono": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "display-weight": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #f8f9f9;
+            color: #191c1c;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .metric-card {
+            border: 1px solid #E2E8F0;
+            background: #ffffff;
+        }
+        .progress-track {
+            background-color: #F0F2F2;
+        }
+        .progress-fill {
+            background-color: #3d6561; /* Secondary Teal */
+        }
+        .thumb-zone-button {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md selection:bg-secondary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface border-b border-outline-variant flex items-center justify-center h-16 px-gutter max-w-[480px] mx-auto left-0 right-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="analytics">analytics</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Минус 40</h1>
+</div>
+</header>
+<main class="pt-20 pb-32 px-gutter max-w-[480px] mx-auto min-h-screen">
+<!-- Hero Block: Current Weight -->
+<section class="section-margin">
+<div class="metric-card p-6 rounded-lg">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Текущий вес</span>
+<div class="flex items-center gap-1 text-secondary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]" data-icon="trending_down">trending_down</span>
+<span>-1,4 кг</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-weight text-display-weight text-primary">150,0</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface-variant">кг</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1">Изменение за неделю</p>
+</div>
+</section>
+<!-- Progress Section -->
+<section class="section-margin space-y-4">
+<div class="flex justify-between items-end">
+<div>
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase">Прогресс</h3>
+<p class="font-headline-lg-mobile text-headline-lg-mobile text-primary">Цель: 110 кг</p>
+</div>
+<p class="font-data-mono text-data-mono text-secondary">25%</p>
+</div>
+<div class="w-full h-2 progress-track rounded-full overflow-hidden">
+<div class="h-full progress-fill w-1/4 rounded-full"></div>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant">Осталось сбросить 40 кг</p>
+</section>
+<!-- Milestone Goals -->
+<section class="section-margin">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase mb-4 tracking-widest">Ближайшие цели</h3>
+<div class="grid grid-cols-2 gap-stack-gap">
+<!-- Milestone 140 -->
+<div class="metric-card p-4 rounded-lg flex flex-col items-center justify-center border-l-4 border-l-outline-variant">
+<span class="font-label-md text-label-md text-on-surface-variant">Этап 1</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary opacity-40">140 кг</span>
+<span class="material-symbols-outlined text-outline-variant mt-2" data-icon="lock">lock</span>
+</div>
+<!-- Milestone 130 -->
+<div class="metric-card p-4 rounded-lg flex flex-col items-center justify-center opacity-50">
+<span class="font-label-md text-label-md text-on-surface-variant">Этап 2</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary">130 кг</span>
+<span class="material-symbols-outlined text-outline-variant mt-2" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+</div>
+<!-- Milestone 120 -->
+<div class="metric-card p-4 rounded-lg flex flex-col items-center justify-center opacity-50">
+<span class="font-label-md text-label-md text-on-surface-variant">Этап 3</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary">120 кг</span>
+<span class="material-symbols-outlined text-outline-variant mt-2" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+</div>
+<!-- Milestone 110 (Final) -->
+<div class="metric-card p-4 rounded-lg flex flex-col items-center justify-center opacity-50 bg-surface-container-low">
+<span class="font-label-md text-label-md text-on-surface-variant">Финал</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary">110 кг</span>
+<span class="material-symbols-outlined text-secondary mt-2" data-icon="flag">flag</span>
+</div>
+</div>
+</section>
+<!-- Measurement History -->
+<section class="section-margin">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">История измерений</h3>
+<button class="text-secondary font-label-md text-label-md">См. все</button>
+</div>
+<div class="space-y-0.5 border-t border-outline-variant">
+<div class="flex items-center justify-between py-4 border-b border-outline-variant">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary">12 октября</span>
+<span class="text-xs text-on-surface-variant">Суббота</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-data-mono text-data-mono text-primary">150,0 кг</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<div class="flex items-center justify-between py-4 border-b border-outline-variant">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary">5 октября</span>
+<span class="text-xs text-on-surface-variant">Суббота</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-data-mono text-data-mono text-primary">151,4 кг</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Primary Action Button (Fixed position above BottomNav) -->
+<div class="fixed bottom-24 left-0 right-0 px-gutter max-w-[480px] mx-auto pointer-events-none">
+<button class="pointer-events-auto w-full h-16 bg-primary text-on-primary rounded-lg font-label-md text-label-md uppercase tracking-[0.2em] flex items-center justify-center gap-2 active:scale-95 transition-transform thumb-zone-button">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                Добавить вес
+            </button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 right-0 w-full z-50 bg-surface border-t border-outline-variant max-w-[480px] mx-auto">
+<div class="flex justify-around items-center h-20 px-gutter pb-safe">
+<!-- Active Tab: Обзор -->
+<a class="flex flex-col items-center justify-center bg-primary text-on-primary rounded-xl p-2 min-w-[72px] active:scale-95 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-md text-label-md mt-1">Обзор</span>
+</a>
+<!-- Inactive: История -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 min-w-[72px] active:scale-95 transition-all duration-200 hover:bg-surface-container-high" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-label-md text-label-md mt-1">История</span>
+</a>
+<!-- Inactive: Настройки -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 min-w-[72px] active:scale-95 transition-all duration-200 hover:bg-surface-container-high" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md mt-1">Настройки</span>
+</a>
+</div>
+</nav>
+<script>
+        // Simple haptic feedback simulation for buttons
+        document.querySelectorAll('button, a').forEach(element => {
+            element.addEventListener('touchstart', () => {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                }
+            });
+        });
+
+        // Initialize Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+            window.Telegram.WebApp.setHeaderColor('#f8f9f9');
+            window.Telegram.WebApp.setBackgroundColor('#f8f9f9');
+        }
+    </script>
+</body></html>
