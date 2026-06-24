@@ -17,3 +17,9 @@ nav{height:calc(80px + var(--safe-bottom));padding-bottom:var(--safe-bottom)}
 button,input,textarea,select{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .icon-button,.fab,nav button,.primary,.close,.history article button{transition:transform 120ms ease,opacity 120ms ease,filter 120ms ease}
 .icon-button:active,.fab:active,nav button:active,.primary:active,.close:active,.history article button:active{transform:scale(.98);filter:saturate(.94)}
+.total-card-good{background:#00328a;color:#fff}
+.total-card-good label{color:#b3c5ff}
+.total-card-good p{color:#dbe1ff}
+.total-card-bad{background:#ba1a1a;color:#fff}
+.total-card-bad label{color:#ffdad6}
+.total-card-bad p{color:#ffdad6}
