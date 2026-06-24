@@ -14,6 +14,7 @@ import {
   remainingToGoal,
   totalLost,
 } from '../core/progress'
+import { triggerImpact, triggerNotification, triggerSelection } from '../features/telegram/webapp'
 import { animateValue, fadeIn, fadeOut, lerp, slideIn } from './motion'
 
 type Props = {
@@ -141,19 +142,39 @@ function Layout({
       <header>
         <span className="brand-icon">▣</span>
         <b>Minus 40</b>
-        <button className="icon-button" onClick={() => setScreen('settings')}>
+        <button
+          className="icon-button"
+          onClick={() => {
+            triggerSelection()
+            setScreen('settings')
+          }}
+        >
           ⚙
         </button>
       </header>
       <main>{children}</main>
       {screen !== 'settings' && (
-        <button className="fab" onClick={onAdd}>
+        <button
+          className="fab"
+          onClick={() => {
+            triggerImpact('medium')
+            onAdd()
+          }}
+          aria-label="Добавить замер"
+        >
           ＋
         </button>
       )}
       <nav>
         {(Object.keys(icons) as Screen[]).map((item) => (
-          <button key={item} className={screen === item ? 'active' : ''} onClick={() => setScreen(item)}>
+          <button
+            key={item}
+            className={screen === item ? 'active' : ''}
+            onClick={() => {
+              triggerSelection()
+              setScreen(item)
+            }}
+          >
             <i>{icons[item]}</i>
             {{ overview: 'Обзор', history: 'История', graph: 'График', settings: 'Цели' }[item]}
           </button>
@@ -163,7 +184,7 @@ function Layout({
   )
 }
 
-function Overview({ state, onAdd }: { state: AppState; onAdd: () => void }) {
+function Overview({ state }: { state: AppState }) {
   const current = currentWeight(state)
   const milestone = nextMilestone(state)
   const trend = recentTrend(state.entries)
@@ -213,15 +234,11 @@ function Overview({ state, onAdd }: { state: AppState; onAdd: () => void }) {
           {animatedWeight === null ? '—' : animatedWeight.toFixed(1)}
           <small> кг</small>
         </div>
-        {trend === null ? (
-          <button className="chip" onClick={onAdd}>
-            Добавьте замеры
-          </button>
-        ) : (
+        {trend !== null ? (
           <span className={`chip ${trend > 0 ? 'bad' : ''}`}>
             {trend < 0 ? '↓' : trend > 0 ? '↑' : '→'} {Math.abs(trend * 7).toFixed(1)} кг за неделю
           </span>
-        )}
+        ) : null}
         <div className="progress-head">
           <span>Прогресс до цели</span>
           <b>{progress.toFixed(1)}%</b>
@@ -310,7 +327,13 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
               <em className={delta !== null && delta > 0 ? 'red' : 'orange'}>
                 {delta === null ? '—' : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} кг`}
               </em>
-              <button onClick={() => onDelete(entry.id)} aria-label="Удалить">
+              <button
+                onClick={() => {
+                  triggerImpact('medium')
+                  onDelete(entry.id)
+                }}
+                aria-label="Удалить"
+              >
                 ×
               </button>
             </article>
@@ -377,6 +400,7 @@ function Settings({ state, onSave }: { state: AppState; onSave: (start: number, 
           const parsedTarget = Number(target.replace(',', '.'))
 
           if (parsedStart > 0 && parsedTarget > 0 && parsedTarget < parsedStart) {
+            triggerNotification('success')
             onSave(parsedStart, parsedTarget)
           }
         }}
@@ -404,6 +428,7 @@ function AddDialog({ onClose, onAdd }: { onClose: () => void; onAdd: (value: num
 
   const save = (requestClose: () => void) => {
     if (Number.isFinite(parsed) && parsed > 0) {
+      triggerNotification('success')
       onAdd(parsed)
       requestClose()
     }
@@ -450,7 +475,13 @@ function MilestoneDialog({ value, onClose }: { value: number; onClose: () => voi
           <label>РУБЕЖ ДОСТИГНУТ</label>
           <h1>{formatWeight(value)}</h1>
           <p>Отличная работа. Продолжайте в том же ритме.</p>
-          <button className="primary" onClick={requestClose}>
+          <button
+            className="primary"
+            onClick={() => {
+              triggerImpact('light')
+              requestClose()
+            }}
+          >
             Продолжить
           </button>
         </>
@@ -473,7 +504,7 @@ export function AppUI({ state, onAdd, onDelete, onSettings }: Props) {
   const openAdd = () => setAdding(true)
   const view =
     screen === 'overview' ? (
-      <Overview state={state} onAdd={openAdd} />
+      <Overview state={state} />
     ) : screen === 'history' ? (
       <History state={state} onDelete={onDelete} />
     ) : screen === 'graph' ? (

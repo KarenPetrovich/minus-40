@@ -7,3 +7,13 @@
 .progress{overflow:hidden}
 .progress i{transform:translateZ(0)}
 .dialog section,.dialog form{transform:translate3d(0,0,0)}
+html,body,#root{min-height:100%}
+:root{--safe-top:0px;--safe-bottom:0px;--safe-left:0px;--safe-right:0px;background:var(--tg-bg-color,#f9f9fc);color:var(--tg-text-color,#1a1c1e)}
+body{background:var(--tg-bg-color,#f9f9fc);color:var(--tg-text-color,#1a1c1e);overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+main{padding-top:calc(88px + var(--safe-top));padding-bottom:calc(108px + var(--safe-bottom))}
+header{padding-top:var(--safe-top);height:calc(64px + var(--safe-top));padding-left:max(16px,calc((100% - 500px)/2));padding-right:max(16px,calc((100% - 500px)/2))}
+nav{height:calc(80px + var(--safe-bottom));padding-bottom:var(--safe-bottom)}
+.fab{bottom:calc(96px + var(--safe-bottom))}
+button,input,textarea,select{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.icon-button,.fab,nav button,.primary,.close,.history article button{transition:transform 120ms ease,opacity 120ms ease,filter 120ms ease}
+.icon-button:active,.fab:active,nav button:active,.primary:active,.close:active,.history article button:active{transform:scale(.98);filter:saturate(.94)}

@@ -13,6 +13,11 @@ type TelegramInsets = {
 type TelegramWebApp = {
   ready: () => void
   expand: () => void
+  HapticFeedback?: {
+    impactOccurred?: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void
+    selectionChanged?: () => void
+    notificationOccurred?: (type: 'success' | 'warning' | 'error') => void
+  }
   onEvent?: (eventType: string, handler: () => void) => void
   offEvent?: (eventType: string, handler: () => void) => void
   themeParams?: TelegramThemeParams
@@ -72,6 +77,18 @@ function applyThemeFallbacks(webApp: TelegramWebApp | null): void {
   if (textColor) {
     setCssVariable('--tg-text-color', textColor)
   }
+}
+
+export function triggerImpact(style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft' = 'light'): void {
+  getTelegramWebApp()?.HapticFeedback?.impactOccurred?.(style)
+}
+
+export function triggerSelection(): void {
+  getTelegramWebApp()?.HapticFeedback?.selectionChanged?.()
+}
+
+export function triggerNotification(type: 'success' | 'warning' | 'error'): void {
+  getTelegramWebApp()?.HapticFeedback?.notificationOccurred?.(type)
 }
 
 export function initializeTelegramWebApp(): () => void {
