@@ -112,15 +112,9 @@ button {
     calc(16px + var(--safe-left));
 }
 
-.hero,
-.journey-card,
-.milestone-card,
-.history-preview {
-  margin-bottom: 32px;
-}
-
 .hero {
   text-align: center;
+  margin-bottom: 32px;
 }
 
 .section-label {
@@ -132,6 +126,18 @@ button {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-secondary);
+}
+
+.hero__card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  min-width: min(100%, 360px);
+  padding: 16px 18px 18px;
+  border: 1px solid var(--outline);
+  border-radius: 16px;
+  background: var(--surface-low);
 }
 
 .hero__value-row {
@@ -261,6 +267,7 @@ button {
   flex-direction: column;
   align-items: center;
   gap: 14px;
+  position: relative;
 }
 
 .journey-node__marker {
@@ -281,6 +288,31 @@ button {
   height: 10px;
   border-radius: 999px;
   background: var(--outline);
+}
+
+.journey-node__check {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--surface-card);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.journey-node__status {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--secondary);
 }
 
 .journey-node__label {
@@ -307,7 +339,10 @@ button {
 }
 
 .journey-node--current .journey-node__marker {
+  border-width: 4px;
   border-color: var(--secondary);
+  box-shadow: 0 0 0 4px rgba(61, 101, 97, 0.08);
+  background: var(--surface-card);
 }
 
 .journey-node__core--current {
@@ -319,6 +354,15 @@ button {
 .journey-node--current .journey-node__label {
   font-weight: 700;
   color: var(--secondary);
+}
+
+.journey-node--upcoming .journey-node__marker {
+  background: var(--surface-card);
+  border-color: var(--outline-variant);
+}
+
+.journey-node--upcoming .journey-node__label {
+  color: var(--text-secondary);
 }
 
 .journey-card__focus {
@@ -373,7 +417,9 @@ button {
   padding: 24px;
   background: var(--primary);
   color: #ffffff;
-  box-shadow: var(--shadow-soft);
+  border: 2px solid var(--secondary);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+  margin-bottom: 32px;
 }
 
 .milestone-card__header {
@@ -497,13 +543,14 @@ button {
 }
 
 .history-row {
-  border-radius: 16px;
-  padding: 18px 16px;
+  border-radius: 14px;
+  padding: 16px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background: var(--surface-low);
+  background: var(--surface-card);
+  border-color: var(--surface-line);
 }
 
 .history-row__left,
@@ -517,7 +564,7 @@ button {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: var(--outline);
+  background: var(--outline-variant);
 }
 
 .history-row__dot--latest {
@@ -540,10 +587,11 @@ button {
   font-weight: 700;
 }
 
-.history-row__arrow {
+.history-row__chevron {
   color: var(--outline);
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
+  font-weight: 700;
 }
 
 .entry-panel {

@@ -189,9 +189,11 @@ function App() {
           {currentWeight === null ? (
             <p className="hero__empty">Пока нет ни одной записи. Внесите первый вес, чтобы построить путь.</p>
           ) : (
-            <div className="hero__value-row">
-              <p className="hero__value">{formatCompactWeight(currentWeight)}</p>
-              <span className="hero__unit">кг</span>
+            <div className="hero__card">
+              <div className="hero__value-row">
+                <p className="hero__value">{formatCompactWeight(currentWeight)}</p>
+                <span className="hero__unit">кг</span>
+              </div>
               <span className={`trend-pill${weeklyChange !== null && weeklyChange < 0 ? ' trend-pill--good' : ''}`}>
                 {weeklyChange !== null && weeklyChange < 0 ? 'К цели' : 'В фокусе'}
               </span>
@@ -221,8 +223,14 @@ function App() {
 
                 return (
                   <div className={`journey-node journey-node--${state}`} key={milestone}>
+                    {state === 'current' ? (
+                      <span className="journey-node__status" aria-hidden="true">
+                        Сейчас
+                      </span>
+                    ) : null}
                     <div className="journey-node__marker">
                       <span className={`journey-node__core journey-node__core--${state}`} />
+                      {state === 'passed' ? <span className="journey-node__check">✓</span> : null}
                     </div>
                     <span className="journey-node__label">{milestone}</span>
                   </div>
@@ -314,8 +322,8 @@ function App() {
                   </div>
                   <div className="history-row__right">
                     <span className="history-row__weight">{formatWeight(entry.weight)}</span>
-                    <span className="history-row__arrow" aria-hidden="true">
-                      &gt;
+                    <span className="history-row__chevron" aria-hidden="true">
+                      ›
                     </span>
                   </div>
                 </article>
