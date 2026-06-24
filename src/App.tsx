@@ -6,7 +6,7 @@ import type { WeightEntry } from './features/weight/types'
 const initialEntries = loadWeightEntries()
 const START_WEIGHT = 150
 const GOAL_WEIGHT = 110
-const MILESTONES = [140, 130, 120, 110] as const
+const MILESTONES = [150, 140, 130, 120, 110] as const
 const HISTORY_PREVIEW_LIMIT = 3
 
 type MilestoneState = 'passed' | 'current' | 'upcoming'
@@ -216,13 +216,6 @@ function App() {
             />
 
             <div className="journey-map__nodes">
-              <div className="journey-node journey-node--passed">
-                <div className="journey-node__marker">
-                  <span className="journey-node__core journey-node__core--passed" />
-                </div>
-                <span className="journey-node__label">150</span>
-              </div>
-
               {MILESTONES.map((milestone) => {
                 const state = getMilestoneState(currentWeight, milestone, nextMilestone)
 
