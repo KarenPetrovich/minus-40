@@ -195,6 +195,8 @@ function Overview({ state }: { state: AppState }) {
   const progressRef = useRef<HTMLElement>(null)
   const progressFrom = useRef(progress)
   const progressDisplayed = useRef(progress)
+  const lostTotal = totalLost(state)
+  const isAboveStart = lostTotal < 0
   const line = points.map((point) => `${point.x},${point.y}`).join(' ')
 
   useEffect(() => {
@@ -266,7 +268,7 @@ function Overview({ state }: { state: AppState }) {
             <b>{milestone === null ? 'Цель достигнута' : formatWeight(milestone)}</b>
           </em>
         </span>
-        <b>{current === null || milestone === null ? '' : `−${formatWeight(Math.max(current - milestone, 0))}`}</b>
+        <b>{current === null || milestone === null ? '' : formatWeight(Math.max(current - milestone, 0))}</b>
       </section>
 
       <section className="forecast">
@@ -296,11 +298,11 @@ function Overview({ state }: { state: AppState }) {
       </section>
 
       <section className="total-card">
-        <label>ВСЕГО СБРОШЕНО</label>
+        <label>{isAboveStart ? 'ИЗМЕНЕНИЕ ОТ СТАРТА' : 'ВСЕГО СБРОШЕНО'}</label>
         <strong>
-          {totalLost(state).toFixed(1)} <small>кг</small>
+          {(isAboveStart ? Math.abs(lostTotal) : lostTotal).toFixed(1)} <small>кг</small>
         </strong>
-        <p>С момента начала ({formatWeight(state.startWeight)})</p>
+        <p>{isAboveStart ? `Выше стартового веса ${formatWeight(state.startWeight)}` : `С момента начала (${formatWeight(state.startWeight)})`}</p>
       </section>
     </div>
   )
