@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
-  font-family: 'Hanken Grotesk', sans-serif;
+  font-family: 'Manrope', sans-serif;
   color: #1a1c1e;
   background: #f9f9fc;
   --safe-top: 0px;
@@ -46,13 +46,13 @@ header {
   top: 0;
   z-index: 5;
   width: 100%;
-  height: calc(56px + var(--safe-top));
+  height: calc(44px + var(--safe-top));
   padding-top: var(--safe-top);
   padding-left: max(14px, calc((100% - 500px) / 2));
   padding-right: max(14px, calc((100% - 500px) / 2));
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: #f9f9fcf0;
   backdrop-filter: blur(14px);
   border-bottom: 1px solid #c3c6d6;
@@ -74,24 +74,10 @@ header {
   letter-spacing: 0;
 }
 
-.brand-title {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -.02em;
-}
-
-header .icon-button {
-  margin-left: auto;
-  border: 0;
-  background: none;
-  color: #434653;
-  font-size: 20px;
-}
-
 main {
   max-width: 500px;
   margin: auto;
-  padding: calc(76px + var(--safe-top)) 16px calc(104px + var(--safe-bottom));
+  padding: calc(60px + var(--safe-top)) 16px calc(104px + var(--safe-bottom));
 }
 
 .stack {
@@ -130,10 +116,10 @@ main {
   margin: 10px 0 8px;
   color: #00328a;
   display: inline-flex;
-  align-items: flex-end;
+  align-items: baseline;
   justify-content: center;
   gap: 0;
-  font-family: 'Sora', 'Hanken Grotesk', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: clamp(60px, 18vw, 74px);
   font-weight: 700;
   letter-spacing: -.045em;
@@ -147,6 +133,13 @@ main {
 .total-card small {
   font-size: .34em;
   letter-spacing: 0;
+}
+
+.weight small {
+  margin-left: 4px;
+  margin-bottom: 0;
+  font-size: .4em;
+  line-height: 1;
 }
 
 .weight-whole {
@@ -225,17 +218,18 @@ main {
 
 .milestone-footer {
   display: flex;
-  justify-content: space-between;
+  width: 100%;
+  justify-content: flex-end;
   align-items: baseline;
-  gap: 12px;
-  margin-top: 2px;
+  gap: 6px;
+  margin-top: 4px;
   color: #737685;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .milestone-footer b {
   color: #1a1c1e;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 800;
   letter-spacing: -.03em;
 }
@@ -246,9 +240,10 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #0047bb;
-  color: #fff;
-  box-shadow: 0 8px 20px #00328a33;
+  background: #eef4ff;
+  border: 1px solid #c9d8ff;
+  color: #0f2f75;
+  box-shadow: none;
 }
 
 .forecast span {
@@ -274,15 +269,33 @@ main {
   font-style: normal;
   font-size: 10px;
   letter-spacing: .12em;
-  color: #dbe1ff;
+  color: #5f6c89;
 }
 
 .forecast em b {
   display: block;
   margin-top: 3px;
-  color: #fff;
+  color: #0f2f75;
   font-size: 16px;
   letter-spacing: 0;
+}
+
+.forecast-primary,
+.forecast-secondary {
+  display: block;
+}
+
+.forecast-primary {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f2f75;
+}
+
+.forecast-secondary {
+  margin-top: 2px;
+  color: #5f6c89;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .chart-card {
@@ -335,27 +348,30 @@ main {
 }
 
 .total-card {
-  padding: 28px 24px;
-  border-radius: 28px;
-  background: #00328a;
-  color: #fff;
+  padding: 22px 20px;
+  border-radius: 24px;
+  background: #fff;
+  border: 2px solid #00328a;
+  color: #1a1c1e;
 }
 
 .total-card label {
-  color: #b3c5ff;
+  color: #5f6c89;
 }
 
 .total-card strong {
   display: block;
   margin-top: 4px;
-  font-size: 56px;
+  font-size: 48px;
   font-weight: 800;
   letter-spacing: -.05em;
+  color: #fc820c;
 }
 
 .total-card p {
-  margin: 4px 0 0;
-  color: #dbe1ff;
+  margin: 6px 0 0;
+  color: #5f6c89;
+  font-size: 15px;
 }
 
 .fab {

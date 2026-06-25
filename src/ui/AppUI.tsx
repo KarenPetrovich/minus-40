@@ -92,6 +92,36 @@ function splitWeightParts(value: number | null) {
   return { whole, fraction }
 }
 
+function renderForecastText(forecast: { days: number; basis: 'weekly' | 'provisional' } | null, milestone: number | null) {
+  if (milestone === null) {
+    return (
+      <>
+        <span className="forecast-primary">Цель уже достигнута</span>
+      </>
+    )
+  }
+
+  if (forecast === null) {
+    return (
+      <>
+        <span className="forecast-primary">Пока рано для прогноза</span>
+      </>
+    )
+  }
+
+  return forecast.basis === 'weekly' ? (
+    <>
+      <span className="forecast-primary">{forecast.days} дн.</span>
+      <span className="forecast-secondary">до {formatWeight(milestone)}</span>
+    </>
+  ) : (
+    <>
+      <span className="forecast-primary">Предварительно: {forecast.days} дн.</span>
+      <span className="forecast-secondary">до {formatWeight(milestone)}</span>
+    </>
+  )
+}
+
 function DialogFrame({
   className = '',
   onClose,
@@ -156,17 +186,6 @@ function Layout({
         <span className="brand-mark" aria-hidden="true">
           {BRAND_PLACEHOLDER_MARK}
         </span>
-        <span className="brand-title">Минус 40</span>
-        <button
-          className="icon-button"
-          aria-label="Открыть цели"
-          onClick={() => {
-            triggerSelection()
-            setScreen('settings')
-          }}
-        >
-          ⚑
-        </button>
       </header>
       <main>{children}</main>
       {screen !== 'settings' && (
@@ -277,7 +296,7 @@ function Overview({ state }: { state: AppState }) {
           <i ref={progressRef} style={{ width: `${milestoneProgress.toFixed(2)}%` }} />
         </div>
         <div className="milestone-footer">
-          <span>Осталось до {milestone === null ? formatWeight(state.targetWeight) : formatWeight(milestone)}</span>
+          <span>Осталось</span>
           <b>{milestoneRemaining === null ? '0,0 кг' : formatWeight(milestoneRemaining)}</b>
         </div>
       </section>
@@ -289,15 +308,7 @@ function Overview({ state }: { state: AppState }) {
           </span>
           <em>
             Прогноз
-            <b>
-              {milestone === null
-                ? 'Цель уже достигнута'
-                : forecast === null
-                  ? 'Пока рано для прогноза'
-                  : forecast.basis === 'weekly'
-                    ? `${forecast.days} дн. до ${formatWeight(milestone)}`
-                    : `Предварительно: ${forecast.days} дн. до ${formatWeight(milestone)}`}
-            </b>
+            <b>{renderForecastText(forecast, milestone)}</b>
           </em>
         </span>
       </section>
@@ -307,7 +318,7 @@ function Overview({ state }: { state: AppState }) {
         <strong>
           {(isAboveStart ? Math.abs(lostTotal) : lostTotal).toFixed(1)} <small>кг</small>
         </strong>
-        <p>{isAboveStart ? `Выше стартового веса ${formatWeight(state.startWeight)}` : `С момента начала (${formatWeight(state.startWeight)})`}</p>
+        <p>{isAboveStart ? `Выше стартового веса ${formatWeight(state.startWeight)}` : `С момента начала ${formatWeight(state.startWeight)}`}</p>
       </section>
     </div>
   )
