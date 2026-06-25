@@ -146,3 +146,15 @@ Why:
 - navigation is part of the core product identity;
 - the app needs a more intentional premium feel without playful over-animation;
 - keeping raw imports in the active tree creates noise and weakens repository hygiene.
+
+### 2026-06-25 - Forecast Calendar Asset Naming
+
+Decision:
+
+- the forecast icon asset uses the canonical filename `forecast-calendar.png`;
+- the earlier typo `kalandar.png` is incorrect and should not be reused.
+
+Why:
+
+- asset names should stay searchable and unambiguous in the active project tree;
+- avoiding spelling drift reduces broken imports and future confusion.

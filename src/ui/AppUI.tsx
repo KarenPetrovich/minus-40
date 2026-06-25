@@ -16,6 +16,7 @@ import {
 } from '../core/progress'
 import { triggerImpact, triggerNotification, triggerSelection } from '../features/telegram/webapp'
 import { animateValue, fadeIn, fadeOut, lerp, slideIn } from './motion'
+import forecastCalendarIcon from '../../forecast-calendar.png'
 
 type Props = {
   state: AppState
@@ -211,9 +212,7 @@ function Layout({
   return (
     <>
       <header>
-        <span className="brand-mark" aria-hidden="true">
-          {BRAND_PLACEHOLDER_MARK}
-        </span>
+        <img className="brand-mark brand-logo" src="/brand-logo.png" alt="Логотип Минус 40" data-brand-mark={BRAND_PLACEHOLDER_MARK} />
       </header>
       <main>{children}</main>
       {screen !== 'settings' && (
@@ -334,7 +333,7 @@ function Overview({ state }: { state: AppState }) {
       <section className="forecast">
         <span>
           <span className="placeholder-mark" aria-hidden="true">
-            {BRAND_PLACEHOLDER_MARK}
+            <img className="forecast-icon" src={forecastCalendarIcon} alt="" />
           </span>
           <em>
             Прогноз
