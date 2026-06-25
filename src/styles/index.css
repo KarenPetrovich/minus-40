@@ -394,17 +394,20 @@ nav {
   bottom: 0;
   z-index: 5;
   width: 100%;
-  height: calc(80px + var(--safe-bottom));
+  height: calc(84px + var(--safe-bottom));
   padding-bottom: var(--safe-bottom);
   display: flex;
   justify-content: center;
+  gap: 2px;
   background: #f9f9fcf5;
   backdrop-filter: blur(14px);
   border-top: 1px solid #c3c6d6;
 }
 
 nav button {
-  min-width: 78px;
+  min-width: 74px;
+  flex: 1 1 0;
+  max-width: 108px;
   border: 0;
   background: none;
   color: #737685;
@@ -412,28 +415,147 @@ nav button {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  padding: 10px 6px 8px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -.01em;
 }
 
-nav button i {
+nav button .nav-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 14px;
-  font-size: 20px;
-  font-style: normal;
+  width: 40px;
+  height: 40px;
+  border-radius: 16px;
+  color: currentColor;
+  background: transparent;
+  transition: background-color 180ms ease, transform 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.nav-icon svg {
+  width: 24px;
+  height: 24px;
+  overflow: visible;
+}
+
+.nav-icon .nav-shell,
+.nav-icon .nav-axis,
+.nav-icon .nav-line,
+.nav-icon .nav-stem,
+.nav-icon .nav-hand,
+.nav-icon .nav-pole,
+.nav-icon .nav-flag,
+.nav-icon .nav-cell,
+.nav-icon .nav-dot {
+  vector-effect: non-scaling-stroke;
+  transition:
+    transform 220ms cubic-bezier(.22, 1, .36, 1),
+    opacity 180ms ease,
+    fill 180ms ease,
+    stroke 180ms ease,
+    stroke-width 180ms ease;
+  transform-origin: center;
+}
+
+.nav-icon .nav-shell,
+.nav-icon .nav-axis,
+.nav-icon .nav-stem,
+.nav-icon .nav-pole {
+  stroke: currentColor;
+  opacity: .82;
+}
+
+.nav-icon .nav-line,
+.nav-icon .nav-hand,
+.nav-icon .nav-flag {
+  stroke: currentColor;
+}
+
+.nav-icon .nav-cell,
+.nav-icon .nav-dot {
+  fill: currentColor;
+  stroke: currentColor;
+  opacity: .34;
 }
 
 nav button.active {
   color: #00328a;
 }
 
-nav button.active i {
+nav button.active .nav-icon {
   background: #dbe1ff;
+  box-shadow: inset 0 0 0 1px #c8d4ff;
+  transform: translateY(-1px);
+}
+
+nav button.active .nav-shell,
+nav button.active .nav-axis,
+nav button.active .nav-stem,
+nav button.active .nav-pole {
+  opacity: 1;
+}
+
+nav button.active .nav-cell,
+nav button.active .nav-dot {
+  opacity: 1;
+}
+
+nav button.active .nav-cell-a {
+  transform: translate(-.2px, -.4px) scale(1.03);
+}
+
+nav button.active .nav-cell-b {
+  transform: translate(.3px, -.2px) scale(1.06);
+}
+
+nav button.active .nav-cell-c {
+  transform: translate(-.1px, .2px) scale(1.02);
+}
+
+nav button.active .nav-cell-d {
+  transform: translate(.2px, .3px) scale(1.08);
+}
+
+nav button.active .nav-hand {
+  transform: rotate(12deg);
+  transform-origin: 12px 12px;
+}
+
+nav button.active .nav-stem {
+  transform: translateY(-.2px);
+}
+
+nav button.active .nav-line {
+  transform: translateY(-.7px);
+}
+
+nav button.active .nav-dot-a {
+  transform: translateY(.2px) scale(1.05);
+}
+
+nav button.active .nav-dot-b {
+  transform: translateY(-.5px) scale(1.08);
+}
+
+nav button.active .nav-dot-c {
+  transform: translateY(-.3px) scale(1.08);
+}
+
+nav button.active .nav-dot-d {
+  transform: translateY(-.9px) scale(1.12);
+}
+
+nav button.active .nav-flag {
+  transform: translateX(.4px) scale(1.03);
+  transform-origin: 8px 8px;
+}
+
+@media (hover: hover) {
+  nav button:hover .nav-icon {
+    background: #edf1ff;
+  }
 }
 
 .history h1,

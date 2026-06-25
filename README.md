@@ -1,107 +1,51 @@
-# Минус 40
+# Minus 40
 
-Персональный Telegram Mini App для снижения веса.
+Personal Telegram Mini App for weight tracking and weight-loss progress control.
 
-Проект создаётся для одного пользователя и фокусируется не на подсчёте калорий, а на контроле прогресса по весу.
+## Product Focus
 
-## Цель проекта
+- one user, not a mass-market product;
+- main metric is weight;
+- current active scope is Stage 1 MVP;
+- the app is meant to help maintain trajectory, not become a calorie-counting platform.
 
-Помочь пройти путь от **150 кг** до **110 кг** и удерживать фокус на главной задаче — убрать лишние **40 кг**.
+## Tech Stack
 
-## Исходные данные
-
-- Пол: мужчина
-- Возраст: 45 лет
-- Рост: 183 см
-- Текущий вес: 150 кг
-- Целевой вес: 110 кг
-
-## Контекст
-
-Пользователь уже проходил успешное снижение веса с **200 кг** до **110 кг**.
-
-Рабочая стратегия в прошлом:
-
-- 2–3 недели очень жёсткого дефицита
-- 1–3 недели стабилизации
-- затем новый рывок
-
-База питания в рабочие периоды:
-
-- капуста
-- свёкла
-- яблоки
-- овощи
-
-Позже добавлялись:
-
-- куриная грудка
-- простая нежирная еда
-
-## Текущие проблемы
-
-- потеря дисциплины
-- ночная еда
-- переедание
-- фастфуд
-- отсутствие постоянного контроля веса
-
-## Философия продукта
-
-- это не приложение для подсчёта калорий
-- это инструмент контроля прогресса
-- главная метрика — изменение веса
-- продукт должен помогать не «идеально питаться», а не терять траекторию снижения веса
-
-## Текущий фокус
-
-Сейчас в работу берётся только **Этап 1 / MVP**:
-
-- учёт веса
-- история веса
-- график веса
-- прогноз достижения 140 / 130 / 120 / 110 кг
-
-Вне текущего этапа ничего не реализуем.
-
-## Технологический стек
-
-- Telegram Mini App
 - React
 - TypeScript
 - Vite
+- Telegram Mini App
 
-## Принципы разработки
-
-- маленькие итерации
-- сначала MVP
-- не усложнять архитектуру заранее
-- не добавлять функциональность вне текущего этапа
-
-## Предлагаемая структура проекта
+## Current Architecture
 
 ```text
-minus-40/
-├─ public/
-├─ src/
-│  ├─ app/
-│  ├─ components/
-│  ├─ features/
-│  │  └─ weight/
-│  ├─ shared/
-│  ├─ styles/
-│  └─ main.tsx
-├─ docs/
-├─ README.md
-├─ PROJECT_NOTES.md
-├─ ROADMAP.md
-├─ index.html
-├─ package.json
-├─ tsconfig.json
-├─ tsconfig.node.json
-└─ vite.config.ts
+src/
+  core/
+  features/telegram/
+  ui/
+  styles/
 ```
 
-## Статус
+## Main Docs
 
-На текущем шаге создан только каркас проекта и базовая документация.
+- `docs/PROJECT_MAP.md`
+- `docs/PROJECT_OPERATIONS.md`
+- `docs/PROJECT_CONTEXT.md`
+- `docs/CURRENT_DESIGN_SYSTEM.md`
+- `docs/SKILLS_GUIDE.md`
+- `docs/ARCHITECTURE.md`
+
+## Commands
+
+```bash
+npm run dev
+npm run build
+```
+
+## Repository Rule
+
+The project root should contain only live project files.
+
+Temporary screenshots, logs, obsolete docs, and raw exports are archived outside the repo workspace flow in:
+
+- `C:\Future\Минус40_архив`

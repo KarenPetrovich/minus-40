@@ -27,11 +27,43 @@ type Props = {
 // Temporary placeholder until we pick the final brand sign.
 const BRAND_PLACEHOLDER_MARK = '▣'
 
-const icons: Record<Screen, string> = {
-  overview: '▦',
-  history: '◷',
-  graph: '↗',
-  settings: '⚑',
+function NavIcon({ screen, active }: { screen: Screen; active: boolean }) {
+  return (
+    <span className={`nav-icon nav-icon-${screen} ${active ? 'is-active' : ''}`} aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        {screen === 'overview' ? (
+          <>
+            <rect className="nav-shell" x="4.5" y="4.5" width="15" height="15" rx="4" />
+            <rect className="nav-cell nav-cell-a" x="7.2" y="7.2" width="3.4" height="3.4" rx="1" />
+            <rect className="nav-cell nav-cell-b" x="13.4" y="7.2" width="3.4" height="3.4" rx="1" />
+            <rect className="nav-cell nav-cell-c" x="7.2" y="13.4" width="3.4" height="3.4" rx="1" />
+            <rect className="nav-cell nav-cell-d" x="13.4" y="13.4" width="3.4" height="3.4" rx="1" />
+          </>
+        ) : screen === 'history' ? (
+          <>
+            <circle className="nav-shell" cx="12" cy="12" r="7.5" />
+            <path className="nav-stem" d="M12 8.4v4.2" />
+            <path className="nav-hand" d="M12 12l2.8 1.8" />
+          </>
+        ) : screen === 'graph' ? (
+          <>
+            <path className="nav-axis" d="M5.5 18.5h13" />
+            <path className="nav-axis" d="M5.5 18.5V6.2" />
+            <path className="nav-line" d="M7.8 15.6l3.3-3.4 2.7 1.9 4-5" />
+            <circle className="nav-dot nav-dot-a" cx="7.8" cy="15.6" r="1.1" />
+            <circle className="nav-dot nav-dot-b" cx="11.1" cy="12.2" r="1.1" />
+            <circle className="nav-dot nav-dot-c" cx="13.8" cy="14.1" r="1.1" />
+            <circle className="nav-dot nav-dot-d" cx="17.8" cy="9.1" r="1.1" />
+          </>
+        ) : (
+          <>
+            <path className="nav-pole" d="M8 18V6.5" />
+            <path className="nav-flag" d="M8 7c2.7-1.4 5.2-1.4 8 0v6c-2.8-1.4-5.3-1.4-8 0" />
+          </>
+        )}
+      </svg>
+    </span>
+  )
 }
 
 function ScreenTransition({ screen, children }: { screen: Screen; children: React.ReactNode }) {
@@ -94,19 +126,11 @@ function splitWeightParts(value: number | null) {
 
 function renderForecastText(forecast: { days: number; basis: 'weekly' | 'provisional' } | null, milestone: number | null) {
   if (milestone === null) {
-    return (
-      <>
-        <span className="forecast-primary">Цель уже достигнута</span>
-      </>
-    )
+    return <span className="forecast-primary">Цель уже достигнута</span>
   }
 
   if (forecast === null) {
-    return (
-      <>
-        <span className="forecast-primary">Пока рано для прогноза</span>
-      </>
-    )
+    return <span className="forecast-primary">Пока рано для прогноза</span>
   }
 
   return forecast.basis === 'weekly' ? (
@@ -201,7 +225,7 @@ function Layout({
         </button>
       )}
       <nav>
-        {(Object.keys(icons) as Screen[]).map((item) => (
+        {(['overview', 'history', 'graph', 'settings'] as Screen[]).map((item) => (
           <button
             key={item}
             className={screen === item ? 'active' : ''}
@@ -218,7 +242,7 @@ function Layout({
               setScreen(item)
             }}
           >
-            <i>{icons[item]}</i>
+            <NavIcon screen={item} active={screen === item} />
             {{ overview: 'Обзор', history: 'История', graph: 'График', settings: 'Цели' }[item]}
           </button>
         ))}
@@ -286,7 +310,9 @@ function Overview({ state }: { state: AppState }) {
           <small> кг</small>
         </div>
         <p className="weight-note">
-          {weekly === null ? 'Недостаточно данных за 7 дней' : `За последние 7 дней: ${Math.abs(weekly).toFixed(1).replace('.', ',')} кг ${weekly < 0 ? 'вниз' : weekly > 0 ? 'вверх' : 'без изменений'}`}
+          {weekly === null
+            ? 'Недостаточно данных за 7 дней'
+            : `За последние 7 дней: ${Math.abs(weekly).toFixed(1).replace('.', ',')} кг ${weekly < 0 ? 'вниз' : weekly > 0 ? 'вверх' : 'без изменений'}`}
         </p>
         <div className="progress-head">
           <span>{milestone === null ? 'Промежуточные цели закрыты' : `До следующей цели ${formatWeight(milestone)}`}</span>

@@ -14,24 +14,10 @@ export const totalLost = (state: AppState) => {
   return current === null ? 0 : state.startWeight - current
 }
 
-export const percentToGoal = (state: AppState) => {
-  const current = currentWeight(state)
-
-  if (current === null) return 0
-
-  return clamp(((state.startWeight - current) / (state.startWeight - state.targetWeight)) * 100, 0, 100)
-}
-
 export const nextMilestone = (state: AppState) => {
   const current = currentWeight(state)
 
   return MILESTONES.find((milestone) => current === null || current > milestone) ?? null
-}
-
-export const remainingToGoal = (state: AppState) => {
-  const current = currentWeight(state)
-
-  return current === null ? Math.max(state.startWeight - state.targetWeight, 0) : Math.max(current - state.targetWeight, 0)
 }
 
 export const percentToMilestone = (state: AppState) => {

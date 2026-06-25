@@ -1,55 +1,61 @@
-# Карта проекта
+# Project Map
 
-Этот файл нужен как быстрый ориентир: что читать сначала, где лежит текущий план и куда смотреть за контекстом.
+## Start Here
 
-## С чего начинать
+If you need quick orientation, read in this order:
 
-1. `CURRENT_PHASE.md` — текущий фокус и ближайший шаг.
-2. `PROJECT_STATUS.md` — что уже сделано, что в работе, что не начато.
-3. `ROADMAP.md` — логика этапов и границы MVP.
-4. `PROJECT_KNOWLEDGE.md` — основная продуктовая база знаний.
+1. `docs/PROJECT_OPERATIONS.md`
+2. `docs/PROJECT_CONTEXT.md`
+3. `docs/CURRENT_DESIGN_SYSTEM.md`
+4. `docs/SKILLS_GUIDE.md`
+5. `docs/ROADMAP.md`
 
-## Где что лежит
+## Live Documentation
 
-### Продукт и стратегия
+### Operations
 
-- `README.md` — короткое описание проекта.
-- `PROJECT_NOTES.md` — продуктовая идея, контекст пользователя, текущие риски.
-- `PROJECT_KNOWLEDGE.md` — главный справочник по продукту и допущениям.
-- `knowledge/WEIGHT_LOSS_MODEL.md` — модель снижения веса и поведенческий контекст.
-- `knowledge/COACHING_RULES.md` — правила коучинга и сценарии возврата в трек.
-- `ROADMAP.md` — этапы развития продукта.
-- `DECISION_LOG.md` — зафиксированные продуктовые решения.
+- `docs/PROJECT_OPERATIONS.md` - current stage, focus, deploy path, cleanup rule
+- `docs/ARCHITECTURE.md` - actual code architecture and source tree
+- `docs/PROJECT_MAP.md` - this navigation file
 
-### Текущая работа
+### Product And Design
 
-- `CURRENT_PHASE.md` — что делаем прямо сейчас.
-- `PROJECT_STATUS.md` — статус по сделанным и незапущенным задачам.
-- `AGENTS_PLAN.md` — какие специалисты выбраны и зачем.
-- `DEFINITION_OF_DONE.md` — критерии завершения.
+- `docs/PROJECT_CONTEXT.md` - product intent and user context
+- `docs/CURRENT_DESIGN_SYSTEM.md` - active visual system
+- `docs/ROADMAP.md` - stage plan
+- `docs/DECISION_LOG.md` - accepted product decisions
+- `docs/DEFINITION_OF_DONE.md` - completion criteria
 
-### Дизайн и визуальные артефакты
+### Skills
 
-- `design/stitch/STITCH_ANALYSIS.md` — анализ Stitch-дизайна и выводы.
-- `design/stitch/DESIGN.md` — рабочая дизайн-документация.
-- `Stitch/` — исходные артефакты и варианты визуальных сборок.
+- `docs/SKILLS_GUIDE.md` - when skills should auto-activate and which ones matter now
+- `Skills/` - local project skill packages
 
-### Код и сборка
+### Domain Knowledge
 
-- `src/` — исходный код приложения.
-- `public/` — статические ресурсы.
-- `dist/` — результат сборки.
-- `package.json` — команды запуска и сборки.
-- `vite.config.ts` — конфигурация Vite.
+- `knowledge/WEIGHT_LOSS_MODEL.md`
+- `knowledge/COACHING_RULES.md`
 
-## Как обращаться к путям
+### Design Artifacts
 
-- Всегда считать корнем проекта `C:\Future\Минус 40`.
-- В командах и ссылках использовать полный путь, если это помогает избежать путаницы.
-- Папки `Skills/active`, `Skills/standby`, `Skills/future` лежат в корне проекта, а не во внешнем профиле.
-- Для системных skills использовать `C:\Users\User\.codex\skills\.system\...`.
-- Если путь не найден, сначала проверять корень проекта и только потом внешний профиль пользователя.
+- `design/stitch/` - curated active Stitch-related source material
 
-## Практическое правило
+## Code Layout
 
-Если возник вопрос «где это искать?», сначала открывай этот файл, потом нужный документ из раздела `С чего начинать`.
+- `src/core/` - types, storage, store, calculations
+- `src/features/telegram/` - Telegram integration
+- `src/ui/` - screens and motion helpers
+- `src/styles/` - global styling and UI tokens
+- `public/` - static assets
+
+## Root Rule
+
+The project root should contain only live project files.
+
+Temporary screenshots, logs, raw exports, outdated docs, and other disposable artifacts belong in:
+
+- `C:\Future\Минус40_архив`
+
+## Path Rule
+
+Treat `C:\Future\Минус 40` as the project root.

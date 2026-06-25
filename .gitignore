@@ -2,6 +2,11 @@ node_modules/
 dist/
 
 *.tsbuildinfo
+*.log
+*.out.log
+*.err.log
+!.gitkeep
+!public/app-icon.png
 
 .DS_Store
 Thumbs.db
@@ -9,3 +14,8 @@ Thumbs.db
 .netlify/
 .env
 .env.*
+
+.codex-*.png
+.font-comparison.png
+.forecast-font-comparison.png
+.nav-animated-preview.png
