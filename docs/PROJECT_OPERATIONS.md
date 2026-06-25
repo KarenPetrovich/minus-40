@@ -26,7 +26,7 @@ As of June 25, 2026, the active focus is:
 
 1. audit of existing screens and navigation;
 2. design polishing of the current MVP;
-3. navigation/icon redesign;
+3. navigation/icon redesign and premium bottom-nav refinement;
 4. keeping the product visually coherent before expanding functionality.
 
 ## Explicitly Deferred
@@ -70,6 +70,7 @@ Move there:
 - temporary screenshots;
 - logs;
 - raw external exports not used as the current source of truth;
+- imported design/export folders after their decisions are integrated into code;
 - generated artifacts that can be rebuilt;
 - obsolete project documents that were replaced by newer canonical docs.
 

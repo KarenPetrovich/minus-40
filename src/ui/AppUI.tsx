@@ -28,37 +28,41 @@ type Props = {
 const BRAND_PLACEHOLDER_MARK = '▣'
 
 function NavIcon({ screen, active }: { screen: Screen; active: boolean }) {
+  const primary = '#00328A'
+  const inactive = '#8A91A3'
+  const strongInactive = '#6E7486'
+  const orange = '#FC820C'
+  const red = '#BA1A1A'
+
   return (
     <span className={`nav-icon nav-icon-${screen} ${active ? 'is-active' : ''}`} aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
         {screen === 'overview' ? (
           <>
-            <rect className="nav-shell" x="4.5" y="4.5" width="15" height="15" rx="4" />
-            <rect className="nav-cell nav-cell-a" x="7.2" y="7.2" width="3.4" height="3.4" rx="1" />
-            <rect className="nav-cell nav-cell-b" x="13.4" y="7.2" width="3.4" height="3.4" rx="1" />
-            <rect className="nav-cell nav-cell-c" x="7.2" y="13.4" width="3.4" height="3.4" rx="1" />
-            <rect className="nav-cell nav-cell-d" x="13.4" y="13.4" width="3.4" height="3.4" rx="1" />
+            <rect x="3" y="3" width="7" height="7" stroke={active ? primary : inactive} strokeWidth={active ? '2.5' : '2'} />
+            <rect x="14" y="3" width="7" height="7" stroke={red} strokeWidth={active ? '2.5' : '2'} />
+            <rect x="14" y="14" width="7" height="7" stroke={active ? primary : inactive} strokeWidth={active ? '2.5' : '2'} />
+            <rect x="3" y="14" width="7" height="7" stroke={orange} strokeWidth={active ? '2.5' : '2'} />
           </>
         ) : screen === 'history' ? (
           <>
-            <circle className="nav-shell" cx="12" cy="12" r="7.5" />
-            <path className="nav-stem" d="M12 8.4v4.2" />
-            <path className="nav-hand" d="M12 12l2.8 1.8" />
+            <circle cx="12" cy="12" r="10" stroke={primary} strokeOpacity={active ? '1' : '0.22'} strokeWidth={active ? '2.5' : '2'} />
+            <polyline points="12 6 12 12 16 14" stroke={active ? primary : strongInactive} strokeWidth={active ? '3' : '2.5'} />
           </>
         ) : screen === 'graph' ? (
           <>
-            <path className="nav-axis" d="M5.5 18.5h13" />
-            <path className="nav-axis" d="M5.5 18.5V6.2" />
-            <path className="nav-line" d="M7.8 15.6l3.3-3.4 2.7 1.9 4-5" />
-            <circle className="nav-dot nav-dot-a" cx="7.8" cy="15.6" r="1.1" />
-            <circle className="nav-dot nav-dot-b" cx="11.1" cy="12.2" r="1.1" />
-            <circle className="nav-dot nav-dot-c" cx="13.8" cy="14.1" r="1.1" />
-            <circle className="nav-dot nav-dot-d" cx="17.8" cy="9.1" r="1.1" />
+            <path d="M3 3v18h18" stroke={active ? primary : inactive} strokeWidth={active ? '2.5' : '2'} />
+            <path d="M18 9l-5 5-2-2-4 4" stroke={red} strokeWidth={active ? '3' : '2.5'} />
           </>
         ) : (
           <>
-            <path className="nav-pole" d="M8 18V6.5" />
-            <path className="nav-flag" d="M8 7c2.7-1.4 5.2-1.4 8 0v6c-2.8-1.4-5.3-1.4-8 0" />
+            <path
+              d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"
+              fill={orange}
+              stroke={active ? primary : inactive}
+              strokeWidth={active ? '2.5' : '2'}
+            />
+            <line x1="4" y1="22" x2="4" y2="15" stroke={active ? primary : inactive} strokeWidth={active ? '2.5' : '2'} />
           </>
         )}
       </svg>

@@ -132,3 +132,17 @@ Decision:
 Why:
 
 - this captures the intended operating model now, before it is forgotten.
+
+### 2026-06-25 - Bottom Navigation Direction
+
+Decision:
+
+- bottom navigation uses custom Stitch-derived icons integrated directly into app code;
+- active state should feel premium but restrained, with no cartoon-level motion;
+- once such exports are integrated, the raw export folders belong in archive storage, not in the active project tree.
+
+Why:
+
+- navigation is part of the core product identity;
+- the app needs a more intentional premium feel without playful over-animation;
+- keeping raw imports in the active tree creates noise and weakens repository hygiene.
