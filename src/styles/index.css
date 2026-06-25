@@ -52,32 +52,32 @@ header {
   padding-right: max(14px, calc((100% - 500px) / 2));
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: #f9f9fcf0;
   backdrop-filter: blur(14px);
   border-bottom: 1px solid #c3c6d6;
   color: #00328a;
+  overflow: hidden;
 }
 
 header::after {
   content: '';
   position: absolute;
-  top: calc(var(--safe-top) + 6px);
-  left: max(56px, calc((100% - 500px) / 2 + 56px));
-  right: max(14px, calc((100% - 500px) / 2));
-  height: 32px;
-  border-radius: 999px;
-  border: 1px solid rgba(40, 86, 184, 0.34);
-  background-color: rgba(8, 34, 96, 0.98);
-  background-image:
-    radial-gradient(circle at 18% 50%, rgba(63, 121, 248, 0.16), transparent 28%),
-    url('/header-dna-ribbon.png');
-  background-repeat: no-repeat, no-repeat;
-  background-position: 0 0, center;
-  background-size: auto, cover;
-  box-shadow:
-    inset 0 0 0 1px rgba(115, 159, 255, 0.12),
-    0 4px 12px rgba(0, 50, 138, 0.08);
+  top: calc(var(--safe-top) + 46%);
+  left: max(54px, calc((100% - 500px) / 2 + 54px));
+  width: clamp(212px, 68vw, 258px);
+  height: 26px;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, rgba(0, 50, 138, 0.54) 0%, rgba(55, 89, 156, 0.48) 55%, rgba(95, 108, 137, 0.34) 100%);
+  -webkit-mask-image: url('/header-dna-ribbon.png');
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: left center;
+  -webkit-mask-size: 100% 88%;
+  mask-image: url('/header-dna-ribbon.png');
+  mask-repeat: no-repeat;
+  mask-position: left center;
+  mask-size: 100% 88%;
+  opacity: 0.72;
   pointer-events: none;
 }
 
@@ -99,9 +99,9 @@ header::after {
 }
 
 .brand-logo {
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
   padding: 0;
   border-radius: 50%;
   object-fit: cover;

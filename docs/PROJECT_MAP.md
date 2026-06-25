@@ -10,11 +10,14 @@ If you need quick orientation, read in this order:
 4. `docs/SKILLS_GUIDE.md`
 5. `docs/ROADMAP.md`
 
+Important:
+`docs/PROJECT_OPERATIONS.md` also contains the active working-efficiency rules that should be followed at the start of each session.
+
 ## Live Documentation
 
 ### Operations
 
-- `docs/PROJECT_OPERATIONS.md` - current stage, focus, deploy path, cleanup rule
+- `docs/PROJECT_OPERATIONS.md` - current stage, focus, deploy path, cleanup rule, working-efficiency rules
 - `docs/ARCHITECTURE.md` - actual code architecture and source tree
 - `docs/PROJECT_MAP.md` - this navigation file
 

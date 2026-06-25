@@ -29,6 +29,29 @@ As of June 25, 2026, the active focus is:
 3. navigation/icon redesign and premium bottom-nav refinement;
 4. keeping the product visually coherent before expanding functionality.
 
+## Working Efficiency Rules
+
+These rules exist to reduce unnecessary token use, iteration churn, and avoidable context rebuilding during sessions.
+
+### Read And Search Discipline
+
+- do not read large files end-to-end if only one block is needed;
+- start with targeted search, then open only the relevant fragment;
+- do not re-read large skills or long docs inside the same task if the needed context is already gathered.
+
+### UI Iteration Discipline
+
+- for small visual refinements, prefer one bundled pass of 2-3 related changes instead of one micro-change at a time;
+- before visual polishing, explicitly define the success criteria in 1-2 short sentences;
+- do not expand a narrow visual fix into broader redesign work unless it clearly helps the stated goal.
+
+### Verification Discipline
+
+- do not run a full production build after every tiny CSS-only tweak if reload plus visual check is enough;
+- do not take a fresh screenshot for every hypothesis;
+- first make a thoughtful pass, then take a verification screenshot;
+- use full build and heavier verification when the change affects behavior, assets, structure, or release confidence.
+
 ## Explicitly Deferred
 
 These items are important, but are not the current implementation focus:
@@ -93,6 +116,8 @@ If there is a conflict, use this order:
 3. `docs/PROJECT_CONTEXT.md`
 4. `docs/CURRENT_DESIGN_SYSTEM.md`
 5. `docs/SKILLS_GUIDE.md`
+
+When starting work, treat the efficiency rules in this file as active default operating rules, not optional advice.
 
 ## Cleanup Trigger
 
