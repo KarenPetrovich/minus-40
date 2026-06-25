@@ -70,6 +70,18 @@ function NavIcon({ screen, active }: { screen: Screen; active: boolean }) {
   )
 }
 
+function ForecastIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4.5" y="6.5" width="15" height="13" rx="3" stroke="#0F2F75" strokeWidth="1.8" />
+      <path d="M8 4.5v4" stroke="#0F2F75" strokeWidth="1.8" />
+      <path d="M16 4.5v4" stroke="#0F2F75" strokeWidth="1.8" />
+      <path d="M4.5 10.5h15" stroke="#0F2F75" strokeWidth="1.6" />
+      <rect x="8" y="13.3" width="3.2" height="3.2" rx="1" fill="#FC820C" />
+    </svg>
+  )
+}
+
 function ScreenTransition({ screen, children }: { screen: Screen; children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -211,9 +223,19 @@ function Layout({
   return (
     <>
       <header>
-        <span className="brand-mark" aria-hidden="true">
-          {BRAND_PLACEHOLDER_MARK}
-        </span>
+        <div className="header-brand" aria-label="Минус 40" data-brand-mark={BRAND_PLACEHOLDER_MARK}>
+          <img className="header-logo" src="/app-icon.png" alt="Логотип Минус 40" />
+          <svg className="header-accent" viewBox="0 0 220 30" aria-hidden="true">
+            <path
+              className="header-accent-line header-accent-line-back"
+              d="M8 22C34 22 54 10 74 10C94 10 108 24 128 24C151 24 170 7 212 8"
+            />
+            <path
+              className="header-accent-line header-accent-line-front"
+              d="M8 8C36 8 55 24 76 24C96 24 110 10 130 10C154 10 174 22 212 22"
+            />
+          </svg>
+        </div>
       </header>
       <main>{children}</main>
       {screen !== 'settings' && (
@@ -334,7 +356,7 @@ function Overview({ state }: { state: AppState }) {
       <section className="forecast">
         <span>
           <span className="placeholder-mark" aria-hidden="true">
-            {BRAND_PLACEHOLDER_MARK}
+            <ForecastIcon />
           </span>
           <em>
             Прогноз
