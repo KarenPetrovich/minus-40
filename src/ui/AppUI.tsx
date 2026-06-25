@@ -9,10 +9,10 @@ import {
   formatDate,
   formatWeight,
   nextMilestone,
-  percentToGoal,
-  recentTrend,
-  remainingToGoal,
+  percentToMilestone,
+  remainingToMilestone,
   totalLost,
+  weeklyChange,
 } from '../core/progress'
 import { triggerImpact, triggerNotification, triggerSelection } from '../features/telegram/webapp'
 import { animateValue, fadeIn, fadeOut, lerp, slideIn } from './motion'
@@ -24,10 +24,13 @@ type Props = {
   onSettings: (start: number, target: number) => void
 }
 
+// Temporary placeholder until we pick the final brand sign.
+const BRAND_PLACEHOLDER_MARK = '▣'
+
 const icons: Record<Screen, string> = {
   overview: '▦',
   history: '◷',
-  graph: '⌃',
+  graph: '↗',
   settings: '⚑',
 }
 
@@ -77,6 +80,16 @@ function useAnimatedWeight(value: number | null) {
   }, [value])
 
   return display
+}
+
+function splitWeightParts(value: number | null) {
+  if (value === null) {
+    return { whole: '—', fraction: '' }
+  }
+
+  const [whole, fraction] = value.toFixed(1).split('.')
+
+  return { whole, fraction }
 }
 
 function DialogFrame({
@@ -140,16 +153,19 @@ function Layout({
   return (
     <>
       <header>
-        <span className="brand-icon">▣</span>
-        <b>Minus 40</b>
+        <span className="brand-mark" aria-hidden="true">
+          {BRAND_PLACEHOLDER_MARK}
+        </span>
+        <span className="brand-title">Минус 40</span>
         <button
           className="icon-button"
+          aria-label="Открыть цели"
           onClick={() => {
             triggerSelection()
             setScreen('settings')
           }}
         >
-          ⚙
+          ⚑
         </button>
       </header>
       <main>{children}</main>
@@ -170,6 +186,14 @@ function Layout({
           <button
             key={item}
             className={screen === item ? 'active' : ''}
+            aria-label={
+              {
+                overview: 'Обзор',
+                history: 'История',
+                graph: 'График',
+                settings: 'Цели',
+              }[item]
+            }
             onClick={() => {
               triggerSelection()
               setScreen(item)
@@ -187,17 +211,17 @@ function Layout({
 function Overview({ state }: { state: AppState }) {
   const current = currentWeight(state)
   const milestone = nextMilestone(state)
-  const trend = recentTrend(state.entries)
+  const weekly = weeklyChange(state.entries)
   const forecast = forecastDaysToMilestone(state)
-  const points = chartPoints(state.entries.slice(0, 7), 300, 92)
-  const progress = percentToGoal(state)
+  const milestoneProgress = percentToMilestone(state)
+  const milestoneRemaining = remainingToMilestone(state)
   const animatedWeight = useAnimatedWeight(current)
+  const weightParts = splitWeightParts(animatedWeight)
   const progressRef = useRef<HTMLElement>(null)
-  const progressFrom = useRef(progress)
-  const progressDisplayed = useRef(progress)
+  const progressFrom = useRef(milestoneProgress)
+  const progressDisplayed = useRef(milestoneProgress)
   const lostTotal = totalLost(state)
   const isAboveStart = lostTotal < 0
-  const line = points.map((point) => `${point.x},${point.y}`).join(' ')
 
   useEffect(() => {
     const element = progressRef.current
@@ -205,17 +229,17 @@ function Overview({ state }: { state: AppState }) {
     if (!element) return
 
     const from = progressFrom.current
-    progressFrom.current = progress
+    progressFrom.current = milestoneProgress
     progressDisplayed.current = from
 
-    if (from === progress) {
-      element.style.width = `${progress.toFixed(2)}%`
+    if (from === milestoneProgress) {
+      element.style.width = `${milestoneProgress.toFixed(2)}%`
       return
     }
 
     return animateValue({
       from,
-      to: progress,
+      to: milestoneProgress,
       duration: 280,
       onUpdate: (next) => {
         const smooth = lerp(progressDisplayed.current, next, 0.7)
@@ -223,78 +247,59 @@ function Overview({ state }: { state: AppState }) {
         element.style.width = `${smooth.toFixed(2)}%`
       },
       onComplete: () => {
-        element.style.width = `${progress.toFixed(2)}%`
+        element.style.width = `${milestoneProgress.toFixed(2)}%`
       },
     })
-  }, [progress])
+  }, [milestoneProgress])
 
   return (
     <div className="stack">
       <section className="hero-card">
         <label>ТЕКУЩИЙ ВЕС</label>
-        <div className="weight">
-          {animatedWeight === null ? '—' : animatedWeight.toFixed(1)}
+        <div className="weight" aria-label={animatedWeight === null ? 'нет веса' : `${animatedWeight.toFixed(1)} кг`}>
+          <span className="weight-whole">{weightParts.whole}</span>
+          {weightParts.fraction ? (
+            <>
+              <span className="weight-separator">.</span>
+              <span className="weight-fraction">{weightParts.fraction}</span>
+            </>
+          ) : null}
           <small> кг</small>
         </div>
-        {trend !== null ? (
-          <span className={`chip ${trend > 0 ? 'bad' : ''}`}>
-            {trend < 0 ? '↓' : trend > 0 ? '↑' : '→'} {Math.abs(trend * 7).toFixed(1)} кг за неделю
-          </span>
-        ) : null}
+        <p className="weight-note">
+          {weekly === null ? 'Недостаточно данных за 7 дней' : `За последние 7 дней: ${Math.abs(weekly).toFixed(1).replace('.', ',')} кг ${weekly < 0 ? 'вниз' : weekly > 0 ? 'вверх' : 'без изменений'}`}
+        </p>
         <div className="progress-head">
-          <span>Прогресс до цели</span>
-          <b>{progress.toFixed(1)}%</b>
+          <span>{milestone === null ? 'Промежуточные цели закрыты' : `До следующей цели ${formatWeight(milestone)}`}</span>
+          <b>{milestone === null ? '100%' : `${milestoneProgress.toFixed(1)}%`}</b>
         </div>
         <div className="progress">
-          <i ref={progressRef} style={{ width: `${progress.toFixed(2)}%` }} />
+          <i ref={progressRef} style={{ width: `${milestoneProgress.toFixed(2)}%` }} />
         </div>
-        <div className="split">
-          <span>
-            Цель
-            <b>{formatWeight(state.targetWeight)}</b>
-          </span>
-          <span>
-            Осталось
-            <b>{formatWeight(remainingToGoal(state))}</b>
-          </span>
+        <div className="milestone-footer">
+          <span>Осталось до {milestone === null ? formatWeight(state.targetWeight) : formatWeight(milestone)}</span>
+          <b>{milestoneRemaining === null ? '0,0 кг' : formatWeight(milestoneRemaining)}</b>
         </div>
-      </section>
-
-      <section className="row-card">
-        <span>
-          ⚑
-          <em>
-            Следующая цель
-            <b>{milestone === null ? 'Цель достигнута' : formatWeight(milestone)}</b>
-          </em>
-        </span>
-        <b>{current === null || milestone === null ? '' : formatWeight(Math.max(current - milestone, 0))}</b>
       </section>
 
       <section className="forecast">
         <span>
-          ▣
+          <span className="placeholder-mark" aria-hidden="true">
+            {BRAND_PLACEHOLDER_MARK}
+          </span>
           <em>
             Прогноз
-            <b>{forecast === null ? 'Нужны данные о тренде' : `${forecast} дн. до ${formatWeight(milestone!)}`}</b>
+            <b>
+              {milestone === null
+                ? 'Цель уже достигнута'
+                : forecast === null
+                  ? 'Пока рано для прогноза'
+                  : forecast.basis === 'weekly'
+                    ? `${forecast.days} дн. до ${formatWeight(milestone)}`
+                    : `Предварительно: ${forecast.days} дн. до ${formatWeight(milestone)}`}
+            </b>
           </em>
         </span>
-      </section>
-
-      <section className="chart-card">
-        <div className="card-title">
-          ⌃ Тренд за 7 дней{' '}
-          <b className={trend !== null && trend > 0 ? 'red' : 'orange'}>
-            {trend === null ? '—' : `${trend * 7 > 0 ? '+' : ''}${(trend * 7).toFixed(1)} кг`}
-          </b>
-        </div>
-        {points.length ? (
-          <svg viewBox="0 0 300 92" preserveAspectRatio="none">
-            <polyline points={line} className={trend !== null && trend > 0 ? 'line-red' : 'line-orange'} />
-          </svg>
-        ) : (
-          <p className="empty">График появится после двух замеров.</p>
-        )}
       </section>
 
       <section className="total-card">
@@ -327,7 +332,7 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
               </span>
               <strong>{formatWeight(entry.weight)}</strong>
               <em className={delta !== null && delta > 0 ? 'red' : 'orange'}>
-                {delta === null ? '—' : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} кг`}
+                {delta === null ? '—' : `${delta > 0 ? '+' : ''}${delta.toFixed(1).replace('.', ',')} кг`}
               </em>
               <button
                 onClick={() => {
@@ -349,7 +354,7 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
 function Graph({ state }: { state: AppState }) {
   const points = chartPoints(state.entries)
   const line = points.map((point) => `${point.x},${point.y}`).join(' ')
-  const trend = recentTrend(state.entries)
+  const trend = weeklyChange(state.entries)
 
   return (
     <div className="graph">
@@ -412,10 +417,7 @@ function Settings({ state, onSave }: { state: AppState; onSave: (start: number, 
       <h2>Промежуточные цели</h2>
       <div className="milestones">
         {MILESTONES.map((milestone) => (
-          <span
-            key={milestone}
-            className={currentWeight(state) !== null && currentWeight(state)! <= milestone ? 'done' : ''}
-          >
+          <span key={milestone} className={currentWeight(state) !== null && currentWeight(state)! <= milestone ? 'done' : ''}>
             {milestone} кг
           </span>
         ))}
@@ -500,10 +502,12 @@ export function AppUI({ state, onAdd, onDelete, onSettings }: Props) {
   const add = (weight: number) => {
     const before = nextMilestone(state)
     onAdd(weight)
+
     if (before !== null && weight <= before) setReached(before)
   }
 
   const openAdd = () => setAdding(true)
+
   const view =
     screen === 'overview' ? (
       <Overview state={state} />
