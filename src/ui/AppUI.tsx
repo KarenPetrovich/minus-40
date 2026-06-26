@@ -31,7 +31,7 @@ const BRAND_PLACEHOLDER_MARK = '▣'
 function NavIcon({ screen, active }: { screen: Screen; active: boolean }) {
   const primary = '#00328A'
   const inactive = '#8A91A3'
-  const strongInactive = '#6E7486'
+  const strongInactive = '#1A1C1E'
   const orange = '#FC820C'
   const red = '#BA1A1A'
 
@@ -47,7 +47,7 @@ function NavIcon({ screen, active }: { screen: Screen; active: boolean }) {
           </>
         ) : screen === 'history' ? (
           <>
-            <circle cx="12" cy="12" r="10" stroke={primary} strokeOpacity={active ? '1' : '0.22'} strokeWidth={active ? '2.5' : '2'} />
+            <circle cx="12" cy="12" r="10" stroke={active ? primary : '#7A8091'} strokeOpacity={active ? '1' : '0.38'} strokeWidth={active ? '2.5' : '2'} />
             <polyline points="12 6 12 12 16 14" stroke={active ? primary : strongInactive} strokeWidth={active ? '3' : '2.5'} />
           </>
         ) : screen === 'graph' ? (
@@ -215,7 +215,7 @@ function Layout({
         <img className="brand-mark brand-logo" src="/brand-logo.png" alt="Логотип Минус 40" data-brand-mark={BRAND_PLACEHOLDER_MARK} />
       </header>
       <main>{children}</main>
-      {screen !== 'settings' && (
+      {screen === 'overview' && (
         <button
           className="fab"
           onClick={() => {
@@ -257,7 +257,6 @@ function Layout({
 function Overview({ state }: { state: AppState }) {
   const current = currentWeight(state)
   const milestone = nextMilestone(state)
-  const weekly = weeklyChange(state.entries)
   const forecast = forecastDaysToMilestone(state)
   const milestoneProgress = percentToMilestone(state)
   const milestoneRemaining = remainingToMilestone(state)
@@ -312,11 +311,6 @@ function Overview({ state }: { state: AppState }) {
           ) : null}
           <small> кг</small>
         </div>
-        <p className="weight-note">
-          {weekly === null
-            ? 'Недостаточно данных за 7 дней'
-            : `За последние 7 дней: ${Math.abs(weekly).toFixed(1).replace('.', ',')} кг ${weekly < 0 ? 'вниз' : weekly > 0 ? 'вверх' : 'без изменений'}`}
-        </p>
         <div className="progress-head">
           <span>{milestone === null ? 'Промежуточные цели закрыты' : `До следующей цели ${formatWeight(milestone)}`}</span>
           <b>{milestone === null ? '100%' : `${milestoneProgress.toFixed(1)}%`}</b>

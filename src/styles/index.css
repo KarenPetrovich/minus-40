@@ -46,16 +46,15 @@ header {
   top: 0;
   z-index: 5;
   width: 100%;
-  height: calc(44px + var(--safe-top));
+  height: calc(48px + var(--safe-top));
   padding-top: var(--safe-top);
   padding-left: max(14px, calc((100% - 500px) / 2));
   padding-right: max(14px, calc((100% - 500px) / 2));
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   background: #f9f9fcf0;
   backdrop-filter: blur(14px);
-  border-bottom: 1px solid #c3c6d6;
   color: #00328a;
   overflow: hidden;
 }
@@ -63,21 +62,21 @@ header {
 header::after {
   content: '';
   position: absolute;
-  top: calc(var(--safe-top) + 46%);
-  left: max(54px, calc((100% - 500px) / 2 + 54px));
-  width: clamp(212px, 68vw, 258px);
-  height: 26px;
+  top: calc(var(--safe-top) + 50%);
+  left: max(62px, calc((100% - 500px) / 2 + 62px));
+  width: clamp(230px, 72vw, 286px);
+  height: 32px;
   transform: translateY(-50%);
   background: linear-gradient(90deg, rgba(0, 50, 138, 0.54) 0%, rgba(55, 89, 156, 0.48) 55%, rgba(95, 108, 137, 0.34) 100%);
   -webkit-mask-image: url('/header-dna-ribbon.png');
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: left center;
-  -webkit-mask-size: 100% 88%;
+  -webkit-mask-size: 100% 100%;
   mask-image: url('/header-dna-ribbon.png');
   mask-repeat: no-repeat;
   mask-position: left center;
-  mask-size: 100% 88%;
-  opacity: 0.72;
+  mask-size: 100% 100%;
+  opacity: 0.8;
   pointer-events: none;
 }
 
@@ -99,9 +98,9 @@ header::after {
 }
 
 .brand-logo {
-  width: 40px;
-  min-width: 40px;
-  height: 40px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
   padding: 0;
   border-radius: 50%;
   object-fit: cover;
@@ -112,7 +111,7 @@ header::after {
 main {
   max-width: 500px;
   margin: auto;
-  padding: calc(60px + var(--safe-top)) 16px calc(104px + var(--safe-bottom));
+  padding: calc(62px + var(--safe-top)) 16px calc(104px + var(--safe-bottom));
 }
 
 .stack {
@@ -189,17 +188,10 @@ main {
   letter-spacing: -.03em;
 }
 
-.weight-note {
-  margin: 0 0 16px;
-  color: #737685;
-  font-size: 14px;
-  line-height: 1.35;
-}
-
 .progress-head {
   display: flex;
   justify-content: space-between;
-  margin-top: 12px;
+  margin-top: 10px;
   text-align: left;
   font-size: 14px;
   color: #434653;
@@ -283,7 +275,7 @@ main {
 
 .forecast span {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
   color: inherit;
   font-size: 16px;
@@ -294,16 +286,16 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   font-size: 15px;
   line-height: 1;
 }
 
 .forecast-icon {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
 }
 
