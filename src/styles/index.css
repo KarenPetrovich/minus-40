@@ -831,6 +831,157 @@ nav button.active {
   font-size: 13px;
 }
 
+.graph {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-height: 0;
+}
+
+.graph-range-switch {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  width: 100%;
+  max-width: 344px;
+  margin: 0 auto;
+  padding: 3px;
+  border-radius: 999px;
+  background: #eef2ff;
+}
+
+.graph-range-switch button {
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: transparent;
+  color: #434653;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.graph-range-switch button.active {
+  background: #fff;
+  color: #00328a;
+  box-shadow: 0 1px 3px rgba(0, 50, 138, 0.08);
+}
+
+.graph-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.graph-summary article {
+  padding: 10px 10px 9px;
+  border: 1px solid #edf0f8;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.graph-summary small {
+  display: block;
+  color: #737685;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.graph-summary strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+
+.big-chart-graph {
+  margin-top: 0;
+  height: auto;
+  min-height: 0;
+  padding: 14px 16px 14px;
+}
+
+.big-chart-graph svg {
+  width: 100%;
+  height: 208px;
+}
+
+.big-chart-graph line {
+  stroke: #e7ebf3;
+}
+
+.big-chart-graph .segment-orange,
+.big-chart-graph .segment-red {
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.big-chart-graph .segment-orange {
+  stroke: #fc820c;
+}
+
+.big-chart-graph .segment-red {
+  stroke: #ba1a1a;
+}
+
+.big-chart-graph .graph-point-hit {
+  cursor: pointer;
+}
+
+.big-chart-graph .point {
+  fill: #fc820c;
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.big-chart-graph .point-active-ring {
+  fill: rgba(0, 50, 138, 0.18);
+}
+
+.big-chart-graph .point-active {
+  fill: #00328a;
+  stroke: #fff;
+  stroke-width: 3.5;
+}
+
+.graph-tooltip {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: #434653;
+  font-size: 13px;
+}
+
+.graph-tooltip b,
+.graph-tooltip span,
+.graph-tooltip em {
+  font-style: normal;
+  font-weight: 800;
+}
+
+.graph-axis-labels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 10px;
+  color: #5f6473;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.graph-axis-labels span:nth-child(2) {
+  text-align: center;
+}
+
+.graph-axis-labels span:last-child {
+  text-align: right;
+}
+
 .empty {
   padding: 20px;
   color: #737685;

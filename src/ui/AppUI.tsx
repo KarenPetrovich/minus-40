@@ -1,11 +1,14 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import type { AppState, Screen } from '../core/types'
 import {
+  averagePeriodChange,
   MILESTONES,
   chartPoints,
   compareEntries,
   currentWeight,
+  filterEntriesByRange,
   forecastDaysToMilestone,
+  type ChartRange,
   formatDate,
   formatDelta,
   formatMonth,
@@ -636,6 +639,116 @@ function Settings({
   )
 }
 
+void Graph
+
+function GraphScreen({ state }: { state: AppState }) {
+  const [range, setRange] = useState<ChartRange>('month')
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+  const filteredEntries = filterEntriesByRange(state.entries, range)
+  const chronologicalEntries = [...filteredEntries].reverse()
+  const points = chartPoints(filteredEntries, 300, 164)
+  const averageChange = averagePeriodChange(filteredEntries)
+  const totalChange = filteredEntries.length >= 2 ? filteredEntries[0].weight - filteredEntries[filteredEntries.length - 1].weight : null
+  const activeIndex = selectedIndex ?? Math.max(points.length - 1, 0)
+  const activePoint = points[activeIndex] ?? null
+  const activeEntry = chronologicalEntries[activeIndex]
+  const previousEntry = chronologicalEntries[activeIndex - 1]
+  const activeDelta = activeEntry ? compareEntries(activeEntry, previousEntry) : null
+
+  return (
+    <div className="graph">
+      <h1>{'График веса'}</h1>
+      <div className="graph-range-switch" role="tablist" aria-label={'Период графика'}>
+        {([
+          ['week', 'Неделя'],
+          ['month', 'Месяц'],
+          ['year', 'Год'],
+        ] as const).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            className={range === value ? 'active' : ''}
+            onClick={() => {
+              setRange(value)
+              setSelectedIndex(null)
+            }}
+            aria-pressed={range === value}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <section className="graph-summary" aria-label={'Сводка графика'}>
+        <article>
+          <small>{'Изменение'}</small>
+          <strong className={totalChange !== null && totalChange > 0 ? 'red' : 'orange'}>
+            {totalChange === null ? '—' : `${formatDelta(totalChange)} кг`}
+          </strong>
+        </article>
+        <article>
+          <small>{'Средний темп'}</small>
+          <strong className={averageChange !== null && averageChange > 0 ? 'red' : 'orange'}>
+            {averageChange === null ? '—' : `${formatDelta(averageChange)} кг/д`}
+          </strong>
+        </article>
+      </section>
+      <section className="big-chart big-chart-graph">
+        {points.length > 1 ? (
+          <>
+            {activePoint ? (
+              <div className="graph-tooltip" aria-live="polite">
+                <b>{formatDate(activePoint.date, true)}</b>
+                <span>{formatWeight(activePoint.weight)}</span>
+                <em className={activeDelta !== null && activeDelta > 0 ? 'red' : activeDelta !== null && activeDelta < 0 ? 'orange' : ''}>
+                  {activeDelta === null ? 'Старт' : `${formatDelta(activeDelta)} кг`}
+                </em>
+              </div>
+            ) : null}
+            <svg viewBox="0 0 300 164" preserveAspectRatio="none">
+              <line x1="0" x2="300" y1="36" y2="36" />
+              <line x1="0" x2="300" y1="90" y2="90" />
+              <line x1="0" x2="300" y1="144" y2="144" />
+              {points.slice(0, -1).map((point, index) => {
+                const nextPoint = points[index + 1]
+                const segmentDelta = nextPoint.weight - point.weight
+
+                return (
+                  <line
+                    key={`${point.date}-${nextPoint.date}`}
+                    x1={point.x}
+                    y1={point.y}
+                    x2={nextPoint.x}
+                    y2={nextPoint.y}
+                    className={segmentDelta > 0 ? 'segment-red' : 'segment-orange'}
+                  />
+                )
+              })}
+              {points.map((point, index) => (
+                <g key={point.date} className="graph-point-hit" onClick={() => setSelectedIndex(index)}>
+                  {index === activeIndex ? <circle cx={point.x} cy={point.y} r="9" className="point-active-ring" /> : null}
+                  <circle
+                    cx={point.x}
+                    cy={point.y}
+                    r={index === activeIndex ? '6.5' : '5.4'}
+                    className={index === activeIndex ? 'point-active' : 'point'}
+                  />
+                </g>
+              ))}
+            </svg>
+            <div className="graph-axis-labels" aria-hidden="true">
+              <span>{formatDate(filteredEntries[filteredEntries.length - 1].date, true)}</span>
+              <span>{formatDate(filteredEntries[Math.floor((filteredEntries.length - 1) / 2)].date, true)}</span>
+              <span>{formatDate(filteredEntries[0].date, true)}</span>
+            </div>
+          </>
+        ) : (
+          <p className="empty">Добавьте ещё 1-2 замера для более точного тренда.</p>
+        )}
+      </section>
+    </div>
+  )
+}
+
 function AddDialog({ onClose, onAdd }: { onClose: () => void; onAdd: (value: number) => void }) {
   const [value, setValue] = useState('')
   const parsed = Number(value.replace(',', '.'))
@@ -724,7 +837,7 @@ export function AppUI({ state, onAdd, onDelete, onSettings }: Props) {
     ) : screen === 'history' ? (
       <History state={state} onDelete={onDelete} />
     ) : screen === 'graph' ? (
-      <Graph state={state} />
+      <GraphScreen state={state} />
     ) : (
       <Settings state={state} onSave={onSettings} />
     )

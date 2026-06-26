@@ -42,6 +42,7 @@ export const remainingToMilestone = (state: AppState) => {
 export const compareEntries = (entry: WeightEntry, older?: WeightEntry) => (older ? entry.weight - older.weight : null)
 
 export type HistoryRange = 'week' | 'month' | 'year'
+export type ChartRange = 'week' | 'month' | 'year'
 
 export function historyExtremes(entries: WeightEntry[], range: HistoryRange): { best: number | null; worst: number | null } {
   if (entries.length < 2) return { best: null, worst: null }
@@ -144,4 +145,25 @@ export function chartPoints(entries: WeightEntry[], width = 300, height = 150) {
     weight: entry.weight,
     date: entry.date,
   }))
+}
+
+export function filterEntriesByRange(entries: WeightEntry[], range: ChartRange) {
+  if (entries.length < 2) return entries
+
+  const newest = entries[0]
+  const windowDays = range === 'week' ? 7 : range === 'month' ? 30 : 365
+  const cutoff = newest.date - windowDays * DAY
+  const filtered = entries.filter((entry) => entry.date >= cutoff)
+
+  return filtered.length ? filtered : [entries[0]]
+}
+
+export function averagePeriodChange(entries: WeightEntry[]): number | null {
+  if (entries.length < 2) return null
+
+  const newest = entries[0]
+  const oldest = entries[entries.length - 1]
+  const days = Math.max((newest.date - oldest.date) / DAY, 1)
+
+  return (newest.weight - oldest.weight) / days
 }
