@@ -559,18 +559,18 @@ nav button.active {
   color: #737685;
 }
 
-.history-metrics,
-.history-summary {
+.history-panel {
+  width: 100%;
+  max-width: 344px;
+  margin: 12px auto 10px;
+}
+
+.history-metrics {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   width: 100%;
-  max-width: 344px;
-  margin: 12px auto 6px;
-}
-
-.history-summary {
-  margin-top: 0;
+  margin: 0 0 8px;
 }
 
 .history-range-switch,
@@ -585,9 +585,8 @@ nav button.active {
 }
 
 .history-range-switch {
-  grid-column: 1 / -1;
   width: 100%;
-  max-width: none;
+  max-width: 100%;
   margin: 0;
 }
 
@@ -673,6 +672,14 @@ nav button.active {
   text-transform: none;
 }
 
+.history-metrics .metric-good {
+  color: #fc820c;
+}
+
+.history-metrics .metric-bad {
+  color: #ba1a1a;
+}
+
 .history-summary-value {
   display: inline-block;
 }
@@ -695,13 +702,14 @@ nav button.active {
 
 .history-filter {
   width: 100%;
-  max-width: 344px;
-  margin: 0 auto 8px;
+  max-width: 100%;
+  margin: 8px 0 0;
 }
 
 .history-filter-secondary {
-  max-width: 292px;
-  margin: 0 auto 10px;
+  width: 100%;
+  max-width: 100%;
+  margin: 8px 0 0;
   padding: 2px;
   gap: 2px;
   background: #f3f5fb;
@@ -830,7 +838,7 @@ nav button.active {
 }
 
 .settings h1 {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .settings-card {
@@ -843,7 +851,7 @@ nav button.active {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
-  padding: 12px 16px 10px;
+  padding: 8px 14px 8px;
 }
 
 .settings-metrics article {
@@ -852,7 +860,7 @@ nav button.active {
   grid-template-columns: 72px minmax(0, 1fr);
   align-items: center;
   column-gap: 10px;
-  padding: 10px 0;
+  padding: 8px 0;
   border-bottom: 1px solid #d9dce6;
 }
 
@@ -873,7 +881,7 @@ nav button.active {
   border: 0;
   outline: 0;
   color: #00328a;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
   letter-spacing: -.03em;
   text-align: right;
@@ -887,22 +895,12 @@ nav button.active {
 
 .primary {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 8px;
   border: 0;
   border-radius: 16px;
-  padding: 10px 16px;
+  padding: 9px 16px;
   background: #00328a;
   color: #fff;
-  font-weight: 700;
-}
-
-.secondary {
-  width: 100%;
-  border: 1px solid #c8d4ff;
-  border-radius: 14px;
-  padding: 10px 14px;
-  background: #eef4ff;
-  color: #00328a;
   font-weight: 700;
 }
 
@@ -915,8 +913,8 @@ nav button.active {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-top: 10px;
-  padding-top: 2px;
+  margin-top: 8px;
+  padding-top: 0;
 }
 
 .settings-remaining small {
@@ -929,35 +927,14 @@ nav button.active {
 
 .settings-remaining strong {
   color: #00328a;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   letter-spacing: -.02em;
 }
 
-.settings-transfer {
-  margin-top: 10px;
-  padding: 10px 12px 12px;
-}
-
-.settings-transfer-copy h2 {
-  margin: 0;
-  color: #434653;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-
-.settings-transfer-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 10px;
-}
-
 .settings-achievements {
-  margin-top: 10px;
-  padding: 12px 12px 10px;
+  margin-top: 8px;
+  padding: 10px 10px 8px;
   border-color: #ffd7bf;
   background:
     radial-gradient(circle at top right, rgba(252, 130, 12, 0.08), transparent 28%),
@@ -974,7 +951,7 @@ nav button.active {
 .settings-achievements h2 {
   margin: 0;
   color: #434653;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -982,25 +959,25 @@ nav button.active {
 
 .settings-achievements-head b {
   color: #964900;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: -.02em;
 }
 
 .milestones {
-  margin-top: 10px;
+  margin-top: 8px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
 }
 
 .milestones span {
-  padding: 9px 8px;
+  padding: 8px 7px;
   border: 1px solid #e2e2e5;
   border-radius: 12px;
   background: #f7f7fa;
   color: #5f6c89;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   text-align: center;
 }

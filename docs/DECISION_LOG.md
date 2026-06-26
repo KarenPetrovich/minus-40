@@ -170,3 +170,15 @@ Why:
 
 - Netlify deployment capacity is currently constrained;
 - the project still needs a secondary fallback host recorded for recovery and migration work.
+
+### 2026-06-26 - Goals Screen Free Space
+
+Decision:
+
+- the free lower space on the `Цели` screen is intentionally reserved for milestone celebration art;
+- when approaching and then reaching each milestone such as `140 кг`, that area should later show a dedicated celebratory image for that stage.
+
+Why:
+
+- the current compact screen leaves visible space at the bottom;
+- that space should later reinforce achievement and emotional reward instead of being filled with random UI.

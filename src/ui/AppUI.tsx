@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import type { AppState, Screen } from '../core/types'
 import {
   MILESTONES,
@@ -27,8 +27,6 @@ type Props = {
   onAdd: (weight: number) => void
   onDelete: (id: string) => void
   onSettings: (start: number, target: number) => void
-  onExport: () => string
-  onImport: (state: AppState) => void
 }
 
 // Temporary placeholder until we pick the final brand sign.
@@ -565,57 +563,18 @@ function Graph({ state }: { state: AppState }) {
 function Settings({
   state,
   onSave,
-  onExport,
-  onImport,
 }: {
   state: AppState
   onSave: (start: number, target: number) => void
-  onExport: () => string
-  onImport: (state: AppState) => void
 }) {
   const [start, setStart] = useState(String(state.startWeight))
   const [target, setTarget] = useState(String(state.targetWeight))
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const parsedStart = Number(start.replace(',', '.'))
   const parsedTarget = Number(target.replace(',', '.'))
   const remaining = Number.isFinite(parsedStart) && Number.isFinite(parsedTarget) && parsedStart > parsedTarget ? parsedStart - parsedTarget : null
   const current = currentWeight(state)
   const next = nextMilestone(state)
   const completedMilestones = MILESTONES.filter((milestone) => current !== null && current <= milestone).length
-
-  const exportData = () => {
-    const payload = onExport()
-    const blob = new Blob([payload], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    const stamp = new Date().toISOString().slice(0, 10)
-
-    link.href = url
-    link.download = `minus-40-backup-${stamp}.json`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-    triggerNotification('success')
-  }
-
-  const importData = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-
-    if (!file) return
-
-    try {
-      const text = await file.text()
-      const parsed = JSON.parse(text) as AppState
-
-      onImport(parsed)
-      triggerNotification('success')
-    } catch {
-      triggerNotification('error')
-    } finally {
-      event.target.value = ''
-    }
-  }
 
   return (
     <div className="settings">
@@ -651,20 +610,6 @@ function Settings({
       >
         {'\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c'}
       </button>
-      <section className="settings-card settings-transfer">
-        <div className="settings-transfer-copy">
-          <h2>{'\u041f\u0435\u0440\u0435\u043d\u043e\u0441 \u0434\u0430\u043d\u043d\u044b\u0445'}</h2>
-        </div>
-        <div className="settings-transfer-actions">
-          <button type="button" className="secondary" onClick={exportData}>
-            {'\u042d\u043a\u0441\u043f\u043e\u0440\u0442'}
-          </button>
-          <button type="button" className="secondary" onClick={() => fileInputRef.current?.click()}>
-            {'\u0418\u043c\u043f\u043e\u0440\u0442'}
-          </button>
-          <input ref={fileInputRef} type="file" accept="application/json" onChange={importData} hidden />
-        </div>
-      </section>
       <section className="settings-card settings-achievements">
         <div className="settings-achievements-head">
           <h2>{'\u041f\u0440\u043e\u043c\u0435\u0436\u0443\u0442\u043e\u0447\u043d\u044b\u0435 \u0446\u0435\u043b\u0438'}</h2>
@@ -759,7 +704,7 @@ function MilestoneDialog({ value, onClose }: { value: number; onClose: () => voi
   )
 }
 
-export function AppUI({ state, onAdd, onDelete, onSettings, onExport, onImport }: Props) {
+export function AppUI({ state, onAdd, onDelete, onSettings }: Props) {
   const [screen, setScreen] = useState<Screen>('overview')
   const [adding, setAdding] = useState(false)
   const [reached, setReached] = useState<number | null>(null)
@@ -781,7 +726,7 @@ export function AppUI({ state, onAdd, onDelete, onSettings, onExport, onImport }
     ) : screen === 'graph' ? (
       <Graph state={state} />
     ) : (
-      <Settings state={state} onSave={onSettings} onExport={onExport} onImport={onImport} />
+      <Settings state={state} onSave={onSettings} />
     )
 
   return (
