@@ -28,6 +28,13 @@ import {
 import { triggerImpact, triggerNotification, triggerSelection } from '../features/telegram/webapp'
 import { animateValue, fadeIn, fadeOut, lerp, slideIn } from './motion'
 import forecastCalendarIcon from '../../forecast-calendar.png'
+import milestone110Art from '../assets/ui/milestones/110.png'
+import milestone115Art from '../assets/ui/milestones/115.png'
+import milestone120Art from '../assets/ui/milestones/120.png'
+import milestone125Art from '../assets/ui/milestones/125.png'
+import milestone130Art from '../assets/ui/milestones/130.png'
+import milestone140Art from '../assets/ui/milestones/140.png'
+import milestone150Art from '../assets/ui/milestones/150.png'
 
 type Props = {
   state: AppState
@@ -44,6 +51,16 @@ const pluralizeDays = (value: number) => {
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'дня'
 
   return 'дней'
+}
+
+const MILESTONE_ART: Record<number, string> = {
+  150: milestone150Art,
+  140: milestone140Art,
+  130: milestone130Art,
+  125: milestone125Art,
+  120: milestone120Art,
+  115: milestone115Art,
+  110: milestone110Art,
 }
 
 // Temporary placeholder until we pick the final brand sign.
@@ -591,7 +608,10 @@ function Settings({
   const remaining = Number.isFinite(parsedStart) && Number.isFinite(parsedTarget) && parsedStart > parsedTarget ? parsedStart - parsedTarget : null
   const current = currentWeight(state)
   const next = nextMilestone(state)
-  const completedMilestones = MILESTONES.filter((milestone) => current !== null && current <= milestone).length
+  const achievedMilestones = MILESTONES.filter((milestone) => current !== null && current <= milestone)
+  const completedMilestones = achievedMilestones.length
+  const unlockedMilestone = achievedMilestones[achievedMilestones.length - 1] ?? null
+  const unlockedArt = unlockedMilestone === null ? null : MILESTONE_ART[unlockedMilestone]
 
   return (
     <div className="settings">
@@ -647,6 +667,19 @@ function Settings({
               {milestone} {'\u043a\u0433'}
             </span>
           ))}
+        </div>
+        <div className="milestone-showcase">
+          <div className="milestone-showcase-head">
+            <small>{unlockedMilestone === null ? 'Первая награда' : 'Открытый рубеж'}</small>
+            <b>{unlockedMilestone === null ? '150 кг' : `${unlockedMilestone} кг`}</b>
+          </div>
+          <div className={`milestone-showcase-art milestone-showcase-${unlockedMilestone ?? 'empty'}`}>
+            {unlockedArt ? (
+              <img src={unlockedArt} alt={`Награда за достижение ${unlockedMilestone} кг`} />
+            ) : (
+              <p>Первая награда появится здесь после достижения 150 кг.</p>
+            )}
+          </div>
         </div>
       </section>
     </div>
