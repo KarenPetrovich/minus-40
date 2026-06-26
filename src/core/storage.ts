@@ -1,7 +1,15 @@
 import type { AppState } from './types'
 
 const KEY = 'minus40.app-state'
-const fallback: AppState = { entries: [], startWeight: 150, targetWeight: 110 }
+const fallback: AppState = {
+  startWeight: 150.5,
+  targetWeight: 110,
+  entries: [
+    { id: 'restore-2026-06-26', date: Date.parse('2026-06-26T12:00:00+03:00'), weight: 146.4 },
+    { id: 'restore-2026-06-25', date: Date.parse('2026-06-25T12:00:00+03:00'), weight: 148.2 },
+    { id: 'restore-2026-06-24', date: Date.parse('2026-06-24T12:00:00+03:00'), weight: 150.5 },
+  ],
+}
 
 export function normalizeState(value: unknown): AppState {
   if (
