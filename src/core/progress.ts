@@ -116,7 +116,7 @@ export function forecastDaysToMilestone(state: AppState): { days: number; basis:
 
 export const formatWeight = (weight: number) => `${weight.toFixed(1).replace('.', ',')} кг`
 
-export const formatDelta = (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(1).replace('.', ',')} кг`
+export const formatDelta = (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(1).replace('.', ',')}`
 
 export const formatDate = (date: number, short = false) =>
   new Intl.DateTimeFormat('ru-RU', short ? { day: '2-digit', month: 'short' } : { day: '2-digit', month: 'long', year: 'numeric' })

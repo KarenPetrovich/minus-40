@@ -213,12 +213,16 @@ function Layout({
   children: React.ReactNode
   onAdd: () => void
 }) {
+  const brandedHeader = screen === 'overview'
+
   return (
     <>
-      <header>
-        <img className="brand-mark brand-logo" src="/brand-logo.png" alt="Логотип Минус 40" data-brand-mark={BRAND_PLACEHOLDER_MARK} />
-      </header>
-      <main>{children}</main>
+      {brandedHeader ? (
+        <header className="app-header app-header-brand">
+          <img className="brand-mark brand-logo" src="/brand-logo.png" alt="?????????????? ?????????? 40" data-brand-mark={BRAND_PLACEHOLDER_MARK} />
+        </header>
+      ) : null}
+      <main className={brandedHeader ? 'main-branded' : 'main-plain'}>{children}</main>
       {screen === 'overview' && (
         <button
           className="fab"
@@ -517,42 +521,81 @@ function Graph({ state }: { state: AppState }) {
 function Settings({ state, onSave }: { state: AppState; onSave: (start: number, target: number) => void }) {
   const [start, setStart] = useState(String(state.startWeight))
   const [target, setTarget] = useState(String(state.targetWeight))
+  const [celebrating, setCelebrating] = useState(false)
+  const parsedStart = Number(start.replace(',', '.'))
+  const parsedTarget = Number(target.replace(',', '.'))
+  const remaining = Number.isFinite(parsedStart) && Number.isFinite(parsedTarget) && parsedStart > parsedTarget ? parsedStart - parsedTarget : null
+  const current = currentWeight(state)
+  const next = nextMilestone(state)
+  const completedMilestones = MILESTONES.filter((milestone) => current !== null && current <= milestone).length
+
+  useEffect(() => {
+    if (completedMilestones === 0) return
+
+    setCelebrating(true)
+    triggerNotification('success')
+
+    const timeoutId = window.setTimeout(() => setCelebrating(false), 1800)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [completedMilestones])
 
   return (
     <div className="settings">
-      <h1>Цели и ориентиры</h1>
-      <section>
-        <label>СТАРТОВЫЙ ВЕС</label>
-        <input value={start} inputMode="decimal" onChange={(event) => setStart(event.target.value)} />
-        <span>кг</span>
-      </section>
-      <section>
-        <label>ЦЕЛЕВОЙ ВЕС</label>
-        <input value={target} inputMode="decimal" onChange={(event) => setTarget(event.target.value)} />
-        <span>кг</span>
+      <h1>{'\u0426\u0435\u043b\u0438'}</h1>
+      <section className="settings-card settings-metrics">
+        <article>
+          <label>{'\u0421\u0442\u0430\u0440\u0442'}</label>
+          <div className="settings-input-row">
+            <input value={start} inputMode="decimal" onChange={(event) => setStart(event.target.value)} />
+            <span>{'\u043a\u0433'}</span>
+          </div>
+        </article>
+        <article>
+          <label>{'\u0426\u0435\u043b\u044c'}</label>
+          <div className="settings-input-row">
+            <input value={target} inputMode="decimal" onChange={(event) => setTarget(event.target.value)} />
+            <span>{'\u043a\u0433'}</span>
+          </div>
+        </article>
+        <div className="settings-remaining">
+          <small>{'\u0414\u043e \u0446\u0435\u043b\u0438'}</small>
+          <strong>{remaining === null ? '\u2014' : formatWeight(remaining)}</strong>
+        </div>
       </section>
       <button
         className="primary"
         onClick={() => {
-          const parsedStart = Number(start.replace(',', '.'))
-          const parsedTarget = Number(target.replace(',', '.'))
-
           if (parsedStart > 0 && parsedTarget > 0 && parsedTarget < parsedStart) {
             triggerNotification('success')
             onSave(parsedStart, parsedTarget)
           }
         }}
       >
-        Сохранить цели
+        {'\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c'}
       </button>
-      <h2>Промежуточные цели</h2>
-      <div className="milestones">
-        {MILESTONES.map((milestone) => (
-          <span key={milestone} className={currentWeight(state) !== null && currentWeight(state)! <= milestone ? 'done' : ''}>
-            {milestone} кг
-          </span>
-        ))}
-      </div>
+      <section className={`settings-card settings-achievements ${celebrating ? 'is-celebrating' : ''}`.trim()}>
+        <div className="settings-achievements-head">
+          <h2>{'\u041f\u0440\u043e\u043c\u0435\u0436\u0443\u0442\u043e\u0447\u043d\u044b\u0435 \u0446\u0435\u043b\u0438'}</h2>
+          <b>{completedMilestones}/{MILESTONES.length}</b>
+        </div>
+        <div className="milestones">
+          {MILESTONES.map((milestone) => (
+            <span
+              key={milestone}
+              className={
+                current !== null && current <= milestone
+                  ? 'done'
+                  : next === milestone
+                    ? 'current'
+                    : ''
+              }
+            >
+              {milestone} {'\u043a\u0433'}
+            </span>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }
