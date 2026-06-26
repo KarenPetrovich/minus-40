@@ -41,6 +41,33 @@ export const remainingToMilestone = (state: AppState) => {
 
 export const compareEntries = (entry: WeightEntry, older?: WeightEntry) => (older ? entry.weight - older.weight : null)
 
+export type HistoryRange = 'week' | 'month'
+
+export function historyExtremes(entries: WeightEntry[], range: HistoryRange): { best: number | null; worst: number | null } {
+  if (entries.length < 2) return { best: null, worst: null }
+
+  const newest = entries[0]
+  const windowDays = range === 'week' ? 7 : 30
+  const cutoff = newest.date - windowDays * DAY
+  const deltas = entries
+    .map((entry, index) => {
+      const older = entries[index + 1]
+      const delta = compareEntries(entry, older)
+
+      if (delta === null || entry.date < cutoff) return null
+
+      return delta
+    })
+    .filter((delta): delta is number => delta !== null)
+
+  if (!deltas.length) return { best: null, worst: null }
+
+  return {
+    best: Math.min(...deltas),
+    worst: Math.max(...deltas),
+  }
+}
+
 export function weeklyChange(entries: WeightEntry[]): number | null {
   if (entries.length < 2) return null
 
@@ -90,6 +117,11 @@ export const formatDelta = (value: number) => `${value > 0 ? '+' : ''}${value.to
 
 export const formatDate = (date: number, short = false) =>
   new Intl.DateTimeFormat('ru-RU', short ? { day: '2-digit', month: 'short' } : { day: '2-digit', month: 'long', year: 'numeric' })
+    .format(new Date(date))
+    .replace('.', '')
+
+export const formatMonth = (date: number) =>
+  new Intl.DateTimeFormat('ru-RU', { month: 'long' })
     .format(new Date(date))
     .replace('.', '')
 

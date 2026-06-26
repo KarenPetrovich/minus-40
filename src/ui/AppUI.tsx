@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import type { AppState, Screen } from '../core/types'
 import {
   MILESTONES,
@@ -7,7 +7,11 @@ import {
   currentWeight,
   forecastDaysToMilestone,
   formatDate,
+  formatDelta,
+  formatMonth,
   formatWeight,
+  historyExtremes,
+  type HistoryRange,
   nextMilestone,
   percentToMilestone,
   remainingToMilestone,
@@ -348,36 +352,129 @@ function Overview({ state }: { state: AppState }) {
 }
 
 function History({ state, onDelete }: { state: AppState; onDelete: (id: string) => void }) {
+  const [range, setRange] = useState<HistoryRange>('week')
+  const [filter, setFilter] = useState<'all' | 'loss' | 'gain'>('all')
+  const extremes = historyExtremes(state.entries, range)
+  const visibleEntries = state.entries.filter((entry, index) => {
+    if (filter === 'all') return true
+
+    const delta = compareEntries(entry, state.entries[index + 1])
+
+    if (delta === null) return false
+
+    return filter === 'loss' ? delta < 0 : delta > 0
+  })
+  const visibleRows = visibleEntries.map((entry) => {
+    const originalIndex = state.entries.findIndex((item) => item.id === entry.id)
+    const delta = compareEntries(entry, state.entries[originalIndex + 1])
+
+    return { entry, delta }
+  })
+
   return (
     <div className="history">
-      <h1>История веса</h1>
-      <p>Все сохранённые замеры</p>
+      <h1>{'\u0417\u0430\u043c\u0435\u0440\u044b \u0432\u0435\u0441\u0430'}</h1>
+      <section className="history-summary" aria-label={'\u0421\u0432\u043e\u0434\u043a\u0430 \u043f\u043e \u0437\u0430\u043c\u0435\u0440\u0430\u043c'}>
+        <div className="history-range-switch" role="tablist" aria-label={'\u041f\u0435\u0440\u0438\u043e\u0434 \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0438'}>
+          {([
+            ['week', '\u041d\u0435\u0434\u0435\u043b\u044f'],
+            ['month', '\u041c\u0435\u0441\u044f\u0446'],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={range === value ? 'active' : ''}
+              onClick={() => setRange(value)}
+              aria-pressed={range === value}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <article>
+          <small className="history-summary-label">{'\u0420\u0435\u043a\u043e\u0440\u0434'}</small>
+          <strong className="metric-good">
+            {extremes.best === null ? (
+              '\u2014'
+            ) : (
+              <>
+                <span className="history-summary-value">{extremes.best > 0 ? '+' : ''}{extremes.best.toFixed(1).replace('.', ',')}</span>
+                <small>{'\u043a\u0433'}</small>
+              </>
+            )}
+          </strong>
+        </article>
+        <article>
+          <small className="history-summary-label">{'\u041f\u0440\u043e\u0432\u0430\u043b'}</small>
+          <strong className="metric-bad">
+            {extremes.worst === null ? (
+              '\u2014'
+            ) : (
+              <>
+                <span className="history-summary-value">{extremes.worst > 0 ? '+' : ''}{extremes.worst.toFixed(1).replace('.', ',')}</span>
+                <small>{'\u043a\u0433'}</small>
+              </>
+            )}
+          </strong>
+        </article>
+      </section>
+      <div className="history-filter" role="tablist" aria-label={'\u0424\u0438\u043b\u044c\u0442\u0440 \u0437\u0430\u043c\u0435\u0440\u043e\u0432'}>
+        {([
+          ['all', '\u0412\u0441\u0435'],
+          ['loss', '\u0421\u043d\u0438\u0436\u0435\u043d\u0438\u0435'],
+          ['gain', '\u041d\u0430\u0431\u043e\u0440'],
+        ] as const).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            className={filter === value ? 'active' : ''}
+            onClick={() => setFilter(value)}
+            aria-pressed={filter === value}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       {state.entries.length === 0 ? (
-        <p className="empty">Пока нет замеров.</p>
+        <p className="empty">{'\u041f\u043e\u043a\u0430 \u043d\u0435\u0442 \u0437\u0430\u043c\u0435\u0440\u043e\u0432.'}</p>
+      ) : visibleEntries.length === 0 ? (
+        <p className="empty">{'\u0414\u043b\u044f \u044d\u0442\u043e\u0433\u043e \u0444\u0438\u043b\u044c\u0442\u0440\u0430 \u043f\u043e\u043a\u0430 \u043d\u0435\u0442 \u0437\u0430\u043c\u0435\u0440\u043e\u0432.'}</p>
       ) : (
-        state.entries.map((entry, index) => {
-          const delta = compareEntries(entry, state.entries[index + 1])
+        visibleRows.map(({ entry, delta }, index) => {
+          const trendClass = delta === null ? 'is-neutral' : delta > 0 ? 'is-gain' : delta < 0 ? 'is-loss' : 'is-neutral'
+          const trendLabel =
+            delta === null
+              ? '\u0421\u0442\u0430\u0440\u0442'
+              : delta > 0
+                ? '\u041d\u0430\u0431\u043e\u0440'
+                : delta < 0
+                  ? '\u0421\u043d\u0438\u0436\u0435\u043d\u0438\u0435'
+                  : '\u0411\u0435\u0437 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439'
 
           return (
-            <article key={entry.id}>
-              <span>
-                <b>{formatDate(entry.date, true)}</b>
-                <small>{formatDate(entry.date)}</small>
-              </span>
-              <strong>{formatWeight(entry.weight)}</strong>
-              <em className={delta !== null && delta > 0 ? 'red' : 'orange'}>
-                {delta === null ? '—' : `${delta > 0 ? '+' : ''}${delta.toFixed(1).replace('.', ',')} кг`}
-              </em>
-              <button
-                onClick={() => {
-                  triggerImpact('medium')
-                  onDelete(entry.id)
-                }}
-                aria-label="Удалить"
-              >
-                ×
-              </button>
-            </article>
+            <Fragment key={entry.id}>
+              {(index === 0 || formatMonth(visibleRows[index - 1].entry.date) !== formatMonth(entry.date)) && (
+                <div className="history-month">{formatMonth(entry.date)}</div>
+              )}
+              <article>
+                <span className="history-date">
+                  <b>{formatDate(entry.date, true)}</b>
+                </span>
+                <strong>{formatWeight(entry.weight)}</strong>
+                <em className={`history-delta ${trendClass}`} aria-label={trendLabel}>
+                  <span>{delta === null ? '\u0421\u0442\u0430\u0440\u0442' : formatDelta(delta)}</span>
+                </em>
+                <button
+                  onClick={() => {
+                    triggerImpact('medium')
+                    onDelete(entry.id)
+                  }}
+                  aria-label={'\u0423\u0434\u0430\u043b\u0438\u0442\u044c'}
+                >
+                  {'\u00D7'}
+                </button>
+              </article>
+            </Fragment>
           )
         })
       )}
