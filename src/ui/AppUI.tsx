@@ -412,24 +412,7 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
   return (
     <div className="history">
       <h1>{'\u0417\u0430\u043c\u0435\u0440\u044b \u0432\u0435\u0441\u0430'}</h1>
-      <section className="history-summary" aria-label={'\u0421\u0432\u043e\u0434\u043a\u0430 \u043f\u043e \u0437\u0430\u043c\u0435\u0440\u0430\u043c'}>
-        <div className="history-range-switch" role="tablist" aria-label={'\u041f\u0435\u0440\u0438\u043e\u0434 \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0438'}>
-          {([
-            ['week', '\u041d\u0435\u0434\u0435\u043b\u044f'],
-            ['month', '\u041c\u0435\u0441\u044f\u0446'],
-            ['all', '\u0412\u0441\u0451'],
-          ] as const).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              className={range === value ? 'active' : ''}
-              onClick={() => setRange(value)}
-              aria-pressed={range === value}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+      <section className="history-metrics" aria-label={'\u0421\u0432\u043e\u0434\u043a\u0430 \u043f\u043e \u0437\u0430\u043c\u0435\u0440\u0430\u043c'}>
         <article>
           <small className="history-summary-label">{'\u0420\u0435\u043a\u043e\u0440\u0434'}</small>
           <strong className="metric-good">
@@ -456,6 +439,25 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
             )}
           </strong>
         </article>
+      </section>
+      <section className="history-summary" aria-label={'\u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u0438\u0441\u0442\u043e\u0440\u0438\u0435\u0439'}>
+        <div className="history-range-switch" role="tablist" aria-label={'\u041f\u0435\u0440\u0438\u043e\u0434 \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0438'}>
+          {([
+            ['week', '\u041d\u0435\u0434\u0435\u043b\u044f'],
+            ['month', '\u041c\u0435\u0441\u044f\u0446'],
+            ['all', '\u0412\u0441\u0451'],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={range === value ? 'active' : ''}
+              onClick={() => setRange(value)}
+              aria-pressed={range === value}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </section>
       <div className="history-filter history-filter-secondary" role="tablist" aria-label={'\u0424\u0438\u043b\u044c\u0442\u0440 \u0437\u0430\u043c\u0435\u0440\u043e\u0432'}>
         {([
