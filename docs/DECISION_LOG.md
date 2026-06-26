@@ -171,14 +171,16 @@ Why:
 - Netlify deployment capacity is currently constrained;
 - the project still needs a secondary fallback host recorded for recovery and migration work.
 
-### 2026-06-26 - Goals Screen Free Space
+### 2026-06-26 - Goals Screen Reward Area
 
 Decision:
 
-- the free lower space on the `Цели` screen is intentionally reserved for milestone celebration art;
-- when approaching and then reaching each milestone such as `140 кг`, that area should later show a dedicated celebratory image for that stage.
+- the free lower space on the `Цели` screen is used for milestone reward art;
+- each unlocked milestone from `150 кг` down to `110 кг` maps to its own dedicated image in `src/assets/ui/milestones/`;
+- the reward area should stay inside the same card and remain visually supportive rather than dominant.
 
 Why:
 
-- the current compact screen leaves visible space at the bottom;
-- that space should later reinforce achievement and emotional reward instead of being filled with random UI.
+- the compact goals layout leaves a natural lower zone for emotional reinforcement;
+- that space now reinforces achievement instead of being filled with random UI;
+- milestone imagery is part of the motivation layer, but still subordinate to the weight goal itself.
