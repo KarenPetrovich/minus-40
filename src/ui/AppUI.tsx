@@ -457,11 +457,11 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
           </strong>
         </article>
       </section>
-      <div className="history-filter" role="tablist" aria-label={'\u0424\u0438\u043b\u044c\u0442\u0440 \u0437\u0430\u043c\u0435\u0440\u043e\u0432'}>
+      <div className="history-filter history-filter-secondary" role="tablist" aria-label={'\u0424\u0438\u043b\u044c\u0442\u0440 \u0437\u0430\u043c\u0435\u0440\u043e\u0432'}>
         {([
           ['all', '\u0412\u0441\u0435'],
-          ['loss', '\u2212'],
-          ['gain', '+'],
+          ['loss', '\u0421\u043d\u0438\u0436\u0435\u043d\u0438\u044f'],
+          ['gain', '\u041d\u0430\u0431\u043e\u0440'],
         ] as const).map(([value, label]) => (
           <button
             key={value}

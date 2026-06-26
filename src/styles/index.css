@@ -563,7 +563,7 @@ nav button.active {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  margin: 12px 0 10px;
+  margin: 12px 0 6px;
 }
 
 .history-range-switch,
@@ -580,7 +580,7 @@ nav button.active {
 .history-range-switch {
   grid-column: 1 / -1;
   width: 100%;
-  max-width: 336px;
+  max-width: 344px;
   margin: 0 auto;
 }
 
@@ -607,11 +607,12 @@ nav button.active {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  column-gap: 10px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: #fcfcfe;
-  border: 1px solid #edf0f8;
+  column-gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #f0f2f8;
+  box-shadow: none;
 }
 
 .history-summary-label {
@@ -628,7 +629,7 @@ nav button.active {
   display: inline-flex;
   align-items: baseline;
   gap: 3px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   letter-spacing: -.02em;
   justify-self: end;
@@ -657,22 +658,36 @@ nav button.active {
 
 .history-filter {
   width: 100%;
-  max-width: 336px;
+  max-width: 344px;
   margin: 0 auto 8px;
 }
 
-.history-filter button.is-loss span {
-  color: #fc820c;
+.history-filter-secondary {
+  max-width: 292px;
+  margin: 0 auto 10px;
+  padding: 2px;
+  gap: 2px;
+  background: #f3f5fb;
 }
 
-.history-filter button.is-gain span {
-  color: #ba1a1a;
+.history-filter-secondary button {
+  padding: 6px 8px;
+  font-size: 11px;
+  color: #6f7483;
+  font-weight: 700;
 }
 
-.history-filter button.is-loss,
-.history-filter button.is-gain {
-  font-size: 16px;
-  letter-spacing: 0;
+.history-filter-secondary button.active {
+  color: #00328a;
+  box-shadow: 0 1px 2px rgba(0, 50, 138, 0.08);
+}
+
+.history-filter-secondary button.is-loss:not(.active) {
+  color: #a7661d;
+}
+
+.history-filter-secondary button.is-gain:not(.active) {
+  color: #8d4242;
 }
 
 .history-month {
