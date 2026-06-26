@@ -17,15 +17,24 @@
 html,
 body,
 #root {
-  min-height: 100%;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
   margin: 0;
+  position: fixed;
+  inset: 0;
   background: var(--tg-bg-color, #f9f9fc);
   color: var(--tg-text-color, #1a1c1e);
-  overscroll-behavior: none;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  overflow: hidden;
 }
 
 button,
@@ -110,8 +119,14 @@ button {
 
 .main-branded,
 .main-plain {
+  width: 100%;
+  height: 100dvh;
   max-width: 500px;
   margin: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .main-branded {
@@ -638,7 +653,9 @@ nav button.active {
 }
 
 .history-filter {
-  margin-bottom: 8px;
+  width: 100%;
+  max-width: 336px;
+  margin: 0 auto 8px;
 }
 
 .history-month {
@@ -801,10 +818,10 @@ nav button.active {
 
 .primary {
   width: 100%;
-  margin-top: 12px;
+  margin-top: 10px;
   border: 0;
   border-radius: 16px;
-  padding: 11px 16px;
+  padding: 10px 16px;
   background: #00328a;
   color: #fff;
   font-weight: 700;
@@ -843,79 +860,39 @@ nav button.active {
 
 .settings-remaining strong {
   color: #00328a;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 800;
   letter-spacing: -.02em;
 }
 
 .settings-transfer {
-  margin-top: 12px;
-  padding: 14px 14px 16px;
+  margin-top: 10px;
+  padding: 10px 12px 12px;
 }
 
 .settings-transfer-copy h2 {
   margin: 0;
   color: #434653;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: .08em;
   text-transform: uppercase;
-}
-
-.settings-transfer-copy p {
-  margin: 8px 0 0;
-  color: #737685;
-  font-size: 13px;
-  line-height: 1.35;
 }
 
 .settings-transfer-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 .settings-achievements {
-  position: relative;
-  overflow: hidden;
-  margin-top: 12px;
-  padding: 14px 14px 12px;
+  margin-top: 10px;
+  padding: 12px 12px 10px;
   border-color: #ffd7bf;
   background:
-    radial-gradient(circle at top right, rgba(252, 130, 12, 0.12), transparent 32%),
+    radial-gradient(circle at top right, rgba(252, 130, 12, 0.08), transparent 28%),
     linear-gradient(180deg, #fffdfb 0%, #fff7f0 100%);
-}
-
-.settings-achievements::before,
-.settings-achievements::after {
-  content: '';
-  position: absolute;
-  inset: -12% -6% auto;
-  height: 88px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.settings-achievements::before {
-  background:
-    radial-gradient(circle, rgba(252, 130, 12, 0.95) 0 3px, transparent 4px) 6% 54% / 44px 44px,
-    radial-gradient(circle, rgba(255, 170, 72, 0.92) 0 3px, transparent 4px) 20% 18% / 52px 52px,
-    radial-gradient(circle, rgba(255, 202, 150, 0.95) 0 2px, transparent 3px) 36% 58% / 38px 38px,
-    radial-gradient(circle, rgba(252, 130, 12, 0.88) 0 3px, transparent 4px) 54% 16% / 48px 48px,
-    radial-gradient(circle, rgba(255, 170, 72, 0.9) 0 2px, transparent 3px) 72% 50% / 42px 42px,
-    radial-gradient(circle, rgba(252, 130, 12, 0.9) 0 3px, transparent 4px) 88% 24% / 46px 46px;
-  background-repeat: no-repeat;
-}
-
-.settings-achievements::after {
-  background:
-    linear-gradient(120deg, transparent 0 42%, rgba(252, 130, 12, 0.9) 42% 58%, transparent 58% 100%) 14% 34% / 18px 18px,
-    linear-gradient(45deg, transparent 0 42%, rgba(255, 178, 92, 0.95) 42% 58%, transparent 58% 100%) 30% 8% / 16px 16px,
-    linear-gradient(120deg, transparent 0 42%, rgba(252, 130, 12, 0.88) 42% 58%, transparent 58% 100%) 50% 48% / 18px 18px,
-    linear-gradient(45deg, transparent 0 42%, rgba(255, 178, 92, 0.92) 42% 58%, transparent 58% 100%) 68% 10% / 16px 16px,
-    linear-gradient(120deg, transparent 0 42%, rgba(252, 130, 12, 0.86) 42% 58%, transparent 58% 100%) 84% 38% / 18px 18px;
-  background-repeat: no-repeat;
 }
 
 .settings-achievements-head {
@@ -928,7 +905,7 @@ nav button.active {
 .settings-achievements h2 {
   margin: 0;
   color: #434653;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -936,25 +913,25 @@ nav button.active {
 
 .settings-achievements-head b {
   color: #964900;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: -.02em;
 }
 
 .milestones {
-  margin-top: 12px;
+  margin-top: 10px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .milestones span {
-  padding: 11px 10px;
+  padding: 9px 8px;
   border: 1px solid #e2e2e5;
   border-radius: 12px;
   background: #f7f7fa;
   color: #5f6c89;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   text-align: center;
 }
@@ -971,77 +948,6 @@ nav button.active {
   color: #00328a;
   border-color: #c8d4ff;
   box-shadow: inset 0 0 0 1px #d8e2ff;
-}
-
-.settings-achievements.is-celebrating::before {
-  animation: confetti-burst 1.6s ease-out 1;
-}
-
-.settings-achievements.is-celebrating::after {
-  animation: confetti-burst-delayed 1.6s ease-out 1;
-}
-
-.settings-achievements.is-celebrating .milestones .done {
-  animation: milestone-breathe 1.55s ease-out 1;
-}
-
-@keyframes milestone-breathe {
-  0%,
-  100% {
-    transform: translateY(0);
-    box-shadow: inset 0 0 0 1px rgba(255, 244, 233, 0.4), 0 8px 18px rgba(252, 130, 12, 0.2);
-  }
-
-  35% {
-    transform: translateY(-1px) scale(1.02);
-    box-shadow: inset 0 0 0 1px rgba(255, 244, 233, 0.48), 0 14px 24px rgba(252, 130, 12, 0.34);
-  }
-
-  70% {
-    transform: translateY(0) scale(1.01);
-    box-shadow: inset 0 0 0 1px rgba(255, 244, 233, 0.45), 0 10px 20px rgba(252, 130, 12, 0.28);
-  }
-}
-
-@keyframes confetti-burst {
-  0% {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.92);
-  }
-
-  18% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(28px) scale(1.08);
-  }
-}
-
-@keyframes confetti-burst-delayed {
-  0%,
-  8% {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.9);
-  }
-
-  24% {
-    opacity: .92;
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(26px) scale(1.06);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .settings-achievements.is-celebrating::before,
-  .settings-achievements.is-celebrating::after,
-  .settings-achievements.is-celebrating .milestones .done {
-    animation: none;
-  }
 }
 
 .dialog {

@@ -82,6 +82,12 @@ Already working:
 - This project is a Vite SPA, so `vercel.json` keeps all routes rewritten to `index.html`.
 - If Telegram shows an old version, first verify the latest Vercel deployment status before checking any backup host.
 
+### Host Transition Notes
+
+- Telegram WebView is sensitive to root-page overscroll, so scrolling must stay inside the app container, not at the `body` level.
+- To reduce host-switch data loss, app state is mirrored into both `minus40.app-state` and `minus40.app-backup` in local storage.
+- Different hosts still mean different browser origins, so local storage is not automatically shared between Netlify and Vercel.
+
 ## Repository Hygiene Rule
 
 Temporary and obsolete files must not stay in the main project root.

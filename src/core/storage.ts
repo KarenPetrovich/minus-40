@@ -1,6 +1,7 @@
 import type { AppState } from './types'
 
 const KEY = 'minus40.app-state'
+const BACKUP_KEY = 'minus40.app-backup'
 const fallback: AppState = {
   startWeight: 150.5,
   targetWeight: 110,
@@ -38,9 +39,18 @@ export function normalizeState(value: unknown): AppState {
 
 export function loadState(): AppState {
   try {
-    const value = JSON.parse(localStorage.getItem(KEY) ?? '')
-    return normalizeState(value)
+    const primary = localStorage.getItem(KEY)
+    const backup = localStorage.getItem(BACKUP_KEY)
+
+    if (primary) return normalizeState(JSON.parse(primary))
+    if (backup) return normalizeState(JSON.parse(backup))
+
+    return fallback
   } catch { return fallback }
 }
 
-export function saveState(state: AppState): void { localStorage.setItem(KEY, JSON.stringify(state)) }
+export function saveState(state: AppState): void {
+  const payload = JSON.stringify(state)
+  localStorage.setItem(KEY, payload)
+  localStorage.setItem(BACKUP_KEY, payload)
+}

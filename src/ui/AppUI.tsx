@@ -533,7 +533,6 @@ function Settings({
 }) {
   const [start, setStart] = useState(String(state.startWeight))
   const [target, setTarget] = useState(String(state.targetWeight))
-  const [celebrating, setCelebrating] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const parsedStart = Number(start.replace(',', '.'))
   const parsedTarget = Number(target.replace(',', '.'))
@@ -541,17 +540,6 @@ function Settings({
   const current = currentWeight(state)
   const next = nextMilestone(state)
   const completedMilestones = MILESTONES.filter((milestone) => current !== null && current <= milestone).length
-
-  useEffect(() => {
-    if (completedMilestones === 0) return
-
-    setCelebrating(true)
-    triggerNotification('success')
-
-    const timeoutId = window.setTimeout(() => setCelebrating(false), 1800)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [completedMilestones])
 
   const exportData = () => {
     const payload = onExport()
@@ -624,7 +612,6 @@ function Settings({
       <section className="settings-card settings-transfer">
         <div className="settings-transfer-copy">
           <h2>{'\u041f\u0435\u0440\u0435\u043d\u043e\u0441 \u0434\u0430\u043d\u043d\u044b\u0445'}</h2>
-          <p>{'\u042d\u043a\u0441\u043f\u043e\u0440\u0442 \u0438\u0437 \u0441\u0442\u0430\u0440\u043e\u0439 \u0432\u0435\u0440\u0441\u0438\u0438, \u0437\u0430\u0442\u0435\u043c \u0438\u043c\u043f\u043e\u0440\u0442 \u0432 \u043d\u043e\u0432\u043e\u0439.'}</p>
         </div>
         <div className="settings-transfer-actions">
           <button type="button" className="secondary" onClick={exportData}>
@@ -636,7 +623,7 @@ function Settings({
           <input ref={fileInputRef} type="file" accept="application/json" onChange={importData} hidden />
         </div>
       </section>
-      <section className={`settings-card settings-achievements ${celebrating ? 'is-celebrating' : ''}`.trim()}>
+      <section className="settings-card settings-achievements">
         <div className="settings-achievements-head">
           <h2>{'\u041f\u0440\u043e\u043c\u0435\u0436\u0443\u0442\u043e\u0447\u043d\u044b\u0435 \u0446\u0435\u043b\u0438'}</h2>
           <b>{completedMilestones}/{MILESTONES.length}</b>
