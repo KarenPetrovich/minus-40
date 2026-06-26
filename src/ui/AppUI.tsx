@@ -21,7 +21,7 @@ import {
   nextMilestone,
   percentToMilestone,
   remainingToMilestone,
-  stabilityPercent,
+  monthlyCalendarChange,
   totalLost,
   weeklyChange,
 } from '../core/progress'
@@ -34,6 +34,16 @@ type Props = {
   onAdd: (weight: number) => void
   onDelete: (id: string) => void
   onSettings: (start: number, target: number) => void
+}
+
+const pluralizeDays = (value: number) => {
+  const mod10 = value % 10
+  const mod100 = value % 100
+
+  if (mod10 === 1 && mod100 !== 11) return 'день'
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'дня'
+
+  return 'дней'
 }
 
 // Temporary placeholder until we pick the final brand sign.
@@ -665,8 +675,11 @@ function GraphScreen({ state }: { state: AppState }) {
   const previousEntry = chronologicalEntries[activeIndex - 1]
   const activeDelta = activeEntry ? compareEntries(activeEntry, previousEntry) : null
   const longestStreak = longestLossStreak(filteredEntries)
-  const weeklyRate = averageChange !== null ? averageChange * 7 : null
-  const stability = stabilityPercent(filteredEntries)
+  const realWeeklyRate = weeklyChange(filteredEntries)
+  const provisionalWeeklyRate = averageChange !== null ? averageChange * 7 : null
+  const weeklyRate = realWeeklyRate ?? provisionalWeeklyRate
+  const isWeeklyRateProvisional = realWeeklyRate === null && provisionalWeeklyRate !== null
+  const monthChange = monthlyCalendarChange(state.entries)
   const journeyDays = daysInJourney(state.entries)
   const activeBubbleLeft = activePoint ? clamp((activePoint.x / chartWidth) * 100, 20, 80) : 50
   const activeBubbleTop = activePoint ? clamp((activePoint.y / chartHeight) * 100 - 8, 16, 78) : 24
@@ -807,7 +820,7 @@ function GraphScreen({ state }: { state: AppState }) {
       <section className="graph-insights" aria-label={'Аналитика периода'}>
         <article>
           <small>{'Серия снижения'}</small>
-          <strong>{longestStreak === null ? '—' : `${longestStreak} зам.`}</strong>
+          <strong>{longestStreak === null ? '—' : `${longestStreak} ${pluralizeDays(longestStreak)}`}</strong>
           <p>{longestStreak === null ? 'Нужно больше данных' : 'Подряд без набора'}</p>
         </article>
         <article>
@@ -815,17 +828,18 @@ function GraphScreen({ state }: { state: AppState }) {
           <strong className={weeklyRate !== null && weeklyRate > 0 ? 'red' : 'orange'}>
             {weeklyRate === null ? '—' : `${formatDelta(weeklyRate)} кг`}
           </strong>
-          <p>{'За неделю в среднем'}</p>
+          <p>{isWeeklyRateProvisional ? 'Предварительно за неделю' : 'За неделю в среднем'}</p>
         </article>
         <article>
-          <small>{'Стабильность'}</small>
-          <strong>{stability === null ? '—' : `${stability}%`}</strong>
-          <p>{'Снижений в периоде'}</p>
+          <small>{'За месяц'}</small>
+          <strong className={monthChange !== null && monthChange > 0 ? 'red' : 'orange'}>
+            {monthChange === null ? '—' : `${formatDelta(monthChange)} кг`}
+          </strong>
+          <p>{monthChange === null ? 'Нужно больше данных' : monthChange > 0 ? 'Регресс' : 'Прогресс'}</p>
         </article>
         <article>
           <small>{'Дней в пути'}</small>
           <strong>{journeyDays === null ? '—' : journeyDays}</strong>
-          <p>{'С первого замера'}</p>
         </article>
       </section>
     </div>

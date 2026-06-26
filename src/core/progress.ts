@@ -189,18 +189,24 @@ export function longestLossStreak(entries: WeightEntry[]): number | null {
   return best
 }
 
-export function stabilityPercent(entries: WeightEntry[]): number | null {
+export function monthlyCalendarChange(entries: WeightEntry[]): number | null {
   if (entries.length < 2) return null
 
-  const deltas = entries
-    .map((entry, index) => compareEntries(entry, entries[index + 1]))
-    .filter((value): value is number => value !== null)
+  const newest = entries[0]
+  const newestDate = new Date(newest.date)
+  const month = newestDate.getMonth()
+  const year = newestDate.getFullYear()
+  const monthlyEntries = entries.filter((entry) => {
+    const date = new Date(entry.date)
 
-  if (!deltas.length) return null
+    return date.getMonth() === month && date.getFullYear() === year
+  })
 
-  const losses = deltas.filter((value) => value < 0).length
+  if (monthlyEntries.length < 2) return null
 
-  return Math.round((losses / deltas.length) * 100)
+  const oldest = monthlyEntries[monthlyEntries.length - 1]
+
+  return newest.weight - oldest.weight
 }
 
 export function daysInJourney(entries: WeightEntry[]): number | null {
