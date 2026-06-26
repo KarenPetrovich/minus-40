@@ -62,9 +62,12 @@ export function historyExtremes(entries: WeightEntry[], range: HistoryRange): { 
 
   if (!deltas.length) return { best: null, worst: null }
 
+  const losses = deltas.filter((delta) => delta < 0)
+  const gains = deltas.filter((delta) => delta > 0)
+
   return {
-    best: Math.min(...deltas),
-    worst: Math.max(...deltas),
+    best: losses.length ? Math.min(...losses) : null,
+    worst: gains.length ? Math.max(...gains) : null,
   }
 }
 
