@@ -216,6 +216,38 @@ function Layout({
   onAdd: () => void
 }) {
   const brandedHeader = screen === 'overview'
+  const mainRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const element = mainRef.current
+
+    if (!element) return
+
+    let startY = 0
+
+    const handleTouchStart = (event: TouchEvent) => {
+      startY = event.touches[0]?.clientY ?? 0
+    }
+
+    const handleTouchMove = (event: TouchEvent) => {
+      const currentY = event.touches[0]?.clientY ?? startY
+      const deltaY = currentY - startY
+      const atTop = element.scrollTop <= 0
+      const atBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - 1
+
+      if ((atTop && deltaY > 0) || (atBottom && deltaY < 0)) {
+        event.preventDefault()
+      }
+    }
+
+    element.addEventListener('touchstart', handleTouchStart, { passive: true })
+    element.addEventListener('touchmove', handleTouchMove, { passive: false })
+
+    return () => {
+      element.removeEventListener('touchstart', handleTouchStart)
+      element.removeEventListener('touchmove', handleTouchMove)
+    }
+  }, [screen])
 
   return (
     <>
@@ -224,7 +256,7 @@ function Layout({
           <img className="brand-mark brand-logo" src="/brand-logo.png" alt="?????????????? ?????????? 40" data-brand-mark={BRAND_PLACEHOLDER_MARK} />
         </header>
       ) : null}
-      <main className={brandedHeader ? 'main-branded' : 'main-plain'}>{children}</main>
+      <main ref={mainRef} className={brandedHeader ? 'main-branded' : 'main-plain'}>{children}</main>
       {screen === 'overview' && (
         <button
           className="fab"
@@ -385,6 +417,7 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
           {([
             ['week', '\u041d\u0435\u0434\u0435\u043b\u044f'],
             ['month', '\u041c\u0435\u0441\u044f\u0446'],
+            ['all', '\u0412\u0441\u0451'],
           ] as const).map(([value, label]) => (
             <button
               key={value}
@@ -427,17 +460,24 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
       <div className="history-filter" role="tablist" aria-label={'\u0424\u0438\u043b\u044c\u0442\u0440 \u0437\u0430\u043c\u0435\u0440\u043e\u0432'}>
         {([
           ['all', '\u0412\u0441\u0435'],
-          ['loss', '\u0421\u043d\u0438\u0436\u0435\u043d\u0438\u0435'],
-          ['gain', '\u041d\u0430\u0431\u043e\u0440'],
+          ['loss', '\u2212'],
+          ['gain', '+'],
         ] as const).map(([value, label]) => (
           <button
             key={value}
             type="button"
-            className={filter === value ? 'active' : ''}
+            className={`${filter === value ? 'active' : ''} ${value === 'loss' ? 'is-loss' : value === 'gain' ? 'is-gain' : ''}`.trim()}
             onClick={() => setFilter(value)}
             aria-pressed={filter === value}
+            aria-label={
+              value === 'all'
+                ? '\u0412\u0441\u0435'
+                : value === 'loss'
+                  ? '\u0422\u043e\u043b\u044c\u043a\u043e \u0441\u043d\u0438\u0436\u0435\u043d\u0438\u0435'
+                  : '\u0422\u043e\u043b\u044c\u043a\u043e \u043d\u0430\u0431\u043e\u0440'
+            }
           >
-            {label}
+            <span>{label}</span>
           </button>
         ))}
       </div>

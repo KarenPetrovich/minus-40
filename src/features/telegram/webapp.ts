@@ -13,6 +13,8 @@ type TelegramInsets = {
 type TelegramWebApp = {
   ready: () => void
   expand: () => void
+  disableVerticalSwipes?: () => void
+  enableVerticalSwipes?: () => void
   HapticFeedback?: {
     impactOccurred?: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void
     selectionChanged?: () => void
@@ -108,6 +110,7 @@ export function initializeTelegramWebApp(): () => void {
 
   webApp.ready()
   webApp.expand()
+  webApp.disableVerticalSwipes?.()
 
   const headerColor = webApp.themeParams?.bg_color
 

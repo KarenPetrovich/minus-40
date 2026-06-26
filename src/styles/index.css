@@ -579,6 +579,9 @@ nav button.active {
 
 .history-range-switch {
   grid-column: 1 / -1;
+  width: 100%;
+  max-width: 336px;
+  margin: 0 auto;
 }
 
 .history-range-switch button,
@@ -656,6 +659,20 @@ nav button.active {
   width: 100%;
   max-width: 336px;
   margin: 0 auto 8px;
+}
+
+.history-filter button.is-loss span {
+  color: #fc820c;
+}
+
+.history-filter button.is-gain span {
+  color: #ba1a1a;
+}
+
+.history-filter button.is-loss,
+.history-filter button.is-gain {
+  font-size: 16px;
+  letter-spacing: 0;
 }
 
 .history-month {
