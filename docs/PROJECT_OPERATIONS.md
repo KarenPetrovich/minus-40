@@ -75,10 +75,12 @@ Already working:
 
 ## Deployment Workflow
 
-- Hosting is already connected through Netlify.
+- Primary deployment is now Vercel.
+- Backup deployment remains Netlify, but day-to-day release verification should use Vercel Deployments first.
 - Normal deploy path: `git push origin main`
-- If Telegram shows an old version, first verify the latest Netlify deploy status.
-- Do not assume deployment is broken before checking Netlify.
+- Vercel should auto-build from GitHub on each push to `main`.
+- This project is a Vite SPA, so `vercel.json` keeps all routes rewritten to `index.html`.
+- If Telegram shows an old version, first verify the latest Vercel deployment status before checking any backup host.
 
 ## Repository Hygiene Rule
 
