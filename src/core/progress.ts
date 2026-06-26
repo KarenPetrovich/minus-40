@@ -167,3 +167,47 @@ export function averagePeriodChange(entries: WeightEntry[]): number | null {
 
   return (newest.weight - oldest.weight) / days
 }
+
+export function longestLossStreak(entries: WeightEntry[]): number | null {
+  if (entries.length < 2) return null
+
+  const chronological = [...entries].reverse()
+  let current = 1
+  let best = 1
+
+  for (let index = 1; index < chronological.length; index += 1) {
+    const delta = chronological[index].weight - chronological[index - 1].weight
+
+    if (delta <= 0) {
+      current += 1
+      best = Math.max(best, current)
+    } else {
+      current = 1
+    }
+  }
+
+  return best
+}
+
+export function stabilityPercent(entries: WeightEntry[]): number | null {
+  if (entries.length < 2) return null
+
+  const deltas = entries
+    .map((entry, index) => compareEntries(entry, entries[index + 1]))
+    .filter((value): value is number => value !== null)
+
+  if (!deltas.length) return null
+
+  const losses = deltas.filter((value) => value < 0).length
+
+  return Math.round((losses / deltas.length) * 100)
+}
+
+export function daysInJourney(entries: WeightEntry[]): number | null {
+  if (!entries.length) return null
+
+  const newest = entries[0]
+  const oldest = entries[entries.length - 1]
+
+  return Math.max(Math.round((newest.date - oldest.date) / DAY) + 1, 1)
+}

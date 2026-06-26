@@ -2,6 +2,9 @@ import { Fragment, useEffect, useRef, useState } from 'react'
 import type { AppState, Screen } from '../core/types'
 import {
   averagePeriodChange,
+  clamp,
+  daysInJourney,
+  longestLossStreak,
   MILESTONES,
   chartPoints,
   compareEntries,
@@ -18,6 +21,7 @@ import {
   nextMilestone,
   percentToMilestone,
   remainingToMilestone,
+  stabilityPercent,
   totalLost,
   weeklyChange,
 } from '../core/progress'
@@ -642,11 +646,17 @@ function Settings({
 void Graph
 
 function GraphScreen({ state }: { state: AppState }) {
+  const chartWidth = 300
+  const chartHeight = 164
+  const chartEdgePadding = 14
   const [range, setRange] = useState<ChartRange>('month')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const filteredEntries = filterEntriesByRange(state.entries, range)
   const chronologicalEntries = [...filteredEntries].reverse()
-  const points = chartPoints(filteredEntries, 300, 164)
+  const points = chartPoints(filteredEntries, chartWidth - chartEdgePadding * 2, chartHeight).map((point) => ({
+    ...point,
+    x: point.x + chartEdgePadding,
+  }))
   const averageChange = averagePeriodChange(filteredEntries)
   const totalChange = filteredEntries.length >= 2 ? filteredEntries[0].weight - filteredEntries[filteredEntries.length - 1].weight : null
   const activeIndex = selectedIndex ?? Math.max(points.length - 1, 0)
@@ -654,6 +664,40 @@ function GraphScreen({ state }: { state: AppState }) {
   const activeEntry = chronologicalEntries[activeIndex]
   const previousEntry = chronologicalEntries[activeIndex - 1]
   const activeDelta = activeEntry ? compareEntries(activeEntry, previousEntry) : null
+  const longestStreak = longestLossStreak(filteredEntries)
+  const weeklyRate = averageChange !== null ? averageChange * 7 : null
+  const stability = stabilityPercent(filteredEntries)
+  const journeyDays = daysInJourney(state.entries)
+  const activeBubbleLeft = activePoint ? clamp((activePoint.x / chartWidth) * 100, 20, 80) : 50
+  const activeBubbleTop = activePoint ? clamp((activePoint.y / chartHeight) * 100 - 8, 16, 78) : 24
+  const axisItems =
+    chronologicalEntries.length <= 7
+      ? chronologicalEntries.map((entry, index) => ({
+          key: entry.id,
+          index,
+          label: formatDate(entry.date, true),
+          left: `${(index / Math.max(chronologicalEntries.length - 1, 1)) * 100}%`,
+        }))
+      : [
+          {
+            key: chronologicalEntries[0]?.id ?? 'start',
+            index: 0,
+            label: formatDate(chronologicalEntries[0].date, true),
+            left: '0%',
+          },
+          {
+            key: chronologicalEntries[Math.floor((chronologicalEntries.length - 1) / 2)]?.id ?? 'middle',
+            index: Math.floor((chronologicalEntries.length - 1) / 2),
+            label: formatDate(chronologicalEntries[Math.floor((chronologicalEntries.length - 1) / 2)].date, true),
+            left: '50%',
+          },
+          {
+            key: chronologicalEntries[chronologicalEntries.length - 1]?.id ?? 'end',
+            index: chronologicalEntries.length - 1,
+            label: formatDate(chronologicalEntries[chronologicalEntries.length - 1].date, true),
+            left: '100%',
+          },
+        ]
 
   return (
     <div className="graph">
@@ -695,55 +739,94 @@ function GraphScreen({ state }: { state: AppState }) {
       <section className="big-chart big-chart-graph">
         {points.length > 1 ? (
           <>
-            {activePoint ? (
-              <div className="graph-tooltip" aria-live="polite">
-                <b>{formatDate(activePoint.date, true)}</b>
-                <span>{formatWeight(activePoint.weight)}</span>
-                <em className={activeDelta !== null && activeDelta > 0 ? 'red' : activeDelta !== null && activeDelta < 0 ? 'orange' : ''}>
-                  {activeDelta === null ? 'Старт' : `${formatDelta(activeDelta)} кг`}
-                </em>
-              </div>
-            ) : null}
-            <svg viewBox="0 0 300 164" preserveAspectRatio="none">
-              <line x1="0" x2="300" y1="36" y2="36" />
-              <line x1="0" x2="300" y1="90" y2="90" />
-              <line x1="0" x2="300" y1="144" y2="144" />
-              {points.slice(0, -1).map((point, index) => {
-                const nextPoint = points[index + 1]
-                const segmentDelta = nextPoint.weight - point.weight
+            <div className="graph-plot">
+              {activePoint ? (
+                <div
+                  className="graph-popover"
+                  aria-live="polite"
+                  style={{ left: `${activeBubbleLeft}%`, top: `${activeBubbleTop}%` }}
+                >
+                  <b>{formatDate(activePoint.date, true)}</b>
+                  <span>{formatWeight(activePoint.weight)}</span>
+                  <em className={activeDelta !== null && activeDelta > 0 ? 'red' : activeDelta !== null && activeDelta < 0 ? 'orange' : ''}>
+                    {activeDelta === null ? 'Старт' : `${formatDelta(activeDelta)} кг`}
+                  </em>
+                </div>
+              ) : null}
+              <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
+                <line x1="0" x2={chartWidth} y1="36" y2="36" />
+                <line x1="0" x2={chartWidth} y1="90" y2="90" />
+                <line x1="0" x2={chartWidth} y1="144" y2="144" />
+                {points.slice(0, -1).map((point, index) => {
+                  const nextPoint = points[index + 1]
+                  const segmentDelta = nextPoint.weight - point.weight
 
-                return (
-                  <line
-                    key={`${point.date}-${nextPoint.date}`}
-                    x1={point.x}
-                    y1={point.y}
-                    x2={nextPoint.x}
-                    y2={nextPoint.y}
-                    className={segmentDelta > 0 ? 'segment-red' : 'segment-orange'}
-                  />
-                )
-              })}
-              {points.map((point, index) => (
-                <g key={point.date} className="graph-point-hit" onClick={() => setSelectedIndex(index)}>
-                  {index === activeIndex ? <circle cx={point.x} cy={point.y} r="9" className="point-active-ring" /> : null}
-                  <circle
-                    cx={point.x}
-                    cy={point.y}
-                    r={index === activeIndex ? '6.5' : '5.4'}
-                    className={index === activeIndex ? 'point-active' : 'point'}
-                  />
-                </g>
+                  return (
+                    <line
+                      key={`${point.date}-${nextPoint.date}`}
+                      x1={point.x}
+                      y1={point.y}
+                      x2={nextPoint.x}
+                      y2={nextPoint.y}
+                      className={segmentDelta > 0 ? 'segment-red' : 'segment-orange'}
+                    />
+                  )
+                })}
+                {points.map((point, index) => (
+                  <g key={point.date} className="graph-point-hit" onClick={() => setSelectedIndex(index)}>
+                    <circle cx={point.x} cy={point.y} r="16" className="point-hit-area" />
+                    {index === activeIndex ? <circle cx={point.x} cy={point.y} r="12" className="point-active-ring" /> : null}
+                    <circle
+                      cx={point.x}
+                      cy={point.y}
+                      r={index === activeIndex ? '8' : '7'}
+                      className={index === activeIndex ? 'point-active' : 'point'}
+                    />
+                  </g>
+                ))}
+              </svg>
+            </div>
+            <div className="graph-axis-labels" role="list" aria-label={'Даты замеров на графике'}>
+              {axisItems.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  className={item.index === activeIndex ? 'active' : ''}
+                  style={{ left: item.left }}
+                  onClick={() => setSelectedIndex(item.index)}
+                >
+                  {item.label}
+                </button>
               ))}
-            </svg>
-            <div className="graph-axis-labels" aria-hidden="true">
-              <span>{formatDate(filteredEntries[filteredEntries.length - 1].date, true)}</span>
-              <span>{formatDate(filteredEntries[Math.floor((filteredEntries.length - 1) / 2)].date, true)}</span>
-              <span>{formatDate(filteredEntries[0].date, true)}</span>
             </div>
           </>
         ) : (
           <p className="empty">Добавьте ещё 1-2 замера для более точного тренда.</p>
         )}
+      </section>
+      <section className="graph-insights" aria-label={'Аналитика периода'}>
+        <article>
+          <small>{'Серия снижения'}</small>
+          <strong>{longestStreak === null ? '—' : `${longestStreak} зам.`}</strong>
+          <p>{longestStreak === null ? 'Нужно больше данных' : 'Подряд без набора'}</p>
+        </article>
+        <article>
+          <small>{'Средняя скорость'}</small>
+          <strong className={weeklyRate !== null && weeklyRate > 0 ? 'red' : 'orange'}>
+            {weeklyRate === null ? '—' : `${formatDelta(weeklyRate)} кг`}
+          </strong>
+          <p>{'За неделю в среднем'}</p>
+        </article>
+        <article>
+          <small>{'Стабильность'}</small>
+          <strong>{stability === null ? '—' : `${stability}%`}</strong>
+          <p>{'Снижений в периоде'}</p>
+        </article>
+        <article>
+          <small>{'Дней в пути'}</small>
+          <strong>{journeyDays === null ? '—' : journeyDays}</strong>
+          <p>{'С первого замера'}</p>
+        </article>
       </section>
     </div>
   )
