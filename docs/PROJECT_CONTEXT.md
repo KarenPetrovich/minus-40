@@ -75,3 +75,8 @@ Not in current scope:
 ## Practical Product Rule
 
 Prefer the smallest useful solution that gives real control to the user.
+
+## Active App URLs
+
+- primary production URL: `https://minus-40.vercel.app`
+- legacy backup URL: `https://adorable-wisp-fb63cf.netlify.app/`

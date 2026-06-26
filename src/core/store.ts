@@ -1,4 +1,5 @@
-import { loadState, saveState } from './storage'
+import type { AppState } from './types'
+import { loadState, normalizeState, saveState } from './storage'
 let state = loadState(); const listeners = new Set<() => void>()
 const emit = () => { saveState(state); listeners.forEach((listener) => listener()) }
 export const weightStore = {
@@ -7,4 +8,6 @@ export const weightStore = {
   addWeight(weight: number, date = Date.now()) { state = { ...state, entries: [{ id: crypto.randomUUID(), date, weight }, ...state.entries].sort((a, b) => b.date - a.date) }; emit() },
   deleteEntry(id: string) { state = { ...state, entries: state.entries.filter((entry) => entry.id !== id) }; emit() },
   updateSettings(startWeight: number, targetWeight: number) { state = { ...state, startWeight, targetWeight }; emit() },
+  exportState() { return JSON.stringify(state, null, 2) },
+  importState(nextState: AppState) { state = normalizeState(nextState); emit() },
 }

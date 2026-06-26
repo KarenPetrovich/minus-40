@@ -158,3 +158,15 @@ Why:
 
 - asset names should stay searchable and unambiguous in the active project tree;
 - avoiding spelling drift reduces broken imports and future confusion.
+
+### 2026-06-26 - Deployment Host Priority
+
+Decision:
+
+- Vercel is the primary live deployment host at `https://minus-40.vercel.app`;
+- Netlify remains the legacy backup host at `https://adorable-wisp-fb63cf.netlify.app/`.
+
+Why:
+
+- Netlify deployment capacity is currently constrained;
+- the project still needs a secondary fallback host recorded for recovery and migration work.

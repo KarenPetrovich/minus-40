@@ -8,5 +8,14 @@ export default function App() {
 
   useEffect(() => initializeTelegramWebApp(), [])
 
-  return <AppUI state={state} onAdd={weightStore.addWeight} onDelete={weightStore.deleteEntry} onSettings={weightStore.updateSettings} />
+  return (
+    <AppUI
+      state={state}
+      onAdd={weightStore.addWeight}
+      onDelete={weightStore.deleteEntry}
+      onSettings={weightStore.updateSettings}
+      onExport={() => weightStore.exportState()}
+      onImport={(nextState) => weightStore.importState(nextState)}
+    />
+  )
 }
