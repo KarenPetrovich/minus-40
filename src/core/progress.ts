@@ -41,14 +41,14 @@ export const remainingToMilestone = (state: AppState) => {
 
 export const compareEntries = (entry: WeightEntry, older?: WeightEntry) => (older ? entry.weight - older.weight : null)
 
-export type HistoryRange = 'week' | 'month' | 'all'
+export type HistoryRange = 'week' | 'month' | 'year'
 
 export function historyExtremes(entries: WeightEntry[], range: HistoryRange): { best: number | null; worst: number | null } {
   if (entries.length < 2) return { best: null, worst: null }
 
   const newest = entries[0]
-  const windowDays = range === 'week' ? 7 : range === 'month' ? 30 : null
-  const cutoff = windowDays === null ? Number.NEGATIVE_INFINITY : newest.date - windowDays * DAY
+  const windowDays = range === 'week' ? 7 : range === 'month' ? 30 : 365
+  const cutoff = newest.date - windowDays * DAY
   const deltas = entries
     .map((entry, index) => {
       const older = entries[index + 1]
