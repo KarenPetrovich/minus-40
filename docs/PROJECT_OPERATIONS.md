@@ -18,45 +18,35 @@ start here.
 
 - Active roadmap stage: Stage 1
 - Product scope: MVP for weight tracking inside Telegram Mini App
-- Current implementation: local-only app with `localStorage`
+- Current implementation: Supabase-backed cloud sync with local cache and legacy migration support
 
 ## Current Focus
 
-As of June 25, 2026, the active focus is:
+As of June 27, 2026, the active focus is:
 
-1. audit of existing screens and navigation;
-2. design polishing of the current MVP;
-3. navigation/icon redesign and premium bottom-nav refinement;
-4. keeping the product visually coherent before expanding functionality.
+1. stabilizing the shipped Supabase sync baseline;
+2. keeping Telegram-validated cloud access host-independent;
+3. keeping the local database backup mirror in sync with schema changes;
+4. removing temporary diagnostics and duplicate sources of truth after verification.
 
 ## Working Efficiency Rules
 
-These rules exist to reduce unnecessary token use, iteration churn, and avoidable context rebuilding during sessions.
+Keep work narrow, search before reading, and verify at the right scale.
 
-### Read And Search Discipline
-
-- do not read large files end-to-end if only one block is needed;
-- start with targeted search, then open only the relevant fragment;
-- do not re-read large skills or long docs inside the same task if the needed context is already gathered.
-
-### UI Iteration Discipline
-
-- for small visual refinements, prefer one bundled pass of 2-3 related changes instead of one micro-change at a time;
-- before visual polishing, explicitly define the success criteria in 1-2 short sentences;
-- do not expand a narrow visual fix into broader redesign work unless it clearly helps the stated goal.
-
-### Verification Discipline
-
-- do not run a full production build after every tiny CSS-only tweak if reload plus visual check is enough;
-- do not take a fresh screenshot for every hypothesis;
-- first make a thoughtful pass, then take a verification screenshot;
-- use full build and heavier verification when the change affects behavior, assets, structure, or release confidence.
+- search first, then open only the relevant fragment;
+- do not reread long docs or skills if the needed context is already gathered;
+- bundle small UI tweaks into one pass;
+- use reload/spot checks for tiny style changes;
+- reserve full builds for behavior, asset, structure, or release changes.
+- prefer the local preview laboratory at `http://127.0.0.1:5173/preview` for UI iteration;
+- avoid exchanging screenshots unless they are strictly needed for a bug report or final verification;
+- treat the preview page as the primary visual feedback loop to save time and token budget.
 
 ## Explicitly Deferred
 
 These items are important, but are not the current implementation focus:
 
-1. free cloud sync between devices;
+1. realtime push sync beyond refresh/reload based cloud reconciliation;
 2. final logo selection and replacement of the temporary square-in-square mark;
 3. broader architecture expansion beyond the current MVP needs.
 
@@ -65,7 +55,8 @@ These items are important, but are not the current implementation focus:
 Already working:
 
 - adding weight entries;
-- storing entries locally;
+- storing entries locally as legacy/cache state;
+- Supabase cloud bootstrap and refresh;
 - overview screen;
 - history screen;
 - graph screen;
@@ -73,20 +64,23 @@ Already working:
 - Telegram Web App initialization;
 - mobile launch path through Netlify + Telegram.
 
+In progress:
+
+- keeping the local database backup artifacts under `C:\Future\Минус40_архив\database\minus-40` aligned with schema changes;
+- cleaning up temporary diagnostics after verification passes.
+
 ## Deployment Workflow
 
-- Primary deployment is now Vercel.
-- Backup deployment remains Netlify, but day-to-day release verification should use Vercel Deployments first.
-- Normal deploy path: `git push origin main`
+- Primary deployment is Vercel.
+- Backup deployment remains Netlify.
 - Vercel should auto-build from GitHub on each push to `main`.
 - This project is a Vite SPA, so `vercel.json` keeps all routes rewritten to `index.html`.
-- If Telegram shows an old version, first verify the latest Vercel deployment status before checking any backup host.
 
 ### Host Transition Notes
 
 - Telegram WebView is sensitive to root-page overscroll, so scrolling must stay inside the app container, not at the `body` level.
-- To reduce host-switch data loss, app state is mirrored into both `minus40.app-state` and `minus40.app-backup` in local storage.
-- Different hosts still mean different browser origins, so local storage is not automatically shared between Netlify and Vercel.
+- Different hosts still mean different browser origins, so browser local storage is not automatically shared between Netlify and Vercel.
+- Cloud sync stays independent from the frontend host and relies only on Supabase plus Telegram identity validation.
 
 ## Repository Hygiene Rule
 
@@ -135,3 +129,5 @@ When the user says "проведи чистку", it means:
 2. check whether active documents still reflect reality;
 3. reduce duplicate sources of truth;
 4. leave only live project files in `C:\Future\Минус 40`.
+- use `http://127.0.0.1:5173/preview` as the first-stop visual lab for UI changes;
+- avoid screenshot ping-pong unless a bug specifically requires it.

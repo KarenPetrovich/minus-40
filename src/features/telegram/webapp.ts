@@ -11,6 +11,15 @@ type TelegramInsets = {
 }
 
 type TelegramWebApp = {
+  initData?: string
+  initDataUnsafe?: {
+    user?: {
+      id?: number
+      username?: string
+      first_name?: string
+      last_name?: string
+    }
+  }
   ready: () => void
   expand: () => void
   disableVerticalSwipes?: () => void
@@ -91,6 +100,24 @@ export function triggerSelection(): void {
 
 export function triggerNotification(type: 'success' | 'warning' | 'error'): void {
   getTelegramWebApp()?.HapticFeedback?.notificationOccurred?.(type)
+}
+
+export function getTelegramInitData(): string {
+  return getTelegramWebApp()?.initData ?? ''
+}
+
+export function subscribeTelegramEvent(eventType: string, handler: () => void): () => void {
+  const webApp = getTelegramWebApp()
+
+  if (!webApp) {
+    return () => {}
+  }
+
+  webApp.onEvent?.(eventType, handler)
+
+  return () => {
+    webApp.offEvent?.(eventType, handler)
+  }
 }
 
 export function initializeTelegramWebApp(): () => void {

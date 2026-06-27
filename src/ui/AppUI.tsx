@@ -1,11 +1,10 @@
-import { Fragment, useEffect, useRef, useState } from 'react'
+﻿import { Fragment, useEffect, useRef, useState } from 'react'
 import type { AppState, Screen } from '../core/types'
 import {
   averagePeriodChange,
   clamp,
   daysInJourney,
   longestLossStreak,
-  MILESTONES,
   chartPoints,
   compareEntries,
   currentWeight,
@@ -27,20 +26,15 @@ import {
 } from '../core/progress'
 import { triggerImpact, triggerNotification, triggerSelection } from '../features/telegram/webapp'
 import { animateValue, fadeIn, fadeOut, lerp, slideIn } from './motion'
+import { GoalsScreen } from './GoalsScreen'
 import forecastCalendarIcon from '../../forecast-calendar.png'
-import milestone110Art from '../assets/ui/milestones/110.png'
-import milestone115Art from '../assets/ui/milestones/115.png'
-import milestone120Art from '../assets/ui/milestones/120.png'
-import milestone125Art from '../assets/ui/milestones/125.png'
-import milestone130Art from '../assets/ui/milestones/130.png'
-import milestone140Art from '../assets/ui/milestones/140.png'
-import milestone150Art from '../assets/ui/milestones/150.png'
 
 type Props = {
   state: AppState
   onAdd: (weight: number) => void
   onDelete: (id: string) => void
   onSettings: (start: number, target: number) => void
+  initialScreen?: Screen
 }
 
 const pluralizeDays = (value: number) => {
@@ -53,18 +47,8 @@ const pluralizeDays = (value: number) => {
   return 'дней'
 }
 
-const MILESTONE_ART: Record<number, string> = {
-  150: milestone150Art,
-  140: milestone140Art,
-  130: milestone130Art,
-  125: milestone125Art,
-  120: milestone120Art,
-  115: milestone115Art,
-  110: milestone110Art,
-}
-
 // Temporary placeholder until we pick the final brand sign.
-const BRAND_PLACEHOLDER_MARK = '▣'
+const BRAND_PLACEHOLDER_MARK = '?'
 
 function NavIcon({ screen, active }: { screen: Screen; active: boolean }) {
   const primary = '#00328A'
@@ -298,7 +282,7 @@ function Layout({
           }}
           aria-label="Добавить замер"
         >
-          ＋
+          +
         </button>
       )}
       <nav>
@@ -562,38 +546,6 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
   )
 }
 
-function Graph({ state }: { state: AppState }) {
-  const points = chartPoints(state.entries)
-  const line = points.map((point) => `${point.x},${point.y}`).join(' ')
-  const trend = weeklyChange(state.entries)
-
-  return (
-    <div className="graph">
-      <h1>График веса</h1>
-      <p>Динамика всех замеров</p>
-      <section className="big-chart">
-        {points.length > 1 ? (
-          <svg viewBox="0 0 300 150" preserveAspectRatio="none">
-            <line x1="0" x2="300" y1="30" y2="30" />
-            <line x1="0" x2="300" y1="75" y2="75" />
-            <line x1="0" x2="300" y1="120" y2="120" />
-            <polyline points={line} className={trend !== null && trend > 0 ? 'line-red' : 'line-orange'} />
-            {points.map((point) => (
-              <circle key={point.date} cx={point.x} cy={point.y} r="3" />
-            ))}
-          </svg>
-        ) : (
-          <p className="empty">Для графика добавьте минимум два замера.</p>
-        )}
-      </section>
-      <section className="legend">
-        <span className="orange">● Снижение веса</span>
-        <span className="red">● Набор веса</span>
-      </section>
-    </div>
-  )
-}
-
 function Settings({
   state,
   onSave,
@@ -601,92 +553,8 @@ function Settings({
   state: AppState
   onSave: (start: number, target: number) => void
 }) {
-  const [start, setStart] = useState(String(state.startWeight))
-  const [target, setTarget] = useState(String(state.targetWeight))
-  const parsedStart = Number(start.replace(',', '.'))
-  const parsedTarget = Number(target.replace(',', '.'))
-  const remaining = Number.isFinite(parsedStart) && Number.isFinite(parsedTarget) && parsedStart > parsedTarget ? parsedStart - parsedTarget : null
-  const current = currentWeight(state)
-  const next = nextMilestone(state)
-  const achievedMilestones = MILESTONES.filter((milestone) => current !== null && current <= milestone)
-  const completedMilestones = achievedMilestones.length
-  const unlockedMilestone = achievedMilestones[achievedMilestones.length - 1] ?? null
-  const unlockedArt = unlockedMilestone === null ? null : MILESTONE_ART[unlockedMilestone]
-
-  return (
-    <div className="settings">
-      <h1>{'\u0426\u0435\u043b\u0438'}</h1>
-      <section className="settings-card settings-metrics">
-        <article>
-          <label>{'\u0421\u0442\u0430\u0440\u0442'}</label>
-          <div className="settings-input-row">
-            <input value={start} inputMode="decimal" onChange={(event) => setStart(event.target.value)} />
-            <span>{'\u043a\u0433'}</span>
-          </div>
-        </article>
-        <article>
-          <label>{'\u0426\u0435\u043b\u044c'}</label>
-          <div className="settings-input-row">
-            <input value={target} inputMode="decimal" onChange={(event) => setTarget(event.target.value)} />
-            <span>{'\u043a\u0433'}</span>
-          </div>
-        </article>
-        <div className="settings-remaining">
-          <small>{'\u0414\u043e \u0446\u0435\u043b\u0438'}</small>
-          <strong>{remaining === null ? '\u2014' : formatWeight(remaining)}</strong>
-        </div>
-      </section>
-      <button
-        className="primary"
-        onClick={() => {
-          if (parsedStart > 0 && parsedTarget > 0 && parsedTarget < parsedStart) {
-            triggerNotification('success')
-            onSave(parsedStart, parsedTarget)
-          }
-        }}
-      >
-        {'\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c'}
-      </button>
-      <section className="settings-card settings-achievements">
-        <div className="settings-achievements-head">
-          <h2>{'\u041f\u0440\u043e\u043c\u0435\u0436\u0443\u0442\u043e\u0447\u043d\u044b\u0435 \u0446\u0435\u043b\u0438'}</h2>
-          <b>{completedMilestones}/{MILESTONES.length}</b>
-        </div>
-        <div className="milestones">
-          {MILESTONES.map((milestone) => (
-            <span
-              key={milestone}
-              className={
-                current !== null && current <= milestone
-                  ? 'done'
-                  : next === milestone
-                    ? 'current'
-                    : ''
-              }
-            >
-              {milestone} {'\u043a\u0433'}
-            </span>
-          ))}
-        </div>
-        <div className="milestone-showcase">
-          <div className="milestone-showcase-head">
-            <small>{unlockedMilestone === null ? 'Первая награда' : 'Открытый рубеж'}</small>
-            <b>{unlockedMilestone === null ? '150 кг' : `${unlockedMilestone} кг`}</b>
-          </div>
-          <div className={`milestone-showcase-art milestone-showcase-${unlockedMilestone ?? 'empty'}`}>
-            {unlockedArt ? (
-              <img src={unlockedArt} alt={`Награда за достижение ${unlockedMilestone} кг`} />
-            ) : (
-              <p>Первая награда появится здесь после достижения 150 кг.</p>
-            )}
-          </div>
-        </div>
-      </section>
-    </div>
-  )
+  return <GoalsScreen state={state} onSave={onSave} />
 }
-
-void Graph
 
 function GraphScreen({ state }: { state: AppState }) {
   const chartWidth = 300
@@ -901,7 +769,7 @@ function AddDialog({ onClose, onAdd }: { onClose: () => void; onAdd: (value: num
           }}
         >
           <button className="close" type="button" onClick={requestClose}>
-            ×
+            ?
           </button>
           <label>НОВЫЙ ЗАМЕР</label>
           <input
@@ -928,7 +796,7 @@ function MilestoneDialog({ value, onClose }: { value: number; onClose: () => voi
     <DialogFrame className="milestone-dialog" onClose={onClose}>
       {(requestClose) => (
         <>
-          <b>★</b>
+          <b>?</b>
           <label>РУБЕЖ ДОСТИГНУТ</label>
           <h1>{formatWeight(value)}</h1>
           <p>Отличная работа. Продолжайте в том же ритме.</p>
@@ -947,8 +815,8 @@ function MilestoneDialog({ value, onClose }: { value: number; onClose: () => voi
   )
 }
 
-export function AppUI({ state, onAdd, onDelete, onSettings }: Props) {
-  const [screen, setScreen] = useState<Screen>('overview')
+export function AppUI({ state, onAdd, onDelete, onSettings, initialScreen = 'overview' }: Props) {
+  const [screen, setScreen] = useState<Screen>(initialScreen)
   const [adding, setAdding] = useState(false)
   const [reached, setReached] = useState<number | null>(null)
 
@@ -980,3 +848,6 @@ export function AppUI({ state, onAdd, onDelete, onSettings }: Props) {
     </Layout>
   )
 }
+
+
+

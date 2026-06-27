@@ -12,8 +12,10 @@ dist/
 Thumbs.db
 
 .netlify/
+.vercel/
 .env
 .env.*
+!.env.example
 
 .codex-*.png
 .font-comparison.png

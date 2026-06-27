@@ -91,3 +91,9 @@
 - аналитика есть, но она декоративна;
 - выводы сложно понять;
 - продукт стал “панелью аналитики” вместо инструмента контроля прогресса.
+
+## Preview Workflow
+
+- Use `http://127.0.0.1:5173/preview` as the primary visual laboratory for UI work.
+- Prefer direct browser verification there instead of exchanging screenshots when the goal is layout iteration.
+- Reserve screenshots for bug reports, final sign-off, or cases where a static image is genuinely necessary.

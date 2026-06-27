@@ -184,3 +184,31 @@ Why:
 - the compact goals layout leaves a natural lower zone for emotional reinforcement;
 - that space now reinforces achievement instead of being filled with random UI;
 - milestone imagery is part of the motivation layer, but still subordinate to the weight goal itself.
+
+### 2026-06-26 - Cloud Sync Architecture
+
+Decision:
+
+- cloud persistence uses Supabase Postgres plus Supabase Edge Functions;
+- frontend hosting must stay static-host compatible and must not depend on Vercel or Netlify server APIs;
+- Telegram identity is accepted only after server-side validation of raw `initData` using `TELEGRAM_BOT_TOKEN`.
+
+Why:
+
+- this keeps the project portable across hosts;
+- it avoids insecure client-only identity assumptions;
+- it centralizes trusted logic next to the database instead of inside a host-specific runtime.
+
+### 2026-06-27 - Production Verification
+
+Decision:
+
+- production builds must include the current Supabase env values before sync verification;
+- temporary diagnostics must be removed after verification;
+- test data should be deleted after it is no longer needed.
+
+Why:
+
+- the first production bundle missed the Supabase env values;
+- temporary diagnostics helped isolate the issue and were then removed;
+- keeping test data in the database makes later checks noisier.

@@ -46,10 +46,13 @@ Important:
 ## Code Layout
 
 - `src/core/` - types, storage, store, calculations
+- `src/features/sync/` - cloud bootstrap and replace-state sync calls
 - `src/features/telegram/` - Telegram integration
+- `src/lib/supabase/` - Supabase client setup
 - `src/ui/` - screens and motion helpers
 - `src/styles/` - global styling and UI tokens
 - `public/` - static assets
+- `supabase/` - migrations, Edge Function, generated database docs
 
 ## Root Rule
 
