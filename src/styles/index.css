@@ -1783,3 +1783,78 @@ nav button:active,
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+.runtime-diagnostics-measure-layer {
+  position: fixed;
+  left: -200vw;
+  top: 0;
+  width: 390px;
+  height: 100dvh;
+  pointer-events: none;
+  visibility: hidden;
+  overflow: hidden;
+}
+
+.runtime-diagnostics-measure-shell {
+  position: fixed;
+  left: -200vw;
+  top: 0;
+  margin: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.runtime-diagnostics-panel {
+  position: fixed;
+  left: 8px;
+  right: 8px;
+  bottom: calc(92px + var(--safe-bottom));
+  z-index: 999;
+  border-radius: 14px;
+  background: rgba(9, 18, 35, 0.92);
+  color: #f4f7ff;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px);
+}
+
+.runtime-diagnostics-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+}
+
+.runtime-diagnostics-head strong {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.runtime-diagnostics-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.runtime-diagnostics-actions button {
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.runtime-diagnostics-panel pre {
+  margin: 0;
+  max-height: 34vh;
+  overflow: auto;
+  padding: 0 12px 12px;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

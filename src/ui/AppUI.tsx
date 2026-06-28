@@ -1,4 +1,4 @@
-﻿import { Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { AppState, Screen } from '../core/types'
 import {
   averagePeriodChange,
@@ -225,17 +225,24 @@ function Layout({
   setScreen,
   children,
   onAdd,
+  mainRef,
+  headerRef,
+  navRef,
 }: {
   screen: Screen
   setScreen: (value: Screen) => void
   children: React.ReactNode
   onAdd: () => void
+  mainRef?: React.MutableRefObject<HTMLElement | null>
+  headerRef?: React.MutableRefObject<HTMLElement | null>
+  navRef?: React.MutableRefObject<HTMLElement | null>
 }) {
   const brandedHeader = screen === 'overview'
-  const mainRef = useRef<HTMLElement>(null)
+  const localMainRef = useRef<HTMLElement>(null)
+  const resolvedMainRef = mainRef ?? localMainRef
 
   useEffect(() => {
-    const element = mainRef.current
+    const element = resolvedMainRef.current
 
     if (!element) return
 
@@ -268,11 +275,11 @@ function Layout({
   return (
     <>
       {brandedHeader ? (
-        <header className="app-header app-header-brand">
+        <header ref={headerRef} className="app-header app-header-brand">
           <img className="brand-mark brand-logo" src="/brand-logo.png" alt="?????????????? ?????????? 40" data-brand-mark={BRAND_PLACEHOLDER_MARK} />
         </header>
       ) : null}
-      <main ref={mainRef} className={brandedHeader ? 'main-branded' : 'main-plain'}>{children}</main>
+      <main ref={resolvedMainRef} className={brandedHeader ? 'main-branded' : 'main-plain'}>{children}</main>
       {screen === 'overview' && (
         <button
           className="fab"
@@ -285,7 +292,7 @@ function Layout({
           +
         </button>
       )}
-      <nav>
+      <nav ref={navRef}>
         {(['overview', 'history', 'graph', 'settings'] as Screen[]).map((item) => (
           <button
             key={item}
@@ -815,10 +822,161 @@ function MilestoneDialog({ value, onClose }: { value: number; onClose: () => voi
   )
 }
 
+
+function RuntimeDiagnostics({
+  state,
+  onSettings,
+  screen,
+  mainRef,
+  headerRef,
+  navRef,
+}: {
+  state: AppState
+  onSettings: (start: number, target: number) => void
+  screen: Screen
+  mainRef: React.MutableRefObject<HTMLElement | null>
+  headerRef: React.MutableRefObject<HTMLElement | null>
+  navRef: React.MutableRefObject<HTMLElement | null>
+}) {
+  const [open, setOpen] = useState(true)
+  const [snapshot, setSnapshot] = useState('Collecting runtime metrics...')
+  const overviewMeasureRef = useRef<HTMLElement>(null)
+  const goalsMeasureRef = useRef<HTMLElement>(null)
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined' || !(window as Window & { Telegram?: unknown }).Telegram) {
+      return
+    }
+
+    const px = (value: number | null | undefined) => Number((value ?? 0).toFixed(2))
+    const readShell = (element: HTMLElement | null, headerHeight: number) => {
+      if (!element) return null
+
+      const content = element.firstElementChild as HTMLElement | null
+      const rect = element.getBoundingClientRect()
+      const contentRect = content?.getBoundingClientRect()
+      const styles = getComputedStyle(element)
+      const paddingBottom = Number.parseFloat(styles.paddingBottom) || 0
+      const usedHeight = contentRect ? contentRect.bottom - rect.top + paddingBottom : element.scrollHeight
+
+      return {
+        headerHeight,
+        bottomNavHeight: px(navRef.current?.getBoundingClientRect().height ?? 0),
+        availableContentHeight: px(element.clientHeight),
+        actualContentHeight: px(usedHeight),
+        scrollHeight: px(element.scrollHeight),
+        verticalScrollingExists: element.scrollHeight - element.clientHeight > 0.5,
+        overflowPixels: px(Math.max(0, element.scrollHeight - element.clientHeight)),
+      }
+    }
+
+    const collect = () => {
+      const rootStyles = getComputedStyle(document.documentElement)
+      const main = mainRef.current
+      const header = headerRef.current
+      const nav = navRef.current
+      const payload = {
+        runtime: {
+          innerWidth: px(window.innerWidth),
+          innerHeight: px(window.innerHeight),
+          visualViewportWidth: px(window.visualViewport?.width ?? 0),
+          visualViewportHeight: px(window.visualViewport?.height ?? 0),
+          documentClientWidth: px(document.documentElement.clientWidth),
+          documentClientHeight: px(document.documentElement.clientHeight),
+          safeArea: {
+            top: px(Number.parseFloat(rootStyles.getPropertyValue('--safe-top')) || 0),
+            bottom: px(Number.parseFloat(rootStyles.getPropertyValue('--safe-bottom')) || 0),
+            left: px(Number.parseFloat(rootStyles.getPropertyValue('--safe-left')) || 0),
+            right: px(Number.parseFloat(rootStyles.getPropertyValue('--safe-right')) || 0),
+          },
+        },
+        chromePreview390x844: {
+          viewportWidth: 390,
+          viewportHeight: 844,
+          overview: {
+            headerHeight: 48,
+            bottomNavHeight: 88,
+            availableContentHeight: 708,
+            actualContentHeight: 599.17,
+          },
+          goals: {
+            headerHeight: 0,
+            bottomNavHeight: 88,
+            availableContentHeight: 708,
+            actualContentHeight: 602.38,
+          },
+        },
+        visibleLayout: {
+          screen,
+          headerHeight: px(header?.getBoundingClientRect().height ?? 0),
+          bottomNavHeight: px(nav?.getBoundingClientRect().height ?? 0),
+          availableContentHeight: px(main?.clientHeight ?? 0),
+          actualContentHeight: px(main?.scrollHeight ?? 0),
+          verticalScrollingExists: (main?.scrollHeight ?? 0) - (main?.clientHeight ?? 0) > 0.5,
+          overflowPixels: px(Math.max(0, (main?.scrollHeight ?? 0) - (main?.clientHeight ?? 0))),
+        },
+        overview: readShell(overviewMeasureRef.current, 48),
+        goals: readShell(goalsMeasureRef.current, 0),
+      }
+
+      ;(window as Window & { __MINUS40_RUNTIME_DIAGNOSTICS__?: unknown }).__MINUS40_RUNTIME_DIAGNOSTICS__ = payload
+      setSnapshot(JSON.stringify(payload, null, 2))
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      collect()
+      window.setTimeout(collect, 350)
+    })
+    const viewport = window.visualViewport
+    viewport?.addEventListener('resize', collect)
+    window.addEventListener('resize', collect)
+
+    return () => {
+      window.cancelAnimationFrame(frameId)
+      viewport?.removeEventListener('resize', collect)
+      window.removeEventListener('resize', collect)
+    }
+  }, [screen, state, mainRef, headerRef, navRef])
+
+  if (typeof window === 'undefined' || !(window as Window & { Telegram?: unknown }).Telegram) {
+    return null
+  }
+
+  return (
+    <>
+      <div className="runtime-diagnostics-measure-layer" aria-hidden="true">
+        <section ref={overviewMeasureRef} className="main-branded runtime-diagnostics-measure-shell">
+          <Overview state={state} />
+        </section>
+        <section ref={goalsMeasureRef} className="main-plain runtime-diagnostics-measure-shell">
+          <Settings state={state} onSave={onSettings} />
+        </section>
+      </div>
+      <aside className={`runtime-diagnostics-panel ${open ? 'is-open' : ''}`}>
+        <div className="runtime-diagnostics-head">
+          <strong>Runtime diagnostics</strong>
+          <div className="runtime-diagnostics-actions">
+            <button type="button" onClick={() => void navigator.clipboard?.writeText(snapshot)}>
+              Copy
+            </button>
+            <button type="button" onClick={() => setOpen((value) => !value)}>
+              {open ? 'Hide' : 'Show'}
+            </button>
+          </div>
+        </div>
+        {open ? <pre>{snapshot}</pre> : null}
+      </aside>
+    </>
+  )
+}
+
 export function AppUI({ state, onAdd, onDelete, onSettings, initialScreen = 'overview' }: Props) {
   const [screen, setScreen] = useState<Screen>(initialScreen)
   const [adding, setAdding] = useState(false)
   const [reached, setReached] = useState<number | null>(null)
+  const mainRef = useRef<HTMLElement>(null)
+  const headerRef = useRef<HTMLElement>(null)
+  const navRef = useRef<HTMLElement>(null)
 
   const add = (weight: number) => {
     const before = nextMilestone(state)
@@ -841,11 +999,28 @@ export function AppUI({ state, onAdd, onDelete, onSettings, initialScreen = 'ove
     )
 
   return (
-    <Layout screen={screen} setScreen={setScreen} onAdd={openAdd}>
-      <ScreenTransition screen={screen}>{view}</ScreenTransition>
-      {adding && <AddDialog onClose={() => setAdding(false)} onAdd={add} />}
-      {reached !== null && <MilestoneDialog value={reached} onClose={() => setReached(null)} />}
-    </Layout>
+    <>
+      <Layout
+        screen={screen}
+        setScreen={setScreen}
+        onAdd={openAdd}
+        mainRef={mainRef}
+        headerRef={headerRef}
+        navRef={navRef}
+      >
+        <ScreenTransition screen={screen}>{view}</ScreenTransition>
+        {adding && <AddDialog onClose={() => setAdding(false)} onAdd={add} />}
+        {reached !== null && <MilestoneDialog value={reached} onClose={() => setReached(null)} />}
+      </Layout>
+      <RuntimeDiagnostics
+        state={state}
+        onSettings={onSettings}
+        screen={screen}
+        mainRef={mainRef}
+        headerRef={headerRef}
+        navRef={navRef}
+      />
+    </>
   )
 }
 
