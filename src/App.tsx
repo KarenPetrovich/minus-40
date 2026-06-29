@@ -1,16 +1,14 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { weightStore } from './core/store'
 import { initializeTelegramWebApp, subscribeTelegramEvent } from './features/telegram/webapp'
-import { AppUI } from './ui/AppUI'
 import { DeveloperPreviewPage } from './ui/DeveloperPreviewPage'
 import { RuntimeInspectorPage } from './ui/RuntimeInspectorPage'
 import './styles/developer-preview.css'
 import './styles/runtime-inspector.css'
 
 export default function App() {
-  const state = useSyncExternalStore(weightStore.subscribe, weightStore.getSnapshot, weightStore.getSnapshot)
+  useSyncExternalStore(weightStore.subscribe, weightStore.getSnapshot, weightStore.getSnapshot)
   const isDevPreview = window.location.pathname === '/dev-preview' || window.location.pathname === '/preview'
-  const isRuntimeInspector = window.location.pathname === '/runtime-inspector'
   const previewScreen = new URLSearchParams(window.location.search).get('screen')
   const previewScreenValue =
     previewScreen === 'overview' || previewScreen === 'history' || previewScreen === 'graph' || previewScreen === 'settings'
@@ -56,16 +54,5 @@ export default function App() {
     )
   }
 
-  if (isRuntimeInspector) {
-    return <RuntimeInspectorPage />
-  }
-
-  return (
-    <AppUI
-      state={state}
-      onAdd={weightStore.addWeight}
-      onDelete={weightStore.deleteEntry}
-      onSettings={weightStore.updateSettings}
-    />
-  )
+  return <RuntimeInspectorPage />
 }
