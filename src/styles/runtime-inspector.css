@@ -1,0 +1,21 @@
+.runtime-inspector {
+  min-height: 100dvh;
+  background: #000;
+  color: #fff;
+  padding: 16px;
+  font: 14px/1.5 monospace;
+}
+
+.runtime-inspector button {
+  margin-bottom: 16px;
+  border: 1px solid #fff;
+  background: #000;
+  color: #fff;
+  padding: 8px 12px;
+}
+
+.runtime-inspector pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
