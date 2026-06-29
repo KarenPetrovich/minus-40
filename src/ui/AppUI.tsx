@@ -4,7 +4,6 @@ import {
   averagePeriodChange,
   clamp,
   daysInJourney,
-  longestLossStreak,
   chartPoints,
   compareEntries,
   currentWeight,
@@ -22,10 +21,10 @@ import {
   remainingToMilestone,
   monthlyCalendarChange,
   totalLost,
-  weeklyChange,
 } from '../core/progress'
-import { triggerImpact, triggerNotification, triggerSelection } from '../features/telegram/webapp'
+import { triggerImpact, triggerNotification } from '../features/telegram/webapp'
 import { animateValue, fadeIn, fadeOut, lerp, slideIn } from './motion'
+import { AppNav } from './AppNav'
 import { GoalsScreen } from './GoalsScreen'
 import forecastCalendarIcon from '../../forecast-calendar.png'
 
@@ -37,61 +36,8 @@ type Props = {
   initialScreen?: Screen
 }
 
-const pluralizeDays = (value: number) => {
-  const mod10 = value % 10
-  const mod100 = value % 100
-
-  if (mod10 === 1 && mod100 !== 11) return 'день'
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'дня'
-
-  return 'дней'
-}
-
 // Temporary placeholder until we pick the final brand sign.
 const BRAND_PLACEHOLDER_MARK = '?'
-
-function NavIcon({ screen, active }: { screen: Screen; active: boolean }) {
-  const primary = '#00328A'
-  const inactive = '#8A91A3'
-  const strongInactive = '#1A1C1E'
-  const orange = '#FC820C'
-  const red = '#BA1A1A'
-
-  return (
-    <span className={`nav-icon nav-icon-${screen} ${active ? 'is-active' : ''}`} aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        {screen === 'overview' ? (
-          <>
-            <rect x="3" y="3" width="7" height="7" stroke={active ? primary : inactive} strokeWidth={active ? '2.5' : '2'} />
-            <rect x="14" y="3" width="7" height="7" stroke={red} strokeWidth={active ? '2.5' : '2'} />
-            <rect x="14" y="14" width="7" height="7" stroke={active ? primary : inactive} strokeWidth={active ? '2.5' : '2'} />
-            <rect x="3" y="14" width="7" height="7" stroke={orange} strokeWidth={active ? '2.5' : '2'} />
-          </>
-        ) : screen === 'history' ? (
-          <>
-            <circle cx="12" cy="12" r="10" stroke={active ? primary : '#7A8091'} strokeOpacity={active ? '1' : '0.38'} strokeWidth={active ? '2.5' : '2'} />
-            <polyline points="12 6 12 12 16 14" stroke={active ? primary : strongInactive} strokeWidth={active ? '3' : '2.5'} />
-          </>
-        ) : screen === 'graph' ? (
-          <>
-            <path d="M3 3v18h18" stroke={active ? primary : inactive} strokeWidth={active ? '2.5' : '2'} />
-            <path d="M18 9l-5 5-2-2-4 4" stroke={red} strokeWidth={active ? '3' : '2.5'} />
-          </>
-        ) : (
-          <>
-            <path
-              d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"
-              fill={orange}
-              stroke={active ? primary : inactive}
-              strokeWidth={active ? '2.5' : '2'}
-            />
-            <line x1="4" y1="22" x2="4" y2="15" stroke={active ? primary : inactive} strokeWidth={active ? '2.5' : '2'} />
-          </>
-        )}
-      </svg>
-    </span>
-  )
-}
 
 function ScreenTransition({ screen, children }: { screen: Screen; children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -272,7 +218,18 @@ function Layout({
           <img className="brand-mark brand-logo" src="/brand-logo.png" alt="?????????????? ?????????? 40" data-brand-mark={BRAND_PLACEHOLDER_MARK} />
         </header>
       ) : null}
-      <main ref={mainRef} className={brandedHeader ? 'main-branded' : 'main-plain'}>{children}</main>
+      <main
+        ref={mainRef}
+        className={
+          screen === 'settings'
+            ? 'main-plain main-settings'
+            : brandedHeader
+              ? 'main-branded'
+              : 'main-plain'
+        }
+      >
+        {children}
+      </main>
       {screen === 'overview' && (
         <button
           className="fab"
@@ -285,29 +242,7 @@ function Layout({
           +
         </button>
       )}
-      <nav>
-        {(['overview', 'history', 'graph', 'settings'] as Screen[]).map((item) => (
-          <button
-            key={item}
-            className={screen === item ? 'active' : ''}
-            aria-label={
-              {
-                overview: 'Обзор',
-                history: 'История',
-                graph: 'График',
-                settings: 'Цели',
-              }[item]
-            }
-            onClick={() => {
-              triggerSelection()
-              setScreen(item)
-            }}
-          >
-            <NavIcon screen={item} active={screen === item} />
-            {{ overview: 'Обзор', history: 'История', graph: 'График', settings: 'Цели' }[item]}
-          </button>
-        ))}
-      </nav>
+      <AppNav screen={screen} onChange={setScreen} />
     </>
   )
 }
@@ -570,20 +505,22 @@ function GraphScreen({ state }: { state: AppState }) {
   }))
   const averageChange = averagePeriodChange(filteredEntries)
   const totalChange = filteredEntries.length >= 2 ? filteredEntries[0].weight - filteredEntries[filteredEntries.length - 1].weight : null
-  const activeIndex = selectedIndex ?? Math.max(points.length - 1, 0)
-  const activePoint = points[activeIndex] ?? null
-  const activeEntry = chronologicalEntries[activeIndex]
-  const previousEntry = chronologicalEntries[activeIndex - 1]
-  const activeDelta = activeEntry ? compareEntries(activeEntry, previousEntry) : null
-  const longestStreak = longestLossStreak(filteredEntries)
-  const realWeeklyRate = weeklyChange(filteredEntries)
-  const provisionalWeeklyRate = averageChange !== null ? averageChange * 7 : null
-  const weeklyRate = realWeeklyRate ?? provisionalWeeklyRate
-  const isWeeklyRateProvisional = realWeeklyRate === null && provisionalWeeklyRate !== null
+  const activeIndex = selectedIndex
+  const activePoint = activeIndex !== null ? points[activeIndex] ?? null : null
+  const activeEntry = activeIndex !== null ? chronologicalEntries[activeIndex] : null
+  const previousEntry = activeIndex !== null ? chronologicalEntries[activeIndex - 1] : null
+  const activeDelta = activeEntry && previousEntry ? compareEntries(activeEntry, previousEntry) : null
   const monthChange = monthlyCalendarChange(state.entries)
   const journeyDays = daysInJourney(state.entries)
-  const activeBubbleLeft = activePoint ? clamp((activePoint.x / chartWidth) * 100, 20, 80) : 50
   const activeBubbleTop = activePoint ? clamp((activePoint.y / chartHeight) * 100 - 8, 16, 78) : 24
+  const activeBubbleAlign =
+    activePoint === null
+      ? 'center'
+      : activePoint.x < 64
+        ? 'left'
+        : activePoint.x > chartWidth - 64
+          ? 'right'
+          : 'center'
   const axisItems =
     chronologicalEntries.length <= 7
       ? chronologicalEntries.map((entry, index) => ({
@@ -653,16 +590,17 @@ function GraphScreen({ state }: { state: AppState }) {
       <section className="big-chart big-chart-graph">
         {points.length > 1 ? (
           <>
-            <div className="graph-plot">
-              {activePoint ? (
-                <div
-                  className="graph-popover"
-                  aria-live="polite"
-                  style={{ left: `${activeBubbleLeft}%`, top: `${activeBubbleTop}%` }}
-                >
-                  <b>{formatDate(activePoint.date, true)}</b>
-                  <span>{formatWeight(activePoint.weight)}</span>
-                  <em className={activeDelta !== null && activeDelta > 0 ? 'red' : activeDelta !== null && activeDelta < 0 ? 'orange' : ''}>
+              <div className="graph-plot">
+                {activePoint ? (
+                  <div
+                    className="graph-popover"
+                    aria-live="polite"
+                    data-align={activeBubbleAlign}
+                    style={{ left: `${activePoint.x}px`, top: `${activeBubbleTop}%` }}
+                  >
+                    <b>{formatDate(activePoint.date, true)}</b>
+                    <span>{formatWeight(activePoint.weight)}</span>
+                    <em className={activeDelta !== null && activeDelta > 0 ? 'red' : activeDelta !== null && activeDelta < 0 ? 'orange' : ''}>
                     {activeDelta === null ? 'Старт' : `${formatDelta(activeDelta)} кг`}
                   </em>
                 </div>
@@ -719,18 +657,6 @@ function GraphScreen({ state }: { state: AppState }) {
         )}
       </section>
       <section className="graph-insights" aria-label={'Аналитика периода'}>
-        <article>
-          <small>{'Серия снижения'}</small>
-          <strong>{longestStreak === null ? '—' : `${longestStreak} ${pluralizeDays(longestStreak)}`}</strong>
-          <p>{longestStreak === null ? 'Нужно больше данных' : 'Подряд без набора'}</p>
-        </article>
-        <article>
-          <small>{'Средняя скорость'}</small>
-          <strong className={weeklyRate !== null && weeklyRate > 0 ? 'red' : 'orange'}>
-            {weeklyRate === null ? '—' : `${formatDelta(weeklyRate)} кг`}
-          </strong>
-          <p>{isWeeklyRateProvisional ? 'Предварительно за неделю' : 'За неделю в среднем'}</p>
-        </article>
         <article>
           <small>{'За месяц'}</small>
           <strong className={monthChange !== null && monthChange > 0 ? 'red' : 'orange'}>

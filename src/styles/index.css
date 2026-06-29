@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
@@ -49,114 +49,6 @@ select {
 
 button {
   cursor: pointer;
-}
-
-.preview-shell {
-  width: 100%;
-  min-height: 100dvh;
-  background:
-    radial-gradient(circle at 1px 1px, rgba(0, 50, 138, 0.08) 1px, transparent 0) 0 0 / 16px 16px,
-    linear-gradient(180deg, #f8f9fc 0%, #eef1f8 100%);
-}
-
-.preview-toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  padding: 18px 24px 14px;
-  border-bottom: 1px solid rgba(0, 50, 138, 0.1);
-  background: rgba(248, 249, 252, 0.9);
-  backdrop-filter: blur(12px);
-}
-
-.preview-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.preview-title {
-  font-size: 38px;
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: #1a1c1e;
-}
-
-.preview-beta {
-  display: inline-flex;
-  align-items: center;
-  height: 30px;
-  padding: 0 12px;
-  border: 1px solid #2f3136;
-  border-radius: 999px;
-  color: #2f3136;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.preview-toolbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.preview-toolbar-icon {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 14px;
-  background: transparent;
-  color: #1f2430;
-}
-
-.preview-toolbar-icon svg {
-  width: 22px;
-  height: 22px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.preview-canvas {
-  min-height: calc(100dvh - 72px);
-  padding: 28px 24px 32px;
-  overflow: auto;
-  display: grid;
-  place-items: center;
-}
-
-.preview-device {
-  width: 390px;
-  height: 884px;
-  margin: 0 auto;
-  border-radius: 40px;
-  overflow: hidden;
-  background: #f9f9fc;
-  box-shadow:
-    0 24px 80px rgba(0, 32, 96, 0.18),
-    0 0 0 1px rgba(0, 50, 138, 0.12);
-}
-
-.preview-device iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-  background: #f9f9fc;
-}
-
-.preview-device > * {
-  width: 100%;
-  height: 100%;
 }
 
 .app-header {
@@ -244,6 +136,13 @@ button {
 
 .main-plain {
   padding: calc(18px + var(--safe-top)) 16px calc(104px + var(--safe-bottom));
+}
+
+.main-settings {
+  padding: calc(4px + var(--safe-top)) 16px calc(64px + var(--safe-bottom));
+  overflow-y: hidden;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: auto;
 }
 
 .stack {
@@ -1087,7 +986,7 @@ nav button.active {
 .graph-popover::after {
   content: '';
   position: absolute;
-  left: 50%;
+  left: var(--tooltip-arrow-left, 50%);
   bottom: -7px;
   width: 12px;
   height: 12px;
@@ -1095,6 +994,20 @@ nav button.active {
   border-bottom: 1.5px solid rgba(0, 50, 138, 0.22);
   background: rgba(255, 255, 255, 0.96);
   transform: translateX(-50%) rotate(45deg);
+}
+
+.graph-popover[data-align='left'] {
+  transform: translate(0, calc(-100% - 14px));
+  --tooltip-arrow-left: 20px;
+}
+
+.graph-popover[data-align='center'] {
+  --tooltip-arrow-left: 50%;
+}
+
+.graph-popover[data-align='right'] {
+  transform: translate(-100%, calc(-100% - 14px));
+  --tooltip-arrow-left: calc(100% - 20px);
 }
 
 .graph-popover b,
@@ -1216,7 +1129,7 @@ nav button.active {
 }
 
 .goals-title {
-  margin: 0 0 10px;
+  margin: 0 0 8px 16px;
   color: #00328a;
   font-size: 30px;
   font-weight: 700;
@@ -1227,8 +1140,8 @@ nav button.active {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 12px 14px 12px 14px;
+  gap: 12px;
+  padding: 14px 14px 14px 14px;
   border-radius: 16px;
   border: 1px solid #cfd5e3;
   box-shadow: 0 2px 8px rgba(0, 50, 138, 0.08);
@@ -1244,7 +1157,7 @@ nav button.active {
 .goals-summary-line {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -1256,7 +1169,7 @@ nav button.active {
 }
 
 .goals-summary-dot-start {
-  background: #964900;
+  background: #fc820c;
 }
 
 .goals-summary-dot-target {
@@ -1279,9 +1192,9 @@ nav button.active {
 .goals-summary-card .settings-edit {
   width: auto;
   flex: 0 0 auto;
-  min-width: 96px;
+  min-width: 104px;
   margin-top: 0;
-  padding: 8px 14px;
+  padding: 9px 15px;
   border-radius: 999px;
   font-size: 12px;
   line-height: 1;
@@ -1349,8 +1262,9 @@ nav button.active {
 }
 
 .settings-roadmap {
-  margin-top: 12px;
-  padding: 12px 12px 14px;
+  margin-top: 0;
+  padding: 0 12px 0;
+  overflow: hidden;
 }
 
 .settings-roadmap-head {
@@ -1373,8 +1287,9 @@ nav button.active {
 .settings-roadmap-frame {
   position: relative;
   width: min(300px, 100%);
-  aspect-ratio: 300 / 600;
-  margin: 4px auto 0;
+  aspect-ratio: auto;
+  margin: -18px auto 0;
+  zoom: 0.95;
 }
 
 .settings-roadmap-path {
@@ -1407,7 +1322,7 @@ nav button.active {
 
 .roadmap-label {
   position: absolute;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1416,8 +1331,8 @@ nav button.active {
 }
 
 .roadmap-node {
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   display: grid;
   place-items: center;
   border: 3px solid currentColor;
@@ -1426,24 +1341,29 @@ nav button.active {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
-.roadmap-node.start,
-.roadmap-node.done,
-.roadmap-node.current {
+.roadmap-node.is-reached {
   color: #964900;
 }
 
-.roadmap-node.locked,
-.roadmap-node.finish {
+.roadmap-node.is-unreached {
   color: #ba1a1a;
 }
 
+.roadmap-node.is-start {
+  color: #fc820c;
+}
+
+.roadmap-label.is-start .roadmap-label-value {
+  color: #964900;
+}
+
 .roadmap-node-icon {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 33px;
   line-height: 1;
   font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
 }
@@ -1783,3 +1703,5 @@ nav button:active,
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
