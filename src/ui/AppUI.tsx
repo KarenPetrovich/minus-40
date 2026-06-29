@@ -518,26 +518,30 @@ function GraphScreen({ state }: { state: AppState }) {
       ? chronologicalEntries.map((entry, index) => ({
           key: entry.id,
           index,
-          label: formatDate(entry.date, true),
+          label: new Intl.DateTimeFormat('ru-RU', { day: 'numeric' }).format(new Date(entry.date)),
           left: `${(index / Math.max(chronologicalEntries.length - 1, 1)) * 100}%`,
         }))
       : [
           {
             key: chronologicalEntries[0]?.id ?? 'start',
             index: 0,
-            label: formatDate(chronologicalEntries[0].date, true),
+            label: new Intl.DateTimeFormat('ru-RU', { day: 'numeric' }).format(new Date(chronologicalEntries[0].date)),
             left: '0%',
           },
           {
             key: chronologicalEntries[Math.floor((chronologicalEntries.length - 1) / 2)]?.id ?? 'middle',
             index: Math.floor((chronologicalEntries.length - 1) / 2),
-            label: formatDate(chronologicalEntries[Math.floor((chronologicalEntries.length - 1) / 2)].date, true),
+            label: new Intl.DateTimeFormat('ru-RU', { day: 'numeric' }).format(
+              new Date(chronologicalEntries[Math.floor((chronologicalEntries.length - 1) / 2)].date),
+            ),
             left: '50%',
           },
           {
             key: chronologicalEntries[chronologicalEntries.length - 1]?.id ?? 'end',
             index: chronologicalEntries.length - 1,
-            label: formatDate(chronologicalEntries[chronologicalEntries.length - 1].date, true),
+            label: new Intl.DateTimeFormat('ru-RU', { day: 'numeric' }).format(
+              new Date(chronologicalEntries[chronologicalEntries.length - 1].date),
+            ),
             left: '100%',
           },
         ]
