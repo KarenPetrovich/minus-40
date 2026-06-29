@@ -383,7 +383,7 @@ button {
 }
 
 .orange {
-  color: #964900;
+  color: #fc820c;
 }
 
 .red {
@@ -1060,12 +1060,28 @@ nav button.active {
   letter-spacing: -.03em;
 }
 
+.graph-insights strong.orange {
+  color: #fc820c;
+}
+
+.graph-insights strong.red {
+  color: #ba1a1a;
+}
+
 .graph-insights p {
   margin: 5px 0 0;
   color: #5f6473;
   font-size: 12px;
   font-weight: 700;
   line-height: 1.25;
+}
+
+.graph-insights p.orange {
+  color: #fc820c;
+}
+
+.graph-insights p.red {
+  color: #ba1a1a;
 }
 
 .empty {
