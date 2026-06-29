@@ -513,38 +513,12 @@ function GraphScreen({ state }: { state: AppState }) {
   const monthChange = monthlyCalendarChange(state.entries)
   const journeyDays = daysInJourney(state.entries)
   const activeBubbleTop = activePoint ? clamp((activePoint.y / chartHeight) * 100 - 8, 16, 78) : 24
-  const axisItems =
-    chronologicalEntries.length <= 7
-      ? chronologicalEntries.map((entry, index) => ({
-          key: entry.id,
-          index,
-          label: new Intl.DateTimeFormat('ru-RU', { day: 'numeric' }).format(new Date(entry.date)),
-          left: `${(index / Math.max(chronologicalEntries.length - 1, 1)) * 100}%`,
-        }))
-      : [
-          {
-            key: chronologicalEntries[0]?.id ?? 'start',
-            index: 0,
-            label: new Intl.DateTimeFormat('ru-RU', { day: 'numeric' }).format(new Date(chronologicalEntries[0].date)),
-            left: '0%',
-          },
-          {
-            key: chronologicalEntries[Math.floor((chronologicalEntries.length - 1) / 2)]?.id ?? 'middle',
-            index: Math.floor((chronologicalEntries.length - 1) / 2),
-            label: new Intl.DateTimeFormat('ru-RU', { day: 'numeric' }).format(
-              new Date(chronologicalEntries[Math.floor((chronologicalEntries.length - 1) / 2)].date),
-            ),
-            left: '50%',
-          },
-          {
-            key: chronologicalEntries[chronologicalEntries.length - 1]?.id ?? 'end',
-            index: chronologicalEntries.length - 1,
-            label: new Intl.DateTimeFormat('ru-RU', { day: 'numeric' }).format(
-              new Date(chronologicalEntries[chronologicalEntries.length - 1].date),
-            ),
-            left: '100%',
-          },
-        ]
+  const axisItems = points.map((point, index) => ({
+    key: point.date,
+    index,
+    label: new Intl.DateTimeFormat('ru-RU', { day: 'numeric' }).format(new Date(point.date)),
+    left: `${point.x}px`,
+  }))
 
   return (
     <div className="graph">
