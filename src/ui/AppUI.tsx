@@ -513,14 +513,6 @@ function GraphScreen({ state }: { state: AppState }) {
   const monthChange = monthlyCalendarChange(state.entries)
   const journeyDays = daysInJourney(state.entries)
   const activeBubbleTop = activePoint ? clamp((activePoint.y / chartHeight) * 100 - 8, 16, 78) : 24
-  const activeBubbleAlign =
-    activePoint === null
-      ? 'center'
-      : activePoint.x < 64
-        ? 'left'
-        : activePoint.x > chartWidth - 64
-          ? 'right'
-          : 'center'
   const axisItems =
     chronologicalEntries.length <= 7
       ? chronologicalEntries.map((entry, index) => ({
@@ -595,8 +587,7 @@ function GraphScreen({ state }: { state: AppState }) {
                   <div
                     className="graph-popover"
                     aria-live="polite"
-                    data-align={activeBubbleAlign}
-                    style={{ left: `${activePoint.x}px`, top: `${activeBubbleTop}%` }}
+                    style={{ left: `${clamp((activePoint.x / chartWidth) * 100, 20, 80)}%`, top: `${activeBubbleTop}%` }}
                   >
                     <b>{formatDate(activePoint.date, true)}</b>
                     <span>{formatWeight(activePoint.weight)}</span>

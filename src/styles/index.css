@@ -986,7 +986,7 @@ nav button.active {
 .graph-popover::after {
   content: '';
   position: absolute;
-  left: var(--tooltip-arrow-left, 50%);
+  left: 50%;
   bottom: -7px;
   width: 12px;
   height: 12px;
@@ -994,20 +994,6 @@ nav button.active {
   border-bottom: 1.5px solid rgba(0, 50, 138, 0.22);
   background: rgba(255, 255, 255, 0.96);
   transform: translateX(-50%) rotate(45deg);
-}
-
-.graph-popover[data-align='left'] {
-  transform: translate(0, calc(-100% - 14px));
-  --tooltip-arrow-left: 20px;
-}
-
-.graph-popover[data-align='center'] {
-  --tooltip-arrow-left: 50%;
-}
-
-.graph-popover[data-align='right'] {
-  transform: translate(-100%, calc(-100% - 14px));
-  --tooltip-arrow-left: calc(100% - 20px);
 }
 
 .graph-popover b,
