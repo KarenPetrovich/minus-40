@@ -19,6 +19,7 @@ import {
   nextMilestone,
   percentToMilestone,
   remainingToMilestone,
+  longestLossStreak,
   monthlyCalendarChange,
   totalLost,
 } from '../core/progress'
@@ -38,6 +39,16 @@ type Props = {
 
 // Temporary placeholder until we pick the final brand sign.
 const BRAND_PLACEHOLDER_MARK = '?'
+
+const pluralizeDays = (value: number) => {
+  const mod10 = value % 10
+  const mod100 = value % 100
+
+  if (mod10 === 1 && mod100 !== 11) return 'день'
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'дня'
+
+  return 'дней'
+}
 
 function ScreenTransition({ screen, children }: { screen: Screen; children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -510,6 +521,7 @@ function GraphScreen({ state }: { state: AppState }) {
   const activeEntry = activeIndex !== null ? chronologicalEntries[activeIndex] : null
   const previousEntry = activeIndex !== null ? chronologicalEntries[activeIndex - 1] : null
   const activeDelta = activeEntry && previousEntry ? compareEntries(activeEntry, previousEntry) : null
+  const longestStreak = longestLossStreak(filteredEntries)
   const monthChange = monthlyCalendarChange(state.entries)
   const journeyDays = daysInJourney(state.entries)
   const activeBubbleTop = activePoint ? clamp((activePoint.y / chartHeight) * 100 - 8, 16, 78) : 24
@@ -620,11 +632,27 @@ function GraphScreen({ state }: { state: AppState }) {
       </section>
       <section className="graph-insights" aria-label={'Аналитика периода'}>
         <article>
+          <small>{'Серия снижения'}</small>
+          <strong>
+            {longestStreak === null ? '—' : `${longestStreak} ${pluralizeDays(longestStreak)}`}
+          </strong>
+          <p>{longestStreak === null ? 'Нужно больше данных' : 'Подряд без набора'}</p>
+        </article>
+        <article>
+          <small>{'Средний темп'}</small>
+          <strong className={averageChange !== null && averageChange > 0 ? 'red' : 'orange'}>
+            {averageChange === null ? '—' : `${formatDelta(averageChange)} кг/д`}
+          </strong>
+          <p>{averageChange === null ? 'Нужно больше данных' : 'В среднем за период'}</p>
+        </article>
+        <article>
           <small>{'За месяц'}</small>
-          <strong className={monthChange !== null && monthChange > 0 ? 'red' : 'orange'}>
+          <strong className={monthChange !== null && monthChange > 0 ? 'red' : monthChange !== null && monthChange < 0 ? 'orange' : ''}>
             {monthChange === null ? '—' : `${formatDelta(monthChange)} кг`}
           </strong>
-          <p>{monthChange === null ? 'Нужно больше данных' : monthChange > 0 ? 'Регресс' : 'Прогресс'}</p>
+          <p className={monthChange !== null && monthChange < 0 ? 'orange' : monthChange !== null && monthChange > 0 ? 'red' : ''}>
+            {monthChange === null ? 'Нужно больше данных' : monthChange > 0 ? 'Регресс' : 'Прогресс'}
+          </p>
         </article>
         <article>
           <small>{'Дней в пути'}</small>
