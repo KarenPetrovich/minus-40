@@ -513,12 +513,7 @@ function GraphScreen({ state }: { state: AppState }) {
   const monthChange = monthlyCalendarChange(state.entries)
   const journeyDays = daysInJourney(state.entries)
   const activeBubbleTop = activePoint ? clamp((activePoint.y / chartHeight) * 100 - 8, 16, 78) : 24
-  const axisItems = points.map((point, index) => ({
-    key: point.date,
-    index,
-    label: new Intl.DateTimeFormat('ru-RU', { day: 'numeric' }).format(new Date(point.date)),
-    left: `${point.x}px`,
-  }))
+  const axisLabelY = chartHeight + 22
 
   return (
     <div className="graph">
@@ -574,7 +569,7 @@ function GraphScreen({ state }: { state: AppState }) {
                   </em>
                 </div>
               ) : null}
-              <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
+              <svg viewBox={`0 0 ${chartWidth} ${chartHeight + 40}`} preserveAspectRatio="none">
                 <line x1="0" x2={chartWidth} y1="36" y2="36" />
                 <line x1="0" x2={chartWidth} y1="90" y2="90" />
                 <line x1="0" x2={chartWidth} y1="144" y2="144" />
@@ -605,20 +600,18 @@ function GraphScreen({ state }: { state: AppState }) {
                     />
                   </g>
                 ))}
+                {points.map((point, index) => (
+                  <g
+                    key={`label-${point.date}`}
+                    className={`graph-axis-label${index === activeIndex ? ' active' : ''}`}
+                    onClick={() => setSelectedIndex(index)}
+                  >
+                    <text x={point.x} y={axisLabelY} textAnchor="middle">
+                      {new Intl.DateTimeFormat('ru-RU', { day: 'numeric' }).format(new Date(point.date))}
+                    </text>
+                  </g>
+                ))}
               </svg>
-            </div>
-            <div className="graph-axis-labels" role="list" aria-label={'Даты замеров на графике'}>
-              {axisItems.map((item) => (
-                <button
-                  key={item.key}
-                  type="button"
-                  className={item.index === activeIndex ? 'active' : ''}
-                  style={{ left: item.left }}
-                  onClick={() => setSelectedIndex(item.index)}
-                >
-                  {item.label}
-                </button>
-              ))}
             </div>
           </>
         ) : (

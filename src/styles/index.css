@@ -966,6 +966,17 @@ nav button.active {
   stroke-width: 4;
 }
 
+.big-chart-graph .graph-axis-label text {
+  fill: #5f6473;
+  font-size: 12px;
+  font-weight: 800;
+  dominant-baseline: hanging;
+}
+
+.big-chart-graph .graph-axis-label.active text {
+  fill: #00328a;
+}
+
 .graph-popover {
   position: absolute;
   z-index: 2;
@@ -1002,38 +1013,6 @@ nav button.active {
   font-style: normal;
   font-weight: 800;
 }
-
-.graph-axis-labels {
-  position: relative;
-  height: 22px;
-  margin-top: 10px;
-}
-
-.graph-axis-labels button {
-  position: absolute;
-  top: 0;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: #5f6473;
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.2;
-  transform: translateX(-50%);
-}
-
-.graph-axis-labels button:first-child {
-  transform: translateX(0);
-}
-
-.graph-axis-labels button:last-child {
-  transform: translateX(-100%);
-}
-
-.graph-axis-labels button.active {
-  color: #00328a;
-}
-
 .graph-insights {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
