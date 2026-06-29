@@ -981,30 +981,17 @@ nav button.active {
   position: absolute;
   z-index: 2;
   display: grid;
+  width: 108px;
   gap: 2px;
-  min-width: 104px;
-  padding: 9px 10px 8px;
+  padding: 12px 12px 11px;
   border: 1.5px solid rgba(0, 50, 138, 0.22);
-  border-radius: 14px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 10px 24px rgba(0, 50, 138, 0.14);
+  box-shadow: 0 14px 32px rgba(0, 50, 138, 0.12), 0 4px 12px rgba(0, 50, 138, 0.06);
   color: #434653;
   font-size: 12px;
   transform: translate(-50%, calc(-100% - 14px));
   pointer-events: none;
-}
-
-.graph-popover::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -7px;
-  width: 12px;
-  height: 12px;
-  border-right: 1.5px solid rgba(0, 50, 138, 0.22);
-  border-bottom: 1.5px solid rgba(0, 50, 138, 0.22);
-  background: rgba(255, 255, 255, 0.96);
-  transform: translateX(-50%) rotate(45deg);
 }
 
 .graph-popover b,
@@ -1012,6 +999,35 @@ nav button.active {
 .graph-popover em {
   font-style: normal;
   font-weight: 800;
+  text-align: left;
+}
+
+.graph-popover b {
+  color: #9a9fb0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.graph-popover span {
+  color: #1a1c1e;
+  font-size: 16px;
+  line-height: 1.02;
+  font-weight: 900;
+}
+
+.graph-popover em {
+  color: #8a91a3;
+  font-size: 12px;
+  line-height: 1.05;
+}
+
+.graph-popover em.red {
+  color: #ba1a1a;
+}
+
+.graph-popover em.orange {
+  color: #fc820c;
 }
 .graph-insights {
   display: grid;
