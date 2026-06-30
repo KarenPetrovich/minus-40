@@ -1,7 +1,10 @@
 .developer-preview-shell {
   min-height: 100dvh;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
   background:
     radial-gradient(circle at 1px 1px, rgba(0, 50, 138, 0.08) 1px, transparent 0) 0 0 / 16px 16px,
     linear-gradient(180deg, #f8f9fc 0%, #eef1f8 100%);
@@ -25,13 +28,36 @@
   pointer-events: none;
 }
 
-.developer-preview-viewport {
+.developer-preview-controls {
   position: relative;
+  z-index: 2;
+  width: min(392px, calc(100vw - 24px));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+  align-self: center;
+}
+
+.developer-preview-controls button {
+  border: 1px solid rgba(0, 50, 138, 0.24);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #00328a;
+  font: 600 12px/1 'Manrope', sans-serif;
+}
+
+.developer-preview-viewport {
+  position: absolute;
+  inset: 0;
   z-index: 1;
   width: 392px;
   height: 719px;
   overflow: hidden;
   background: #f9f9fc;
+  transform: translateZ(0);
+  contain: layout paint;
 }
 
 .developer-preview-viewport .main-branded,
@@ -57,4 +83,196 @@
 
 .developer-preview-viewport nav {
   width: 100%;
+}
+
+.plateau-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: calc(-104px - var(--safe-bottom));
+  padding-bottom: calc(104px + var(--safe-bottom));
+  background: #b9a86f;
+  color: #1a1c1e;
+  font-family: 'Manrope', sans-serif;
+  overflow: hidden;
+}
+
+.app-header-plateau {
+  color: #314b20;
+}
+
+.app-header-title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -.03em;
+}
+
+.app-header-title-plateau {
+  color: #314b20;
+}
+
+.plateau-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: calc(-104px - var(--safe-bottom));
+  padding: 0 16px;
+  padding-bottom: calc(104px + var(--safe-bottom));
+}
+
+.plateau-stage {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plateau-composition {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  height: 452px;
+  transform: translateY(38px);
+}
+
+.plateau-metrics {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.plateau-metrics-top {
+  position: absolute;
+  top: 0;
+  left: 106px;
+}
+
+.plateau-metrics-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 22px;
+}
+
+.plateau-number {
+  color: #1a1c1e;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.plateau-number-top {
+  margin-left: 0;
+}
+
+.plateau-number-bottom {
+  margin-left: 0;
+}
+
+.plateau-number small {
+  font-size: 0.72em;
+  font-weight: 600;
+}
+
+.plateau-approx {
+  margin-right: 2px;
+  color: #1a1c1e;
+}
+
+.plateau-current {
+  position: absolute;
+  top: 50%;
+  left: 54px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.plateau-current-label {
+  color: #314b20;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.plateau-current-number {
+  color: #314b20;
+  font-size: 29px;
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+}
+
+.plateau-rail {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  width: 40px;
+  height: 452px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+  padding: 1px;
+  border-radius: 22px;
+  border: 1px solid rgba(49, 75, 32, 0.2);
+  background: rgba(220, 210, 165, 0.46);
+}
+
+.plateau-segment {
+  flex: 1 1 0;
+  background: rgba(220, 210, 165, 0.8);
+}
+
+.plateau-segment.is-active {
+  background: linear-gradient(180deg, #536b2e 0%, #314b20 100%);
+}
+
+.plateau-segment.is-top {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.plateau-segment.is-bottom {
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.plateau-tagline {
+  margin: 0 auto;
+  max-width: 280px;
+  color: rgba(49, 75, 32, 0.84);
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+.milestone-dialog-badge {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.milestone-dialog .roadmap-node {
+  background: #fff;
+}
+
+.milestone-dialog h1 {
+  margin: 8px 0;
+  color: #00328a;
+  font-size: 44px;
 }

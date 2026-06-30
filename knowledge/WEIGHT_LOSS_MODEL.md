@@ -223,3 +223,36 @@
 - конкретные сценарии поведенческой поддержки.
 
 Эти элементы нужно дополнять по мере развития проекта.
+
+## Current Operating Model
+
+The product now operates as a cycle:
+
+- burst;
+- plateau;
+- burst;
+- plateau;
+- ...
+
+### Burst
+
+- primary goal: reach the target weight;
+- primary visual mode: orange.
+
+### Plateau
+
+- starts automatically when a control milestone is reached for the first time;
+- records `lastConfirmedMilestone` and `plateauStartedAt` at the moment of confirmation;
+- goal: hold the achieved weight;
+- plateau is a full phase of the weight journey, not a pause;
+- small fluctuations are allowed;
+- after 7 days, the plateau ends automatically and the next burst starts toward the next milestone.
+
+## History and Graph Rules
+
+- the weight history is never split into separate histories;
+- plateau measurements stay in the same journal;
+- plateau entries use the plateau palette in history views;
+- the graph remains unified;
+- no separate plateau graph is created;
+- when plateau is active, graph accents switch from orange to the official `Olive Ochre` palette.

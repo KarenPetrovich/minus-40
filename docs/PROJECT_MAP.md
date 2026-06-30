@@ -12,6 +12,7 @@ If you need quick orientation, read in this order:
 
 Important:
 `docs/PROJECT_OPERATIONS.md` also contains the active working-efficiency rules that should be followed at the start of each session.
+`http://127.0.0.1:5173/dev-preview` is the local browser workspace for UI checks.
 
 ## Live Documentation
 
@@ -38,6 +39,10 @@ Important:
 
 - `knowledge/WEIGHT_LOSS_MODEL.md`
 - `knowledge/COACHING_RULES.md`
+
+### Design Artifacts
+
+- `docs/design-reference/goals/` - frozen Goals reference materials
 
 ### Design Artifacts
 

@@ -80,3 +80,29 @@ Prefer the smallest useful solution that gives real control to the user.
 
 - primary production URL: `https://minus-40.vercel.app`
 - legacy backup URL: `https://adorable-wisp-fb63cf.netlify.app/`
+
+## Visual Verification
+
+- `http://localhost:5173/dev-preview` is the local browser workspace for screen checks.
+- the normal loop is change -> `F5` -> evaluate.
+- it exists to reduce deploy churn and screenshot loops while staying on the same production code path.
+- Vercel is reserved for the ordinary application and rare control checks on a real phone.
+
+## Stage Strategy
+
+The product now uses a cyclical strategy:
+
+- burst;
+- plateau;
+- burst;
+- plateau;
+- ...
+
+Important rules:
+
+- history stays unified;
+- graph stays unified;
+- the data source stays unified;
+- only calculations, accent color, and Overview behavior change by stage;
+- burst uses orange;
+- plateau uses green.

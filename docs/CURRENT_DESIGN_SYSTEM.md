@@ -258,6 +258,44 @@ Examples of the desired tone:
 - Whether trend visualization belongs on the main screen
 - Long-term behavior and presentation of forecasting
 
+## Stage Color System
+
+The app now has two official stage colors:
+
+- burst: orange `#FC820C`;
+- plateau: `Olive Ochre`.
+
+### Olive Ochre Palette
+
+Official plateau palette values:
+
+- plateau surface: `#B9A86F`
+- plateau title / labels: `#314B20`
+- plateau active rail: `#536B2E`
+- plateau active rail end: `#314B20`
+- plateau passive rail: `rgba(220, 210, 165, 0.46)`
+- plateau passive segments: `rgba(220, 210, 165, 0.80)`
+
+Rules:
+
+- keep the accent consistent inside one stage;
+- do not create a third accent color for stage switching;
+- use Olive Ochre only when the product is in active plateau;
+- keep the rest of the neutral UI unchanged.
+
+## Goals Screen Visual State
+
+- reached milestones may temporarily appear as visually lost if the weight rises back above them during plateau;
+- use a red lock and red dashed line only for this temporary visual state;
+- this state is strictly visual and does not alter the route or milestone order;
+- once the user returns to the milestone or below it, the normal reached state returns.
+
+## Overview By Stage
+
+- burst Overview keeps the current weight-loss-oriented focus;
+- plateau Overview becomes much simpler and calmer, focused on holding weight rather than pushing new progress;
+- Goals stay unchanged across both stages.
+
 ## Practical Rules For New Screens
 
 - Start with a light background and white cards

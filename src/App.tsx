@@ -1,23 +1,15 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { weightStore } from './core/store'
 import { initializeTelegramWebApp, subscribeTelegramEvent } from './features/telegram/webapp'
+import { AppUI } from './ui/AppUI'
 import { DeveloperPreviewPage } from './ui/DeveloperPreviewPage'
-import { RuntimeInspectorPage } from './ui/RuntimeInspectorPage'
 import './styles/developer-preview.css'
-import './styles/runtime-inspector.css'
 
 export default function App() {
-  useSyncExternalStore(weightStore.subscribe, weightStore.getSnapshot, weightStore.getSnapshot)
+  const state = useSyncExternalStore(weightStore.subscribe, weightStore.getSnapshot, weightStore.getSnapshot)
   const isDevPreview = window.location.pathname === '/dev-preview' || window.location.pathname === '/preview'
-  const previewScreen = new URLSearchParams(window.location.search).get('screen')
-  const previewScreenValue =
-    previewScreen === 'overview' || previewScreen === 'history' || previewScreen === 'graph' || previewScreen === 'settings'
-      ? previewScreen
-      : 'settings'
 
   useEffect(() => {
-    if (isDevPreview) return
-
     const cleanupTelegram = initializeTelegramWebApp()
     const cleanupActivated = subscribeTelegramEvent('activated', () => {
       void weightStore.refresh()
@@ -38,21 +30,24 @@ export default function App() {
   if (isDevPreview) {
     return (
       <DeveloperPreviewPage
-        state={{
-          startWeight: 150.5,
-          targetWeight: 110,
-          entries: [
-            { id: 'p0', date: Date.UTC(2026, 5, 27), weight: 145.7 },
-            { id: 'p1', date: Date.UTC(2026, 5, 1), weight: 150.5 },
-            { id: 'p2', date: Date.UTC(2026, 5, 8), weight: 146.4 },
-            { id: 'p3', date: Date.UTC(2026, 5, 15), weight: 140 },
-            { id: 'p4', date: Date.UTC(2026, 5, 22), weight: 130 },
-          ],
+        state={state}
+        initialScreen="overview"
+        onRefresh={() => {
+          weightStore.rehydrate()
         }}
-        initialScreen={previewScreenValue as 'overview' | 'history' | 'graph' | 'settings'}
+        onAdd={weightStore.addWeight}
+        onDelete={weightStore.deleteEntry}
+        onSettings={weightStore.updateSettings}
       />
     )
   }
 
-  return <RuntimeInspectorPage />
+  return (
+    <AppUI
+      state={state}
+      onAdd={weightStore.addWeight}
+      onDelete={weightStore.deleteEntry}
+      onSettings={weightStore.updateSettings}
+    />
+  )
 }

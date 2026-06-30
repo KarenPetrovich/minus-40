@@ -91,3 +91,36 @@ These are important, but not the current implementation focus:
 - final logo rollout;
 - advanced data analysis;
 - backend-first redesign.
+
+## Future Architecture Candidate
+
+Potential next-stage direction after Stage 1 stabilization:
+
+- Supabase remains the source of truth;
+- a local SQLite database becomes a full mirrored working copy;
+- the app reads from the local database;
+- background sync keeps SQLite and Supabase aligned;
+- Developer Preview reads the same local database, so it always sees current app state;
+- the app keeps working offline;
+- Supabase requests become less frequent;
+- backups and migration become easier.
+
+This should stay a separate architecture task and not be mixed into Developer Preview implementation.
+
+## Stage 1 Mode Extension
+
+Stage 1 now includes a cyclical weight strategy:
+
+- burst;
+- plateau;
+- burst;
+- plateau;
+- ...
+
+This does not change the single-source-of-truth rule.
+
+It only changes:
+
+- stage-specific calculations;
+- stage-specific visual accents;
+- the Overview screen behavior for the current stage.

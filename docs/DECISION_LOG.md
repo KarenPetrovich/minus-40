@@ -212,3 +212,97 @@ Why:
 - the first production bundle missed the Supabase env values;
 - temporary diagnostics helped isolate the issue and were then removed;
 - keeping test data in the database makes later checks noisier.
+
+### 2026-06-29 - Goals Baseline
+
+Decision:
+
+- the current Goals screen is the accepted baseline;
+- the final composition is approved;
+- milestone logic is approved;
+- the color scheme is approved;
+- small technical implementation compromises are acceptable if the visible result stays stable.
+
+Why:
+
+- repeated micro-adjustments did not improve the screen beyond this state;
+- locking the baseline prevents endless rework;
+- the screen now matches the intended product direction.
+
+### 2026-06-29 - Developer Preview Practice
+
+Decision:
+
+- keep a single production code path for screens;
+- use Developer Preview as the local visual workspace;
+- do not maintain a second screen implementation only for preview purposes;
+- treat `/dev-preview` as a local-only development tool;
+- use `http://localhost:5173/dev-preview` as the default working URL;
+- follow the local loop `change -> F5 -> evaluate`;
+- do not deploy Vercel after `dev-preview` changes unless explicitly requested;
+- use screenshots sparingly and only when they really add value.
+
+Why:
+
+- duplicated UI code creates drift between preview and production;
+- a single code path keeps the app easier to reason about;
+- the main goal is to save time and token budget.
+
+### 2026-06-29 - Future Local Database Direction
+
+Idea to revisit later:
+
+- keep Supabase as the source of truth;
+- use a local SQLite database as a full mirrored working copy;
+- make the app read from the local database;
+- sync in the background to keep local data aligned with Supabase;
+- let Developer Preview read the same local database so it always reflects current app state;
+- keep this as a separate next-stage architecture task, not part of Developer Preview work.
+
+### 2026-06-29 - Plateau Mode
+
+Decision:
+
+- the product now officially uses a burst -> plateau -> burst cycle.
+
+Why:
+
+- the user wants plateau to be a real phase of the weight journey, not a pause;
+- the app should support holding the achieved weight before the next burst;
+- history and graph must remain unified so the product does not fragment into multiple data models.
+
+Operational rule:
+
+- one data source;
+- one history;
+- one graph;
+- stage-specific visuals and Overview behavior only.
+
+### 2026-06-29 - Plateau Route Structure
+
+Decision:
+
+- the route is made of control milestones, and each interval between neighboring milestones is a separate burst;
+- plateau starts automatically after the next milestone is reached;
+- plateau duration defaults to 7 days.
+
+Why:
+
+- this makes the cycle readable and predictable;
+- it keeps the product focused on a sequence of controlled phases rather than one vague long-term goal;
+- it preserves the single-history / single-graph rule while adding a stage-based strategy.
+
+### 2026-06-29 - Plateau Recovery Behavior
+
+Decision:
+
+- plateau is a recommended recovery stage between bursts, not a separate test;
+- if weight rises during plateau, the route is not rolled back;
+- the next milestone remains the next milestone on the route;
+- temporarily lost milestones are reflected visually only and do not change the route.
+
+Why:
+
+- the product should support recovery between aggressive phases;
+- the route must stay stable and never punish the user by resetting progress;
+- visual honesty is enough; the route itself should remain forward-moving.

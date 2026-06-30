@@ -20,6 +20,9 @@ Use when the task involves:
 - Mini App platform constraints;
 - safe area / Telegram runtime specifics;
 - product decisions tightly bound to Telegram UX.
+  - `/dev-preview` is local-only by default;
+  - use `http://localhost:5173/dev-preview` for iteration;
+  - do not deploy Vercel after `dev-preview` changes unless asked.
 
 ### `spec-driven-development`
 
@@ -45,6 +48,10 @@ Use when the task involves:
 - checking flows in the browser;
 - visual verification after UI changes;
 - regression checks for the current interface.
+
+### `browser:control-in-app-browser`
+
+Use for browser-based inspection and app verification when local runtime checking matters.
 
 ## Standby Skills
 
@@ -95,10 +102,6 @@ Use only when food tracking or food analysis actually enters implementation.
 
 These are not project-local files, but they are highly relevant:
 
-### `browser:control-in-app-browser`
-
-Use for browser-based inspection and app verification when local runtime checking matters.
-
 ### `visual-test-skill`
 
 Use for repeatable visual verification when UI complexity grows further.
@@ -107,6 +110,7 @@ Operational rule:
 
 - when we begin systematic visual regression checking, use `visual-test-skill` as the standard path;
 - use it for repeatable screenshot-based checks, not just one-off manual inspection.
+- prefer `http://127.0.0.1:5173/dev-preview` over the old preview lab for local UI checks.
 
 ### `data-vis` / dedicated data-visualization skill
 

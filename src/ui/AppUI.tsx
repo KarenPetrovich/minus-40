@@ -21,12 +21,16 @@ import {
   remainingToMilestone,
   longestLossStreak,
   monthlyCalendarChange,
+  currentStage,
+  plateauBounds,
+  plateauFillCount,
   totalLost,
 } from '../core/progress'
 import { triggerImpact, triggerNotification } from '../features/telegram/webapp'
 import { animateValue, fadeIn, fadeOut, lerp, slideIn } from './motion'
 import { AppNav } from './AppNav'
 import { GoalsScreen } from './GoalsScreen'
+import { RoadmapNodeBadge } from './RoadmapNodeBadge'
 import forecastCalendarIcon from '../../forecast-calendar.png'
 
 type Props = {
@@ -35,6 +39,8 @@ type Props = {
   onDelete: (id: string) => void
   onSettings: (start: number, target: number) => void
   initialScreen?: Screen
+  stageOverride?: 'cut' | 'plateau'
+  nowOverride?: number
 }
 
 // Temporary placeholder until we pick the final brand sign.
@@ -117,14 +123,9 @@ function renderForecastText(forecast: { days: number; basis: 'weekly' | 'provisi
     return <span className="forecast-primary">Пока рано для прогноза</span>
   }
 
-  return forecast.basis === 'weekly' ? (
+  return (
     <>
       <span className="forecast-primary">{forecast.days} дн.</span>
-      <span className="forecast-secondary">до {formatWeight(milestone)}</span>
-    </>
-  ) : (
-    <>
-      <span className="forecast-primary">Предварительно: {forecast.days} дн.</span>
       <span className="forecast-secondary">до {formatWeight(milestone)}</span>
     </>
   )
@@ -182,11 +183,15 @@ function Layout({
   setScreen,
   children,
   onAdd,
+  shellVariant = 'default',
+  headerTitle = '',
 }: {
   screen: Screen
   setScreen: (value: Screen) => void
   children: React.ReactNode
   onAdd: () => void
+  shellVariant?: 'default' | 'plateau'
+  headerTitle?: string
 }) {
   const brandedHeader = screen === 'overview'
   const mainRef = useRef<HTMLElement>(null)
@@ -224,9 +229,13 @@ function Layout({
 
   return (
     <>
-      {brandedHeader ? (
+      {brandedHeader && shellVariant === 'default' ? (
         <header className="app-header app-header-brand">
           <img className="brand-mark brand-logo" src="/brand-logo.png" alt="?????????????? ?????????? 40" data-brand-mark={BRAND_PLACEHOLDER_MARK} />
+        </header>
+      ) : brandedHeader && shellVariant === 'plateau' ? (
+        <header className="app-header app-header-plateau">
+          <h1 className="app-header-title app-header-title-plateau">{headerTitle}</h1>
         </header>
       ) : null}
       <main
@@ -241,7 +250,7 @@ function Layout({
       >
         {children}
       </main>
-      {screen === 'overview' && (
+      {screen === 'overview' && shellVariant === 'default' && (
         <button
           className="fab"
           onClick={() => {
@@ -258,7 +267,9 @@ function Layout({
   )
 }
 
-function Overview({ state }: { state: AppState }) {
+function Overview({ state, stageOverride, nowOverride }: { state: AppState; stageOverride?: 'cut' | 'plateau'; nowOverride?: number }) {
+  const now = nowOverride ?? Date.now()
+  const stage = stageOverride ?? currentStage(state, now)
   const current = currentWeight(state)
   const milestone = nextMilestone(state)
   const forecast = forecastDaysToMilestone(state)
@@ -300,6 +311,55 @@ function Overview({ state }: { state: AppState }) {
       },
     })
   }, [milestoneProgress])
+
+  if (stage === 'plateau') {
+    const bounds = plateauBounds(state)
+    const fillCount = plateauFillCount(state, now)
+
+    return (
+      <div className="plateau-screen">
+        <div className="plateau-main">
+          <section className="plateau-stage">
+            <div className="plateau-composition">
+              <div className="plateau-metrics plateau-metrics-top">
+                <strong className="plateau-number plateau-number-top">
+                  <span className="plateau-approx">≈</span>
+                  {bounds.top === null ? '—' : `${bounds.top.toFixed(1)}`} <small>кг</small>
+                </strong>
+              </div>
+
+              <div className="plateau-current">
+                <span className="plateau-current-label">Сегодня</span>
+                <strong className="plateau-current-number">{current === null ? '—' : `${current.toFixed(1)} кг`}</strong>
+              </div>
+
+              <div className="plateau-rail" aria-label="Шкала плато">
+                {Array.from({ length: 7 }).map((_, index) => {
+                  const active = index < fillCount
+                  const roundedTop = index === 6
+                  const roundedBottom = index === 0
+
+                  return (
+                    <span
+                      key={index}
+                      className={`plateau-segment${active ? ' is-active' : ''}${roundedTop ? ' is-top' : ''}${roundedBottom ? ' is-bottom' : ''}`}
+                      aria-hidden="true"
+                    />
+                  )
+                })}
+              </div>
+
+              <div className="plateau-metrics plateau-metrics-bottom">
+                <strong className="plateau-number plateau-number-bottom">
+                  {bounds.bottom === null ? '—' : `${bounds.bottom.toFixed(1)}`} <small>кг</small>
+                </strong>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="stack">
@@ -712,7 +772,9 @@ function MilestoneDialog({ value, onClose }: { value: number; onClose: () => voi
     <DialogFrame className="milestone-dialog" onClose={onClose}>
       {(requestClose) => (
         <>
-          <b>?</b>
+          <div className="milestone-dialog-badge">
+            <RoadmapNodeBadge kind="start" status="reached" icon="flag" />
+          </div>
           <label>РУБЕЖ ДОСТИГНУТ</label>
           <h1>{formatWeight(value)}</h1>
           <p>Отличная работа. Продолжайте в том же ритме.</p>
@@ -731,7 +793,7 @@ function MilestoneDialog({ value, onClose }: { value: number; onClose: () => voi
   )
 }
 
-export function AppUI({ state, onAdd, onDelete, onSettings, initialScreen = 'overview' }: Props) {
+export function AppUI({ state, onAdd, onDelete, onSettings, initialScreen = 'overview', stageOverride, nowOverride }: Props) {
   const [screen, setScreen] = useState<Screen>(initialScreen)
   const [adding, setAdding] = useState(false)
   const [reached, setReached] = useState<number | null>(null)
@@ -747,7 +809,7 @@ export function AppUI({ state, onAdd, onDelete, onSettings, initialScreen = 'ove
 
   const view =
     screen === 'overview' ? (
-      <Overview state={state} />
+      <Overview state={state} stageOverride={stageOverride} nowOverride={nowOverride} />
     ) : screen === 'history' ? (
       <History state={state} onDelete={onDelete} />
     ) : screen === 'graph' ? (
@@ -757,7 +819,13 @@ export function AppUI({ state, onAdd, onDelete, onSettings, initialScreen = 'ove
     )
 
   return (
-    <Layout screen={screen} setScreen={setScreen} onAdd={openAdd}>
+    <Layout
+      screen={screen}
+      setScreen={setScreen}
+      onAdd={openAdd}
+      shellVariant={stageOverride === 'plateau' && screen === 'overview' ? 'plateau' : 'default'}
+      headerTitle="Плато"
+    >
       <ScreenTransition screen={screen}>{view}</ScreenTransition>
       {adding && <AddDialog onClose={() => setAdding(false)} onAdd={add} />}
       {reached !== null && <MilestoneDialog value={reached} onClose={() => setReached(null)} />}

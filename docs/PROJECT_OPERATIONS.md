@@ -29,6 +29,9 @@ As of June 27, 2026, the active focus is:
 3. keeping the local database backup mirror in sync with schema changes;
 4. removing temporary diagnostics and duplicate sources of truth after verification.
 
+Developer Preview is the only local visual workspace for screen work.
+It mirrors the production UI tree and is used to reduce unnecessary deploys and screenshot churn.
+
 ## Working Efficiency Rules
 
 Keep work narrow, search before reading, and verify at the right scale.
@@ -38,9 +41,12 @@ Keep work narrow, search before reading, and verify at the right scale.
 - bundle small UI tweaks into one pass;
 - use reload/spot checks for tiny style changes;
 - reserve full builds for behavior, asset, structure, or release changes.
-- prefer the local preview laboratory at `http://127.0.0.1:5173/preview` for UI iteration;
+- prefer `http://localhost:5173/dev-preview` for UI iteration;
+- use the local `dev-preview` route first, then refresh with `F5` to evaluate changes;
 - avoid exchanging screenshots unless they are strictly needed for a bug report or final verification;
-- treat the preview page as the primary visual feedback loop to save time and token budget.
+- treat Developer Preview as the primary visual feedback loop to save time and token budget;
+- do not deploy Vercel after `dev-preview` changes unless the user explicitly asks for it;
+- do not maintain a second screen implementation just for preview.
 
 ## Explicitly Deferred
 
@@ -67,7 +73,8 @@ Already working:
 In progress:
 
 - keeping the local database backup artifacts under `C:\Future\Минус40_архив\database\minus-40` aligned with schema changes;
-- cleaning up temporary diagnostics after verification passes.
+- cleaning up temporary diagnostics after verification passes;
+- keeping Developer Preview aligned with production layout assumptions.
 
 ## Deployment Workflow
 
@@ -129,5 +136,12 @@ When the user says "проведи чистку", it means:
 2. check whether active documents still reflect reality;
 3. reduce duplicate sources of truth;
 4. leave only live project files in `C:\Future\Минус 40`.
-- use `http://127.0.0.1:5173/preview` as the first-stop visual lab for UI changes;
+- use `http://127.0.0.1:5173/dev-preview` as the first-stop visual workspace for UI changes;
 - avoid screenshot ping-pong unless a bug specifically requires it.
+
+## Plateau Operating Rule
+
+- plateau is a stage of the same product, not a separate app mode;
+- do not introduce a second history, a second graph, or a second store for plateau;
+- the only stage-specific changes are calculations, visuals, and Overview behavior;
+- local preview workflow stays the same: change -> `F5` -> evaluate.

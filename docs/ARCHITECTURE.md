@@ -7,6 +7,9 @@ The current codebase is a compact Telegram Mini App with a lightweight cloud syn
 The frontend remains intentionally small.
 Trusted server-side logic is expected to live in Supabase Edge Functions rather than in host-specific server runtimes.
 
+Developer Preview is a thin local shell around the same production UI tree.
+It is not a second implementation.
+
 ## Current Source Tree
 
 ```text
@@ -90,6 +93,8 @@ Responsibilities:
 - component composition;
 - UI motion helpers.
 
+Developer Preview should wrap these same screens instead of duplicating them.
+
 ### `src/styles`
 
 Responsibilities:
@@ -136,3 +141,21 @@ That is the moment to revisit:
 - conflict handling beyond cloud-wins bootstrap;
 - optional direct user-scoped tokens vs Edge Function mediation;
 - security/privacy review.
+
+## Plateau Mode Reference
+
+The active product model now includes `burst -> plateau -> burst` as the official stage cycle.
+
+The implementation rule is:
+
+- one shared history;
+- one shared graph;
+- one shared data source;
+- only calculations, visual accents, and Overview presentation change by stage;
+- plateau state is derived from two persisted facts: `plateauStartedAt` and `lastConfirmedMilestone`.
+
+The Goals screen may also render a temporary visual loss state for a previously reached milestone if the current weight rises above it during plateau, but the underlying route and milestone order do not change.
+
+Canonical details live in:
+
+- `docs/PLATEAU_MODE.md`

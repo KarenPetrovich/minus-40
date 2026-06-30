@@ -67,6 +67,15 @@ export function normalizeState(value: unknown): AppState {
   return {
     startWeight: (value as AppState).startWeight,
     targetWeight: (value as AppState).targetWeight,
+    plateauStartedAt: Number.isFinite((value as { plateauStartedAt?: unknown }).plateauStartedAt)
+      ? (value as { plateauStartedAt?: number }).plateauStartedAt ?? null
+      : null,
+    lastConfirmedMilestone: Number.isFinite((value as { lastConfirmedMilestone?: unknown }).lastConfirmedMilestone)
+      ? (value as { lastConfirmedMilestone?: number }).lastConfirmedMilestone ?? null
+      : null,
+    plateauStartWeight: Number.isFinite((value as { plateauStartWeight?: unknown }).plateauStartWeight)
+      ? (value as { plateauStartWeight?: number }).plateauStartWeight ?? null
+      : null,
     entries: hasJune27
       ? normalizedEntries
       : [{ id: 'restore-2026-06-27', date: Date.parse('2026-06-27T12:00:00+03:00'), weight: 145.7 }, ...normalizedEntries].sort(
