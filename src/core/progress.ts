@@ -1,6 +1,6 @@
 import type { AppState, WeightEntry } from './types'
 
-export const MILESTONES = [150, 140, 130, 125, 120, 115, 110]
+export const MILESTONES = [150, 140, 130, 120, 115, 110]
 export const PLATEAU_ROUTE = [150, 140, 130, 120, 115, 110]
 export const PLATEAU_DURATION_DAYS = 7
 
@@ -187,12 +187,14 @@ export function currentRouteProgressAt(
   milestones: Array<{ milestone: number; status: MilestoneStatus }>
 } {
   const currentMilestone = currentActiveMilestone(state)
+  const route = routeMilestones()
+  const currentIndex = currentMilestone === null ? -1 : route.indexOf(currentMilestone)
   const lostMilestone = milestoneStates(state).find((item) => item.status === 'temporarilyLost')?.milestone ?? null
 
   return {
     stage: currentStage(state, now),
     currentMilestone,
-    nextMilestone: currentMilestone,
+    nextMilestone: currentIndex >= 0 ? route[currentIndex + 1] ?? null : null,
     plateauEndsAt: plateauEndsAt(state),
     temporarilyLostMilestone: lostMilestone,
     milestones: milestoneStates(state),
