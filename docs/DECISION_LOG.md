@@ -306,3 +306,16 @@ Why:
 - the product should support recovery between aggressive phases;
 - the route must stay stable and never punish the user by resetting progress;
 - visual honesty is enough; the route itself should remain forward-moving.
+
+### 2026-06-30 - Documentation Entry Point
+
+Decision:
+
+- `docs/CODEX_START.md` is the main entry point for new Codex branches;
+- `PROJECT_CONTEXT`, `PROJECT_OPERATIONS`, `ROADMAP`, and `PROJECT_MAP` should stay specialized and avoid repeating the same current-state summary;
+- `knowledge/` remains domain reference material and should be read only for product logic, coaching, or weight-loss model tasks.
+
+Why:
+
+- new branches should understand the project quickly without scanning every doc, skill, and knowledge file;
+- one short entry point reduces token waste and stale duplicate guidance.

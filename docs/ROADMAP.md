@@ -1,54 +1,52 @@
 # Roadmap
 
-## Principles
+## Principle
 
-- move in small useful iterations;
-- do not build future complexity early;
-- finish the current stage before expanding scope;
-- every new feature must help the real product goal.
+Move in small useful iterations. Do not add future complexity before the current stage genuinely needs it.
 
 ## Stage 1: Weight MVP
 
 Goal:
 
-- create a simple and reliable weight-control Mini App.
+- reliable Telegram Mini App for weight tracking and route control.
 
 Scope:
 
 - add weight entries;
-- show history;
-- show graph;
-- show milestone progress;
-- show forecast to milestone targets.
+- show Overview;
+- show History;
+- show Graph;
+- show Goals;
+- support burst -> plateau -> burst cycle;
+- keep Developer Preview aligned with the same UI tree.
 
-Current status:
+Status:
 
-- active stage;
-- current product work is still inside this stage.
+- active.
 
 ## Stage 2: Food Logging
 
 Goal:
 
-- start capturing eating behavior without turning the app into a calorie platform.
+- capture eating behavior without turning the app into a calorie platform.
 
 Likely scope:
 
 - meal/event logging;
 - food photo capture;
-- simple food categorization.
+- simple categorization.
 
 ## Stage 3: AI Food Analysis
 
 Goal:
 
-- reduce manual effort and provide structured feedback on food patterns.
+- reduce manual effort and provide concise structured feedback on food patterns.
 
 Likely scope:
 
 - photo analysis;
 - preliminary classification;
-- concise AI observations.
+- short AI observations.
 
 ## Stage 4: Activity Context
 
@@ -74,53 +72,14 @@ Likely scope:
 - pattern detection;
 - clearer factor-based insights.
 
-## Near-Term Product Sequence
-
-Inside Stage 1, the practical order remains:
-
-1. keep the current screens understandable and clean;
-2. finish the navigation/screen audit;
-3. improve visual system consistency;
-4. only then return to cloud sync and larger architecture work.
-
-## Explicitly Not Current
-
-These are important, but not the current implementation focus:
-
-- cloud sync between devices;
-- final logo rollout;
-- advanced data analysis;
-- backend-first redesign.
-
 ## Future Architecture Candidate
 
-Potential next-stage direction after Stage 1 stabilization:
+Potential later direction:
 
 - Supabase remains the source of truth;
-- a local SQLite database becomes a full mirrored working copy;
+- local SQLite or similar database becomes a full mirrored working copy;
 - the app reads from the local database;
-- background sync keeps SQLite and Supabase aligned;
-- Developer Preview reads the same local database, so it always sees current app state;
-- the app keeps working offline;
-- Supabase requests become less frequent;
-- backups and migration become easier.
+- background sync keeps local data aligned with Supabase;
+- Developer Preview reads the same local database.
 
-This should stay a separate architecture task and not be mixed into Developer Preview implementation.
-
-## Stage 1 Mode Extension
-
-Stage 1 now includes a cyclical weight strategy:
-
-- burst;
-- plateau;
-- burst;
-- plateau;
-- ...
-
-This does not change the single-source-of-truth rule.
-
-It only changes:
-
-- stage-specific calculations;
-- stage-specific visual accents;
-- the Overview screen behavior for the current stage.
+This is a separate future architecture task, not part of the current Developer Preview work.

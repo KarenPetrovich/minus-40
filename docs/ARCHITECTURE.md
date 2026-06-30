@@ -1,16 +1,12 @@
 # Architecture
 
-## Current Reality
+## Current Shape
 
-The current codebase is a compact Telegram Mini App with a lightweight cloud sync layer.
+Minus 40 is a compact Telegram Mini App.
 
-The frontend remains intentionally small.
-Trusted server-side logic is expected to live in Supabase Edge Functions rather than in host-specific server runtimes.
+The frontend is a static Vite React app. Trusted cloud access lives in Supabase Edge Functions for production Telegram sync, while local Developer Preview uses a dev-only Vite endpoint for read-only snapshot refresh.
 
-Developer Preview is a thin local shell around the same production UI tree.
-It is not a second implementation.
-
-## Current Source Tree
+## Source Tree
 
 ```text
 src/
@@ -31,131 +27,128 @@ src/
       client.ts
   styles/
     index.css
+    developer-preview.css
   ui/
     AppUI.tsx
-    motion.ts
+    AppNav.tsx
+    GoalsScreen.tsx
+    DeveloperPreviewPage.tsx
 supabase/
   functions/
     telegram-sync/
-      index.ts
   migrations/
   docs/
 ```
 
-Local generated database mirror:
+## Runtime Layers
 
-- `C:\Future\Минус40_архив\database\minus-40`
+- `src/core/types.ts`: app state shape.
+- `src/core/storage.ts`: local cache, legacy state, cloud snapshot import/export helpers.
+- `src/core/store.ts`: in-memory store, mutations, cloud bootstrap, local rehydrate.
+- `src/core/progress.ts`: derived calculations, milestones, plateau stage, chart helpers.
+- `src/features/telegram/webapp.ts`: Telegram runtime integration and `initData`.
+- `src/features/sync/cloud.ts`: client calls to Supabase Edge Function.
+- `src/ui/`: production screens and Developer Preview shell.
+- `src/styles/`: global app styles and preview-only styles.
+- `supabase/functions/telegram-sync`: production trusted sync endpoint.
+- `supabase/migrations`: canonical database schema changes.
 
-## Actual Architectural Layers
+## Production Data Flow
 
-### `src/core`
+Production sync uses Telegram identity:
 
-Responsibilities:
+```text
+Telegram WebApp initData
+-> Supabase Edge Function telegram-sync
+-> app_users + weight_entries
+-> AppState
+-> minus40.cloud-cache
+-> React UI
+```
 
-- app state shape;
-- legacy/cache storage;
-- state mutations and cloud bootstrap;
-- derived progress calculations.
+The Edge Function validates raw Telegram `initData` server-side before reading or replacing user state.
 
-### `src/features/sync`
+## Developer Preview Data Flow
 
-Responsibilities:
+Developer Preview uses a local read-only snapshot path:
 
-- frontend calls to Supabase Edge Functions;
-- bootstrap and replace-state cloud sync requests.
+```text
+Supabase app_users + weight_entries
+-> assembled snapshot
+-> minus40.cloud-cache
+-> /dev-preview
+```
 
-### `src/features/telegram`
+Important details:
 
-Responsibilities:
+- there is no separate snapshot object/table in Supabase;
+- the snapshot is assembled from `app_users` and `weight_entries`;
+- `minus40.cloud-cache` is browser `localStorage`;
+- `minus40.cloud-meta` stores snapshot metadata such as `lastSyncedAt`;
+- `/dev-preview` refreshes Supabase data only when the user presses `Обновить данные`;
+- auto-refresh, polling, refresh-on-render, and route-entry refresh are forbidden for `/dev-preview`.
 
-- Telegram Web App integration;
-- platform-specific initialization, raw `initData`, and haptics/runtime helpers.
+## Local Dev Snapshot Endpoint
 
-### `src/lib/supabase`
+During `npm run dev`, Vite can expose:
 
-Responsibilities:
+```text
+GET /__dev/cloud-snapshot
+```
 
-- host-agnostic Supabase client setup from environment variables.
+This endpoint is local-only and requires `.env.local` values:
 
-### `supabase/`
+- `VITE_SUPABASE_URL`;
+- `VITE_SUPABASE_PUBLISHABLE_KEY`;
+- `SUPABASE_SERVICE_ROLE_KEY`;
+- `DEV_SNAPSHOT_TOKEN`.
 
-Responsibilities:
+The service role key must never be exposed in UI, committed to git, or deployed as a public client variable.
 
-- canonical SQL migrations;
-- trusted Telegram-validated Edge Function logic;
-- generated database reference artifacts mirrored into `C:\Future\Минус40_архив\database\minus-40`.
+If the dev token or service role key is missing, `/dev-preview` falls back to local cache behavior.
 
-### `src/ui`
+## Local Cache Keys
 
-Responsibilities:
+- `minus40.cloud-cache`: current local AppState snapshot.
+- `minus40.cloud-meta`: cloud/cache metadata.
+- `minus40.app-state`: legacy fallback state.
+- `minus40.app-backup`: legacy backup fallback.
 
-- app screens;
-- component composition;
-- UI motion helpers.
+Read priority:
 
-Developer Preview should wrap these same screens instead of duplicating them.
+```text
+minus40.cloud-cache -> legacy app-state/app-backup -> DEFAULT_STATE
+```
 
-### `src/styles`
+## Plateau Fields
 
-Responsibilities:
+Current AppState plateau facts:
 
-- global styling;
-- design tokens implemented in CSS;
-- card, nav, typography, and state styling.
+- `plateauStartedAt`;
+- `lastConfirmedMilestone`;
+- `plateauStartWeight`.
 
-## State Flow
+These are stored facts. Stage, fill count, active milestone, temporarily lost milestone, and Goals statuses are derived in `progress.ts`.
 
-1. `storage.ts` loads cached cloud state or legacy local state
-2. `store.ts` boots the in-memory state and tries cloud bootstrap
-3. `App.tsx` subscribes via `useSyncExternalStore`
-4. `AppUI.tsx` renders screens from the store snapshot
-5. UI actions call store methods
-6. store writes cache locally and queues canonical state replacement through Supabase Edge Functions
-7. Supabase Edge Functions validate Telegram `initData` and persist the state in Postgres
+If a live Supabase schema does not yet expose plateau columns, dev snapshot assembly may use `null` fallback values for these fields. The app must still render safely.
 
-## Current Contradictions Removed
+## Single UI Tree Rule
 
-The repo should not suggest a bigger feature-folder architecture than the app actually uses.
+Developer Preview must use the same React screens as the ordinary app.
 
-Current rule:
+Do not create separate screen implementations for preview unless the user explicitly requests a one-off diagnostic tool.
 
-- do not keep empty structural placeholders only for a hypothetical future;
-- keep the tree aligned with what is genuinely implemented.
+Allowed preview-specific pieces:
 
-## Intentional Simplicity
+- phone viewport/frame;
+- dev buttons outside the phone viewport;
+- local-only time/stage controls;
+- local-only data refresh controls.
 
-At this stage, the simple store is acceptable because:
+## Deployment Boundary
 
-- there is one user;
-- state is small;
-- sync is snapshot-based rather than realtime;
-- the app is still in MVP scope.
+`/dev-preview` is a local development tool.
 
-## Next Architectural Pressure Point
+Do not treat it as a production page. Do not deploy after preview-only changes unless the user directly asks.
 
-The next real architecture decision will happen after the secure cloud-sync baseline is stable.
-
-That is the moment to revisit:
-
-- realtime subscriptions vs periodic refresh;
-- conflict handling beyond cloud-wins bootstrap;
-- optional direct user-scoped tokens vs Edge Function mediation;
-- security/privacy review.
-
-## Plateau Mode Reference
-
-The active product model now includes `burst -> plateau -> burst` as the official stage cycle.
-
-The implementation rule is:
-
-- one shared history;
-- one shared graph;
-- one shared data source;
-- only calculations, visual accents, and Overview presentation change by stage;
-- plateau state is derived from two persisted facts: `plateauStartedAt` and `lastConfirmedMilestone`.
-
-The Goals screen may also render a temporary visual loss state for a previously reached milestone if the current weight rises above it during plateau, but the underlying route and milestone order do not change.
-
-Canonical details live in:
-
-- `docs/PLATEAU_MODE.md`
+Deployment and CLI checks live in `docs/PROJECT_OPERATIONS.md`.

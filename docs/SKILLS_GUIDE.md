@@ -1,140 +1,83 @@
 # Skills Guide
 
-## Purpose
+## Rule
 
-This document defines which skills are relevant for this project, when they should activate, and how to treat them operationally.
+Use only skills that are actually present and relevant to the task.
 
-## Automatic Use Rule
+Do not read all skills at session start.
 
-If a task clearly falls into the area of an available skill, that skill should be read and used before work starts.
+Do not download or install new skills without a direct user request. If an external skill seems useful, explain why first and get confirmation.
 
-This is not optional for matching tasks.
+## Active Skills
 
-## Active Skill Set For The Current Stage
-
-### `telegram-mini-app`
-
-Use when the task involves:
-
-- Telegram Web App behavior;
-- Mini App platform constraints;
-- safe area / Telegram runtime specifics;
-- product decisions tightly bound to Telegram UX.
-  - `/dev-preview` is local-only by default;
-  - use `http://localhost:5173/dev-preview` for iteration;
-  - do not deploy Vercel after `dev-preview` changes unless asked.
-
-### `spec-driven-development`
-
-Use when the task involves:
-
-- a new feature slice;
-- defining scope before coding;
-- reducing the risk of drifting beyond the current stage.
+These exist in `Skills/active/` and are relevant to the current project stage.
 
 ### `frontend-ui-engineering`
 
-Use when the task involves:
+Use for:
 
-- screen design changes;
-- hierarchy, spacing, readability;
-- mobile UI refinement;
-- component-level UX polishing.
+- screen layout;
+- visual hierarchy;
+- spacing and typography;
+- mobile UI polish;
+- design-system consistency.
 
 ### `playwright-interactive`
 
-Use when the task involves:
+Use for:
 
-- checking flows in the browser;
-- visual verification after UI changes;
-- regression checks for the current interface.
+- local browser checks;
+- visual verification;
+- interaction testing;
+- screenshot-based inspection when needed.
 
-### `browser:control-in-app-browser`
+### `spec-driven-development`
 
-Use for browser-based inspection and app verification when local runtime checking matters.
+Use for:
+
+- new feature slices;
+- architecture decisions before implementation;
+- reducing scope drift;
+- turning user requirements into implementation steps.
+
+### `telegram-mini-app`
+
+Use for:
+
+- Telegram Mini App behavior;
+- WebApp runtime constraints;
+- viewport and safe area behavior;
+- Telegram-specific launch and identity issues.
 
 ## Standby Skills
 
-### `accessibility`
+These exist in `Skills/standby/`.
 
-Use when:
-
-- the UI is stabilizing;
-- forms, contrast, and readability need audit;
-- a major screen pass is happening.
-
-Operational rule:
-
-- for every future UI audit, run an accessibility pass by default;
-- treat accessibility as part of UI quality, not as a late optional extra.
-
-### `security-threat-model`
-
-Use when:
-
-- backend or sync architecture is being introduced;
-- new trust boundaries appear;
-- personal data exposure risks increase.
-
-### `data-privacy-compliance`
-
-Use when:
-
-- cloud sync is being designed;
-- retention and privacy choices are being made;
-- sensitive user data handling changes.
-
-### `security-best-practices`
-
-Use when:
-
-- API/backend work starts;
-- storage/auth/session logic appears;
-- the app begins handling more sensitive flows.
+- `accessibility`: use for UI audit, readability, forms, contrast, and interaction quality.
+- `data-privacy-compliance`: use when cloud data handling, retention, or personal data policy changes.
+- `security-best-practices`: use for auth, storage, backend, Edge Function, env, or API security review.
+- `security-threat-model`: use when new trust boundaries or sensitive flows are introduced.
 
 ## Future Skills
 
-### `fitness-nutrition`
+These exist in `Skills/future/`.
 
-Use only when food tracking or food analysis actually enters implementation.
+- `fitness-nutrition`: keep inactive until food tracking or nutrition analysis becomes active product scope.
 
-## Built-In Skills Worth Remembering
+## Current Practice
 
-These are not project-local files, but they are highly relevant:
+- For ordinary code tasks, read no skill unless the task matches it.
+- For UI tasks, prefer `frontend-ui-engineering`; add `playwright-interactive` when visual verification matters.
+- For Telegram runtime issues, use `telegram-mini-app`.
+- For feature planning, use `spec-driven-development`.
+- For security-sensitive changes, use the relevant standby security skill.
 
-### `visual-test-skill`
+## Priority
 
-Use for repeatable visual verification when UI complexity grows further.
-
-Operational rule:
-
-- when we begin systematic visual regression checking, use `visual-test-skill` as the standard path;
-- use it for repeatable screenshot-based checks, not just one-off manual inspection.
-- prefer `http://127.0.0.1:5173/dev-preview` over the old preview lab for local UI checks.
-
-### `data-vis` / dedicated data-visualization skill
-
-Rule:
-
-- do not install or activate a separate data-visualization skill yet;
-- introduce it only when the graph becomes a truly important product block rather than a secondary screen.
-
-## Priority When Skills Disagree
+If instructions conflict, use this order:
 
 1. direct user instruction;
-2. `docs/DECISION_LOG.md`;
-3. `docs/PROJECT_CONTEXT.md`;
-4. `docs/PROJECT_OPERATIONS.md`;
-5. the skill that most directly matches the current task;
-6. broader supporting skills.
-
-## Practical Rule
-
-Do not activate a skill "just in case".
-Do activate it when the task clearly belongs to its domain.
-
-## Current Installation State
-
-- `accessibility` is already present in the project skill set
-- `visual-test-skill` is already available as a built-in skill in this environment
-- separate `data-vis` skill is intentionally deferred
+2. `docs/CODEX_START.md`;
+3. the task-relevant canonical doc;
+4. the matching skill;
+5. older decision/history docs.

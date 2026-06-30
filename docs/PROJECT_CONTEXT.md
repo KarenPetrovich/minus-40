@@ -4,27 +4,13 @@
 
 Minus 40 is a personal Telegram Mini App for one user.
 
-Its job is not to be a generic health platform.
-Its job is to help maintain a real weight-loss trajectory.
+Its job is to help maintain a real weight-loss trajectory. It is not a generic health platform, calorie tracker, or broad wellness app.
 
 ## Main Goal
 
-- Starting point: 150 kg
-- Target point: 110 kg
-- Core mission: remove the extra 40 kg and keep the user on track
-
-## Main Product Principle
-
-The main metric is weight.
-
-This project is not centered around:
-
-- calories;
-- macros;
-- steps;
-- broad wellness scoring.
-
-If a feature does not help maintain the weight-loss trajectory, its priority is low.
+- start: about 150 kg;
+- target: 110 kg;
+- mission: lose the extra 40 kg and stay on track.
 
 ## User Context
 
@@ -32,77 +18,38 @@ If a feature does not help maintain the weight-loss trajectory, its priority is 
 - 45 years old;
 - height: 183 cm;
 - already has prior successful weight-loss experience;
-- does not need basic education about dieting;
-- needs support for discipline, continuity, and visible control.
+- does not need basic dieting education;
+- needs discipline support, continuity, and visible control.
 
-## Why The Product Exists
+## Product Role
 
-The user already knows how to lose weight.
-The problem is not knowledge.
-The problem is staying in the process consistently and recovering after drift.
-
-So the app should work as:
+The app should work as:
 
 - an external control system;
 - a progress mirror;
-- a return-to-track tool.
+- a return-to-track tool after drift.
 
-## Current Product Boundaries
+## Product Boundaries
 
-Right now we are still inside Stage 1:
+Current focus is weight tracking and route control.
 
-- weight tracking;
-- history;
-- graph;
-- milestone progress;
-- forecast.
-
-Not in current scope:
+Lower priority:
 
 - full food logging;
-- AI food analysis;
-- activity analytics;
-- large backend-first architecture.
+- calorie/macro platform features;
+- broad activity analytics;
+- large backend-first redesign.
 
 ## UX Direction
 
 - mobile-first;
 - fast to read;
 - emotionally calm;
-- visually premium, but not flashy;
+- premium but not flashy;
 - one clear focal metric per block.
 
-## Practical Product Rule
+## Reference
 
-Prefer the smallest useful solution that gives real control to the user.
+For current route, Plateau mode, commands, architecture, and read order, start with:
 
-## Active App URLs
-
-- primary production URL: `https://minus-40.vercel.app`
-- legacy backup URL: `https://adorable-wisp-fb63cf.netlify.app/`
-
-## Visual Verification
-
-- `http://localhost:5173/dev-preview` is the local browser workspace for screen checks.
-- the normal loop is change -> `F5` -> evaluate.
-- it exists to reduce deploy churn and screenshot loops while staying on the same production code path.
-- Vercel is reserved for the ordinary application and rare control checks on a real phone.
-
-## Stage Strategy
-
-The product now uses a cyclical strategy:
-
-- burst;
-- plateau;
-- burst;
-- plateau;
-- ...
-
-Important rules:
-
-- history stays unified;
-- graph stays unified;
-- the data source stays unified;
-- only calculations, accent color, and Overview behavior change by stage;
-- burst uses orange;
-- plateau uses green.
+- `docs/CODEX_START.md`
