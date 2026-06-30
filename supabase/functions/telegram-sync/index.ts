@@ -10,6 +10,9 @@ type AppState = {
   startWeight: number
   targetWeight: number
   entries: WeightEntry[]
+  plateauStartedAt?: number | null
+  lastConfirmedMilestone?: number | null
+  plateauStartWeight?: number | null
 }
 
 type BootstrapPayload = {
@@ -61,6 +64,9 @@ function normalizeState(value: AppState): AppState {
   return {
     startWeight: Number(value.startWeight),
     targetWeight: Number(value.targetWeight),
+    plateauStartedAt: Number.isFinite(value.plateauStartedAt) ? Number(value.plateauStartedAt) : null,
+    lastConfirmedMilestone: Number.isFinite(value.lastConfirmedMilestone) ? Number(value.lastConfirmedMilestone) : null,
+    plateauStartWeight: Number.isFinite(value.plateauStartWeight) ? Number(value.plateauStartWeight) : null,
     entries: [...value.entries]
       .filter((entry) => typeof entry.id === 'string' && Number.isFinite(entry.date) && Number.isFinite(entry.weight))
       .sort((left, right) => right.date - left.date)
@@ -164,6 +170,9 @@ async function validateTelegramInitData(initData: string, botToken: string): Pro
 function mapDbState(user: {
   start_weight: number
   target_weight: number
+  plateau_started_at: number | null
+  last_confirmed_milestone: number | null
+  plateau_start_weight: number | null
 }, entries: Array<{
   id: string
   measured_at: string
@@ -172,6 +181,9 @@ function mapDbState(user: {
   return {
     startWeight: Number(user.start_weight),
     targetWeight: Number(user.target_weight),
+    plateauStartedAt: Number.isFinite(user.plateau_started_at) ? Number(user.plateau_started_at) : null,
+    lastConfirmedMilestone: Number.isFinite(user.last_confirmed_milestone) ? Number(user.last_confirmed_milestone) : null,
+    plateauStartWeight: Number.isFinite(user.plateau_start_weight) ? Number(user.plateau_start_weight) : null,
     entries: entries
       .map((entry) => ({
         id: entry.id,
@@ -242,7 +254,15 @@ async function upsertUserProfile(
   telegramUser: TelegramUser,
   state: AppState,
   markMigrated: boolean,
-): Promise<{ id: string; start_weight: number; target_weight: number; migrated_at: string | null }> {
+): Promise<{
+  id: string
+  start_weight: number
+  target_weight: number
+  plateau_started_at: number | null
+  last_confirmed_milestone: number | null
+  plateau_start_weight: number | null
+  migrated_at: string | null
+}> {
   const payload = {
     telegram_user_id: telegramUser.id,
     telegram_username: telegramUser.username ?? null,
@@ -250,6 +270,9 @@ async function upsertUserProfile(
     telegram_last_name: telegramUser.last_name ?? null,
     start_weight: state.startWeight,
     target_weight: state.targetWeight,
+    plateau_started_at: state.plateauStartedAt ?? null,
+    last_confirmed_milestone: state.lastConfirmedMilestone ?? null,
+    plateau_start_weight: state.plateauStartWeight ?? null,
     last_seen_at: new Date().toISOString(),
   }
 
@@ -261,7 +284,7 @@ async function upsertUserProfile(
     }, {
       onConflict: 'telegram_user_id',
     })
-    .select('id, start_weight, target_weight, migrated_at')
+    .select('id, start_weight, target_weight, plateau_started_at, last_confirmed_milestone, plateau_start_weight, migrated_at')
     .single()
 
   if (error) {
@@ -316,6 +339,9 @@ async function handleBootstrap(
   const seededState: AppState = {
     ...DEFAULT_SETTINGS,
     entries: [],
+    plateauStartedAt: null,
+    lastConfirmedMilestone: null,
+    plateauStartWeight: null,
   }
 
   const user = await upsertUserProfile(db, telegramUser, seededState, false)
