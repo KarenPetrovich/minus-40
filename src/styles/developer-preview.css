@@ -1,10 +1,11 @@
 .developer-preview-shell {
   min-height: 100dvh;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  padding: 18px 32px;
+  gap: 88px;
   background:
     radial-gradient(circle at 1px 1px, rgba(0, 50, 138, 0.08) 1px, transparent 0) 0 0 / 16px 16px,
     linear-gradient(180deg, #f8f9fc 0%, #eef1f8 100%);
@@ -14,6 +15,7 @@
   position: relative;
   width: 392px;
   height: 719px;
+  flex: 0 0 auto;
 }
 
 .developer-preview-frame {
@@ -31,21 +33,52 @@
 .developer-preview-controls {
   position: relative;
   z-index: 2;
-  width: min(392px, calc(100vw - 24px));
+  width: 220px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-start;
-  align-self: center;
+  flex-direction: column;
+  gap: 10px;
+  align-self: stretch;
+  justify-content: center;
 }
 
-.developer-preview-controls button {
-  border: 1px solid rgba(0, 50, 138, 0.24);
-  border-radius: 999px;
-  padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #00328a;
-  font: 600 12px/1 'Manrope', sans-serif;
+.developer-preview-status {
+  color: #314b20;
+  font: 600 11px/1.35 'Manrope', sans-serif;
+}
+
+.developer-preview-status-pending {
+  color: #5f6c89;
+}
+
+.developer-preview-status-local-cache {
+  color: #a7661d;
+}
+
+.developer-preview-status-unavailable {
+  color: #8d4242;
+}
+
+.developer-preview-snapshot-status {
+  color: #5a6c89;
+}
+
+.developer-preview-control-button {
+  width: 168px;
+  min-height: 42px;
+  border: 1px solid rgba(0, 50, 138, 0.28);
+  border-radius: 14px;
+  padding: 9px 11px;
+  background: linear-gradient(180deg, #173f9d 0%, #092d7e 100%);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(0, 32, 96, 0.18);
+  font: 700 12px/1.05 'Manrope', sans-serif;
+  text-align: left;
+  display: flex;
+  align-items: center;
+}
+
+.developer-preview-control-button:hover {
+  background: linear-gradient(180deg, #1d4ab3 0%, #0d357f 100%);
 }
 
 .developer-preview-viewport {

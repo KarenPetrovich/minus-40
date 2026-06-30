@@ -18,6 +18,13 @@ type PlateauFacts = {
   plateauStartWeight: number | null
 }
 
+export type RefreshSource = 'supabase' | 'local-cache' | 'unavailable'
+
+export type RefreshOutcome = {
+  source: RefreshSource
+  usedLocalCache: boolean
+}
+
 type StoreState = AppState & PlateauFacts
 
 const withPlateauFacts = (
@@ -32,7 +39,7 @@ const withPlateauFacts = (
 
 let state: StoreState = withPlateauFacts(loadInitialState())
 const listeners = new Set<() => void>()
-let bootstrapPromise: Promise<void> | null = null
+let bootstrapPromise: Promise<RefreshOutcome> | null = null
 let cloudSyncEnabled = loadCloudMeta().cloudMode
 let syncQueue = Promise.resolve()
 
@@ -90,17 +97,17 @@ function queueCloudReplace(snapshot: AppState): void {
     })
 }
 
-async function bootstrapFromCloud(forceRefresh = false): Promise<void> {
-  await bootstrapFromCloudWithInitData(getTelegramInitData(), forceRefresh)
+async function bootstrapFromCloud(forceRefresh = false): Promise<RefreshOutcome> {
+  return bootstrapFromCloudWithInitData(getTelegramInitData(), forceRefresh)
 }
 
-async function bootstrapFromCloudWithInitData(initData: string, forceRefresh = false): Promise<void> {
+async function bootstrapFromCloudWithInitData(initData: string, forceRefresh = false): Promise<RefreshOutcome> {
   if (!canUseCloudSync()) {
-    return
+    return { source: 'unavailable', usedLocalCache: false }
   }
 
   if (!initData) {
-    return
+    return { source: 'unavailable', usedLocalCache: false }
   }
 
   const legacyState = loadLegacyState()
@@ -117,8 +124,11 @@ async function bootstrapFromCloudWithInitData(initData: string, forceRefresh = f
       legacyMigrated: response.meta.source === 'migrated' || loadCloudMeta().legacyMigrated,
       lastSyncedAt: Date.now(),
     })
+
+    return { source: 'supabase', usedLocalCache: false }
   } catch (error) {
     console.error('Cloud bootstrap failed', error)
+    return { source: 'local-cache', usedLocalCache: true }
   }
 }
 
@@ -144,19 +154,19 @@ export const weightStore = {
 
     return bootstrapPromise
   },
-  async refresh() {
+  async refresh(): Promise<RefreshOutcome> {
     if (!cloudSyncEnabled && !canUseCloudSync()) {
-      return
+      return { source: 'unavailable', usedLocalCache: false }
     }
 
-    await bootstrapFromCloud(true)
+    return bootstrapFromCloud(true)
   },
-  async refreshFromCloud(initData: string) {
+  async refreshFromCloud(initData: string): Promise<RefreshOutcome> {
     if (!cloudSyncEnabled && !canUseCloudSync()) {
-      return
+      return { source: 'unavailable', usedLocalCache: false }
     }
 
-    await bootstrapFromCloudWithInitData(initData, true)
+    return bootstrapFromCloudWithInitData(initData, true)
   },
   addWeight(weight: number, date = Date.now()) {
     const snapshot = withPlateauFacts({

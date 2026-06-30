@@ -11,6 +11,11 @@ export type CloudMeta = {
   lastSyncedAt: number | null
 }
 
+export type CloudSnapshot = {
+  cache: AppState
+  meta: CloudMeta
+}
+
 export const DEFAULT_STATE: AppState = {
   startWeight: 150.5,
   targetWeight: 110,
@@ -136,6 +141,44 @@ export function saveCloudMeta(meta: Partial<CloudMeta>): CloudMeta {
   writeJson(CLOUD_META_KEY, next)
 
   return next
+}
+
+export function exportCloudSnapshot(): CloudSnapshot {
+  return {
+    cache: loadCachedState() ?? loadInitialState(),
+    meta: loadCloudMeta(),
+  }
+}
+
+export function importCloudSnapshot(value: unknown): CloudSnapshot {
+  const snapshot = typeof value === 'string' ? JSON.parse(value) as CloudSnapshot : value as CloudSnapshot
+
+  if (!snapshot || typeof snapshot !== 'object') {
+    throw new Error('Cloud snapshot is invalid.')
+  }
+
+  const cache = normalizeState((snapshot as CloudSnapshot).cache)
+  const meta = {
+    ...DEFAULT_META,
+    ...loadCloudMeta(),
+    ...(snapshot as CloudSnapshot).meta,
+  }
+
+  saveCachedState(cache)
+  writeJson(CLOUD_META_KEY, {
+    cloudMode: Boolean(meta.cloudMode),
+    legacyMigrated: Boolean(meta.legacyMigrated),
+    lastSyncedAt: Number.isFinite(meta.lastSyncedAt) ? meta.lastSyncedAt : null,
+  })
+
+  return {
+    cache,
+    meta: {
+      cloudMode: Boolean(meta.cloudMode),
+      legacyMigrated: Boolean(meta.legacyMigrated),
+      lastSyncedAt: Number.isFinite(meta.lastSyncedAt) ? meta.lastSyncedAt : null,
+    },
+  }
 }
 
 export function loadInitialState(): AppState {

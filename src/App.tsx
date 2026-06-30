@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react'
+import { loadCloudMeta, importCloudSnapshot } from './core/storage'
 import { weightStore } from './core/store'
 import { initializeTelegramWebApp, subscribeTelegramEvent } from './features/telegram/webapp'
 import { AppUI } from './ui/AppUI'
@@ -11,19 +12,27 @@ export default function App() {
 
   useEffect(() => {
     const cleanupTelegram = initializeTelegramWebApp()
-    const cleanupActivated = subscribeTelegramEvent('activated', () => {
-      void weightStore.refresh()
-    })
-    const intervalId = window.setInterval(() => {
-      void weightStore.refresh()
-    }, 45_000)
+    const cleanupActivated = isDevPreview
+      ? () => {}
+      : subscribeTelegramEvent('activated', () => {
+          void weightStore.refresh()
+        })
+    const intervalId = isDevPreview
+      ? null
+      : window.setInterval(() => {
+          void weightStore.refresh()
+        }, 45_000)
 
-    void weightStore.bootstrap()
+    if (!isDevPreview) {
+      void weightStore.bootstrap()
+    }
 
     return () => {
       cleanupActivated()
       cleanupTelegram()
-      window.clearInterval(intervalId)
+      if (intervalId !== null) {
+        window.clearInterval(intervalId)
+      }
     }
   }, [isDevPreview])
 
@@ -32,8 +41,37 @@ export default function App() {
       <DeveloperPreviewPage
         state={state}
         initialScreen="overview"
-        onRefresh={() => {
-          weightStore.rehydrate()
+        cloudMeta={loadCloudMeta()}
+        onRefresh={async () => {
+          try {
+            const response = await fetch('/__dev/cloud-snapshot', {
+              credentials: 'include',
+            })
+
+            if (response.ok) {
+              const snapshot = await response.json() as Parameters<typeof importCloudSnapshot>[0]
+              importCloudSnapshot(snapshot)
+              weightStore.rehydrate()
+
+              return {
+                source: 'supabase' as const,
+                usedLocalCache: false,
+              }
+            }
+          } catch (error) {
+            console.error('Dev snapshot refresh failed', error)
+          }
+
+          const outcome = await weightStore.refresh()
+
+          if (outcome.source !== 'supabase') {
+            weightStore.rehydrate()
+          }
+
+          return {
+            ...outcome,
+            usedLocalCache: outcome.source !== 'supabase' || outcome.usedLocalCache,
+          }
         }}
         onAdd={weightStore.addWeight}
         onDelete={weightStore.deleteEntry}
