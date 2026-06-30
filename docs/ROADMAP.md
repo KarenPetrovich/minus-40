@@ -1,76 +1,25 @@
-# Roadmap
+## Optional Future Consideration
 
-## Principle
-
-Move in small useful iterations. Do not add future complexity before the current stage genuinely needs it.
-
-## Stage 1: Weight MVP
-
-Goal:
-
-- reliable Telegram Mini App for weight tracking and route control.
-
-Scope:
-
-- add weight entries;
-- show Overview;
-- show History;
-- show Graph;
-- show Goals;
-- support burst -> plateau -> burst cycle;
-- keep Developer Preview aligned with the same UI tree.
+### Possible return of the 125 kg milestone
 
 Status:
 
-- active.
+- optional / future consideration only;
+- do not change the current route unless this is explicitly approved.
 
-## Stage 2: Food Logging
+Context:
 
-Goal:
+- current approved route: `150 -> 140 -> 130 -> 120 -> 115 -> 110`;
+- 125 kg may be reconsidered later if the `130 -> 120` jump feels too long or too hard.
 
-- capture eating behavior without turning the app into a calorie platform.
+If 125 kg is restored, the following must be updated together:
 
-Likely scope:
-
-- meal/event logging;
-- food photo capture;
-- simple categorization.
-
-## Stage 3: AI Food Analysis
-
-Goal:
-
-- reduce manual effort and provide concise structured feedback on food patterns.
-
-Likely scope:
-
-- photo analysis;
-- preliminary classification;
-- short AI observations.
-
-## Stage 4: Activity Context
-
-Goal:
-
-- add training and activity context around weight dynamics.
-
-Likely scope:
-
-- workout logging;
-- activity screenshots/photos;
-- simple activity interpretation.
-
-## Stage 5: Factor Analytics
-
-Goal:
-
-- understand which factors most strongly affect progress and regress.
-
-Likely scope:
-
-- cross-analysis of weight, food, and activity;
-- pattern detection;
-- clearer factor-based insights.
+- route / milestones;
+- Goals;
+- Overview;
+- Plateau logic;
+- docs;
+- dev-preview scenarios.
 
 ## Future Architecture Candidate
 

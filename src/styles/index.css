@@ -147,7 +147,7 @@ button {
 
 .stack {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 .hero-card,
@@ -446,7 +446,7 @@ button {
   position: fixed;
   z-index: 6;
   right: max(20px, calc((100% - 500px) / 2));
-  bottom: calc(92px + var(--safe-bottom));
+  bottom: calc(104px + var(--safe-bottom));
   width: 60px;
   height: 60px;
   border: 0;
