@@ -124,10 +124,10 @@ function renderForecastText(forecast: { days: number; basis: 'weekly' | 'provisi
   }
 
   return (
-    <>
-      <span className="forecast-primary">{forecast.days} дн.</span>
+    <span className="forecast-line">
+      <span className="forecast-primary">{forecast.days} {pluralizeDays(forecast.days)}</span>
       <span className="forecast-secondary">до {formatWeight(milestone)}</span>
-    </>
+    </span>
   )
 }
 
@@ -394,8 +394,8 @@ function Overview({ state, stageOverride, nowOverride }: { state: AppState; stag
             <img className="forecast-icon" src={forecastCalendarIcon} alt="" />
           </span>
           <em>
-            Прогноз
-            <b>{renderForecastText(forecast, milestone)}</b>
+            <b>Прогноз</b>
+            {renderForecastText(forecast, milestone)}
           </em>
         </span>
       </section>

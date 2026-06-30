@@ -294,7 +294,7 @@ button {
 
 .forecast {
   border-radius: 18px;
-  padding: 14px 16px;
+  padding: 18px 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -306,61 +306,64 @@ button {
 
 .forecast span {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   align-items: center;
   color: inherit;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 800;
+}
+
+.forecast-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: nowrap;
 }
 
 .placeholder-mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 34px;
+  height: 34px;
   font-size: 15px;
   line-height: 1;
 }
 
 .forecast-icon {
   display: block;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
 .forecast em {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   font-style: normal;
-  font-size: 10px;
-  letter-spacing: .12em;
-  color: #5f6c89;
+  color: #0f2f75;
 }
 
 .forecast em b {
   display: block;
-  margin-top: 3px;
   color: #0f2f75;
-  font-size: 16px;
+  font-size: 19px;
   letter-spacing: 0;
 }
 
-.forecast-primary,
-.forecast-secondary {
-  display: block;
-}
-
 .forecast-primary {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 800;
   color: #0f2f75;
+  white-space: nowrap;
 }
 
 .forecast-secondary {
-  margin-top: 2px;
   color: #5f6c89;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .chart-card {
@@ -738,7 +741,7 @@ nav button.active {
 }
 
 .history-filter-secondary button.is-loss:not(.active) {
-  color: #a7661d;
+  color: #fc820c;
 }
 
 .history-filter-secondary button.is-gain:not(.active) {
