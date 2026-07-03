@@ -11,6 +11,41 @@ export default function App() {
   const isDevPreview = window.location.pathname === '/dev-preview' || window.location.pathname === '/preview'
 
   useEffect(() => {
+    const root = document.documentElement
+    const readyClass = 'material-symbols-ready'
+    let active = true
+
+    if (!document.fonts) {
+      root.classList.add(readyClass)
+
+      return () => {
+        active = false
+      }
+    }
+
+    if (document.fonts.check('24px "Material Symbols Outlined"')) {
+      root.classList.add(readyClass)
+
+      return () => {
+        active = false
+      }
+    }
+
+    void Promise.all([
+      document.fonts.load('24px "Material Symbols Outlined"'),
+      document.fonts.ready,
+    ]).then(() => {
+      if (active) {
+        root.classList.add(readyClass)
+      }
+    })
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  useEffect(() => {
     const cleanupTelegram = initializeTelegramWebApp()
     const cleanupActivated = isDevPreview
       ? () => {}
