@@ -99,7 +99,7 @@ export function GoalsScreen({ state, onSave }: Props) {
           {ROADMAP_NODES.map((node, index) => (
             <div
               key={`${node.key}-label`}
-              className={`roadmap-label roadmap-label-${node.kind} ${statuses[index] === 'reached' ? 'is-reached' : 'is-unreached'} ${statuses[index] === 'temporarilyLost' ? 'is-temporarily-lost' : ''} ${node.kind === 'start' ? 'is-start' : ''}`}
+              className={`roadmap-label roadmap-label-${node.kind} ${statuses[index] === 'reached' ? 'is-reached' : 'is-unreached'} ${statuses[index] === 'temporarilyLost' ? 'is-temporarily-lost' : ''} ${node.kind === 'start' ? 'is-start' : ''} ${node.key === '125' ? 'is-compact' : ''}`}
               style={{ left: `${(node.x / 300) * 100}%`, top: `calc(${(node.y / 600) * 100}% - 26px)` }}
             >
               <RoadmapNodeBadge
