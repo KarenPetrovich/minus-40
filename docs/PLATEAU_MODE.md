@@ -18,7 +18,7 @@ The app now uses a cyclical model:
 
 The route is made of control milestones:
 
-- 150 -> 140 -> 130 -> 120 -> 115 -> 110 -> ...
+- 150 -> 140 -> 130 -> 125 -> 120 -> 115 -> 110 -> ...
 
 Each interval between two neighboring milestones is a separate burst.
 
@@ -26,7 +26,8 @@ Examples:
 
 - 150 -> 140 is the first burst;
 - 140 -> 130 is the second burst;
-- 130 -> 120 is the third burst.
+- 130 -> 125 is the third burst;
+- 125 -> 120 is the fourth burst.
 
 When the next milestone is reached, the current burst ends automatically and the app switches to plateau.
 

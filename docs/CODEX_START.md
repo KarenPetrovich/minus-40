@@ -13,14 +13,15 @@ It is not a generic wellness app, calorie counter, or mass-market product. The c
 The approved route is:
 
 ```text
-150 -> 140 -> 130 -> 120 -> 115 -> 110
+150 -> 140 -> 130 -> 125 -> 120 -> 115 -> 110
 ```
 
 Each segment between neighboring milestones is a separate burst:
 
 - 150 -> 140;
 - 140 -> 130;
-- 130 -> 120;
+- 130 -> 125;
+- 125 -> 120;
 - 120 -> 115;
 - 115 -> 110.
 

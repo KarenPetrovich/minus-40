@@ -16,7 +16,7 @@ Complete when:
 - measurements persist and re-open correctly;
 - there is a history screen;
 - there is a readable graph;
-- there is a forecast for 140 / 130 / 120 / 110 kg;
+- there is a forecast for 140 / 130 / 125 / 120 / 115 / 110 kg;
 - the user can see current position relative to the goals;
 - the scenario remains simple enough for daily use.
 

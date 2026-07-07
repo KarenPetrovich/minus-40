@@ -1,7 +1,6 @@
 import type { AppState, WeightEntry } from './types'
-
-export const MILESTONES = [150, 140, 130, 120, 115, 110]
-export const PLATEAU_ROUTE = [150, 140, 130, 120, 115, 110]
+export const MILESTONES = [150, 140, 130, 125, 120, 115, 110]
+export const PLATEAU_ROUTE = [150, 140, 130, 125, 120, 115, 110]
 export const PLATEAU_DURATION_DAYS = 7
 
 const DAY = 86_400_000

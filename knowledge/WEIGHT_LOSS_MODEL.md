@@ -234,6 +234,10 @@ The product now operates as a cycle:
 - plateau;
 - ...
 
+Current route milestones:
+
+- 150 -> 140 -> 130 -> 125 -> 120 -> 115 -> 110.
+
 ### Burst
 
 - primary goal: reach the target weight;

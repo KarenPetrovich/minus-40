@@ -1,18 +1,16 @@
-## Optional Future Consideration
+## Current Route Note
 
-### Possible return of the 125 kg milestone
+### Current route milestone set
 
 Status:
 
-- optional / future consideration only;
-- do not change the current route unless this is explicitly approved.
+- active route item, not a future option.
 
-Context:
+Route:
 
-- current approved route: `150 -> 140 -> 130 -> 120 -> 115 -> 110`;
-- 125 kg may be reconsidered later if the `130 -> 120` jump feels too long or too hard.
+- `150 -> 140 -> 130 -> 125 -> 120 -> 115 -> 110`.
 
-If 125 kg is restored, the following must be updated together:
+If the route changes again, update together:
 
 - route / milestones;
 - Goals;
@@ -20,15 +18,3 @@ If 125 kg is restored, the following must be updated together:
 - Plateau logic;
 - docs;
 - dev-preview scenarios.
-
-## Future Architecture Candidate
-
-Potential later direction:
-
-- Supabase remains the source of truth;
-- local SQLite or similar database becomes a full mirrored working copy;
-- the app reads from the local database;
-- background sync keeps local data aligned with Supabase;
-- Developer Preview reads the same local database.
-
-This is a separate future architecture task, not part of the current Developer Preview work.
