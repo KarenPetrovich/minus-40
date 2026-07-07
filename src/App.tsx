@@ -116,12 +116,8 @@ export default function App() {
 
           return comment ? { id: comment.id, text: comment.text } : null
         }}
-        onUpsertComment={(targetType, targetKey, text) => {
-          weightStore.upsertComment({ targetType, targetKey, text })
-        }}
-        onDeleteComment={(targetType, targetKey) => {
-          weightStore.deleteComment(targetType, targetKey)
-        }}
+        onUpsertComment={(targetType, targetKey, text) => weightStore.upsertComment({ targetType, targetKey, text })}
+        onDeleteComment={(targetType, targetKey) => weightStore.deleteComment(targetType, targetKey)}
       />
     )
   }
@@ -137,12 +133,8 @@ export default function App() {
 
         return comment ? { id: comment.id, text: comment.text } : null
       }}
-      onUpsertComment={(targetType, targetKey, text) => {
-        weightStore.upsertComment({ targetType, targetKey, text })
-      }}
-      onDeleteComment={(targetType, targetKey) => {
-        weightStore.deleteComment(targetType, targetKey)
-      }}
+      onUpsertComment={(targetType, targetKey, text) => weightStore.upsertComment({ targetType, targetKey, text })}
+      onDeleteComment={(targetType, targetKey) => weightStore.deleteComment(targetType, targetKey)}
     />
   )
 }

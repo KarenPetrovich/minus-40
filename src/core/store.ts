@@ -140,15 +140,15 @@ function deleteCommentInState(currentState: StoreState, targetType: CommentTarge
   }
 }
 
-function queueCloudReplace(snapshot: AppState): void {
+function queueCloudReplace(snapshot: AppState): Promise<void> {
   if (!cloudSyncEnabled || !canUseCloudSync()) {
-    return
+    return Promise.resolve()
   }
 
   const initData = getTelegramInitData()
 
   if (!initData) {
-    return
+    return Promise.resolve()
   }
 
   const normalizedSnapshot = normalizeState(snapshot)
@@ -165,6 +165,8 @@ function queueCloudReplace(snapshot: AppState): void {
     .catch((error) => {
       console.error('Cloud sync failed', error)
     })
+
+  return syncQueue
 }
 
 async function bootstrapFromCloud(forceRefresh = false): Promise<RefreshOutcome> {
@@ -184,9 +186,13 @@ async function bootstrapFromCloudWithInitData(initData: string, forceRefresh = f
 
   try {
     const response = await bootstrapCloudState(initData, forceRefresh ? null : legacyState)
+    const mergedState = mergeCommentsWithLocalFallback(response.state, state)
+    const needsCommentsBackfill =
+      (response.state.comments?.length ?? 0) === 0 &&
+      mergedState.comments.length > 0
 
     cloudSyncEnabled = true
-    state = withPlateauFacts(mergeCommentsWithLocalFallback(response.state, state), state)
+    state = withPlateauFacts(mergedState, state)
     emit()
     clearLegacyState()
     saveCloudMeta({
@@ -194,6 +200,10 @@ async function bootstrapFromCloudWithInitData(initData: string, forceRefresh = f
       legacyMigrated: response.meta.source === 'migrated' || loadCloudMeta().legacyMigrated,
       lastSyncedAt: Date.now(),
     })
+
+    if (needsCommentsBackfill) {
+      queueCloudReplace(state)
+    }
 
     return { source: 'supabase', usedLocalCache: false }
   } catch (error) {
@@ -275,22 +285,22 @@ export const weightStore = {
   getCommentByTarget(targetType: CommentTargetType, targetKey: string) {
     return state.comments.find((comment) => comment.targetType === targetType && comment.targetKey === targetKey) ?? null
   },
-  upsertComment(draft: CommentDraft) {
+  async upsertComment(draft: CommentDraft) {
     state = withPlateauFacts(upsertCommentInState(state, draft), state)
     emit()
-    queueCloudReplace(state)
+    await queueCloudReplace(state)
   },
-  deleteComment(targetType: CommentTargetType, targetKey: string) {
+  async deleteComment(targetType: CommentTargetType, targetKey: string) {
     state = withPlateauFacts(deleteCommentInState(state, targetType, targetKey), state)
     emit()
-    queueCloudReplace(state)
+    await queueCloudReplace(state)
   },
-  trimEmptyComments() {
+  async trimEmptyComments() {
     state = withPlateauFacts({
       ...state,
       comments: state.comments.filter((comment) => comment.text.trim().length > 0),
     }, state)
     emit()
-    queueCloudReplace(state)
+    await queueCloudReplace(state)
   },
 }

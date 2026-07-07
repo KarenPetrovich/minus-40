@@ -39,8 +39,8 @@ type Props = {
   onDelete: (id: string) => void
   onSettings: (start: number, target: number) => void
   onGetComment: (targetType: CommentTargetType, targetKey: string) => { id: string; text: string } | null
-  onUpsertComment: (targetType: CommentTargetType, targetKey: string, text: string) => void
-  onDeleteComment: (targetType: CommentTargetType, targetKey: string) => void
+  onUpsertComment: (targetType: CommentTargetType, targetKey: string, text: string) => Promise<void> | void
+  onDeleteComment: (targetType: CommentTargetType, targetKey: string) => Promise<void> | void
   initialScreen?: Screen
   stageOverride?: 'cut' | 'plateau'
   nowOverride?: number
@@ -232,10 +232,11 @@ function CommentDialog({
   target: CommentTarget
   initialText: string
   onClose: () => void
-  onSave: (text: string) => void
-  onDelete: () => void
-}) {
-  const [value, setValue] = useState(initialText)
+    onSave: (text: string) => Promise<void> | void
+    onDelete: () => Promise<void> | void
+  }) {
+    const [value, setValue] = useState(initialText)
+    const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     setValue(initialText)
@@ -247,19 +248,28 @@ function CommentDialog({
     <DialogFrame className="comment-dialog" onClose={onClose}>
       {(requestClose) => (
         <form
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault()
-
-            if (trimmed) {
-              onSave(trimmed)
-            } else {
-              onDelete()
+            if (submitting) {
+              return
             }
 
-            requestClose()
+            setSubmitting(true)
+
+            try {
+              if (trimmed) {
+                await onSave(trimmed)
+              } else {
+                await onDelete()
+              }
+
+              requestClose()
+            } finally {
+              setSubmitting(false)
+            }
           }}
         >
-          <button className="close" type="button" onClick={requestClose} aria-label="Закрыть">
+          <button className="close" type="button" onClick={requestClose} aria-label="Закрыть" disabled={submitting}>
             ×
           </button>
           <label>КОММЕНТАРИЙ</label>
@@ -273,19 +283,29 @@ function CommentDialog({
           />
           <div className="comment-dialog-actions">
             <button
-              className="secondary"
-              type="button"
-              onClick={() => {
-                onDelete()
-                requestClose()
-              }}
-              disabled={!trimmed && initialText.trim().length === 0}
-            >
-              Удалить
-            </button>
-            <button className="primary" type="submit">
-              Сохранить
-            </button>
+                className="secondary"
+                type="button"
+                onClick={async () => {
+                  if (submitting) {
+                    return
+                  }
+
+                  setSubmitting(true)
+
+                  try {
+                    await onDelete()
+                    requestClose()
+                  } finally {
+                    setSubmitting(false)
+                  }
+                }}
+                disabled={submitting || (!trimmed && initialText.trim().length === 0)}
+              >
+                Удалить
+              </button>
+              <button className="primary" type="submit" disabled={submitting}>
+                Сохранить
+              </button>
           </div>
         </form>
       )}

@@ -13,8 +13,8 @@ type Props = {
   onDelete: (id: string) => void
   onSettings: (start: number, target: number) => void
   onGetComment: (targetType: CommentTargetType, targetKey: string) => { id: string; text: string } | null
-  onUpsertComment: (targetType: CommentTargetType, targetKey: string, text: string) => void
-  onDeleteComment: (targetType: CommentTargetType, targetKey: string) => void
+  onUpsertComment: (targetType: CommentTargetType, targetKey: string, text: string) => Promise<void> | void
+  onDeleteComment: (targetType: CommentTargetType, targetKey: string) => Promise<void> | void
 }
 
 function formatSyncedAt(value: number | null): string {
