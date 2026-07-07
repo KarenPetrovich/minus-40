@@ -738,7 +738,13 @@ function GraphScreen({ state }: { state: AppState }) {
   const activeIndex = selectedIndex
   const activePoint = activeIndex !== null ? points[activeIndex] ?? null : null
   const activeEntry = activeIndex !== null ? chronologicalEntries[activeIndex] : null
-  const previousEntry = activeIndex !== null ? chronologicalEntries[activeIndex - 1] : null
+  const activeEntryIndexInState = activeEntry ? state.entries.findIndex((entry) => entry.id === activeEntry.id) : -1
+  const previousEntry =
+    activeEntryIndexInState >= 0
+      ? state.entries[activeEntryIndexInState + 1] ?? null
+      : activeIndex !== null
+        ? chronologicalEntries[activeIndex - 1] ?? null
+        : null
   const activeDelta = activeEntry && previousEntry ? compareEntries(activeEntry, previousEntry) : null
   const longestStreak = longestLossStreak(filteredEntries)
   const monthChange = monthlyCalendarChange(state.entries)
