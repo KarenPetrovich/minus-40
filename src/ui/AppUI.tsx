@@ -56,6 +56,40 @@ const pluralizeDays = (value: number) => {
   return 'дней'
 }
 
+const pluralizeMonths = (value: number) => {
+  const mod10 = value % 10
+  const mod100 = value % 100
+
+  if (mod10 === 1 && mod100 !== 11) return 'месяц'
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'месяца'
+
+  return 'месяцев'
+}
+
+function formatJourneyDuration(days: number | null) {
+  if (days === null) {
+    return '—'
+  }
+
+  if (days < 30) {
+    return `${days} ${pluralizeDays(days)}`
+  }
+
+  const months = days / 30
+  const roundedMonths = Math.round(months)
+
+  if (Math.abs(months - roundedMonths) < 0.05) {
+    return `${roundedMonths} ${pluralizeMonths(roundedMonths)}`
+  }
+
+  const formattedMonths = months.toLocaleString('ru-RU', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })
+
+  return `${formattedMonths} месяца`
+}
+
 function ScreenTransition({ screen, children }: { screen: Screen; children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -281,6 +315,7 @@ function Overview({ state, stageOverride, nowOverride }: { state: AppState; stag
   const progressFrom = useRef(milestoneProgress)
   const progressDisplayed = useRef(milestoneProgress)
   const lostTotal = totalLost(state)
+  const journeyDays = daysInJourney(state.entries)
   const isAboveStart = lostTotal < 0
 
   useEffect(() => {
@@ -402,8 +437,10 @@ function Overview({ state, stageOverride, nowOverride }: { state: AppState; stag
 
       <section className="total-card">
         <label>{isAboveStart ? 'ИЗМЕНЕНИЕ ОТ СТАРТА' : 'ВСЕГО СБРОШЕНО'}</label>
-        <strong>
-          {(isAboveStart ? Math.abs(lostTotal) : lostTotal).toFixed(1)} <small>кг</small>
+        <strong className="total-card-main">
+          <span className="total-card-main-value">{(isAboveStart ? Math.abs(lostTotal) : lostTotal).toFixed(1)}</span>
+          <small className="total-card-main-unit">кг</small>
+          <em className="total-card-main-duration">{`за ${formatJourneyDuration(journeyDays)}`}</em>
         </strong>
         <p>{isAboveStart ? `Выше стартового веса ${formatWeight(state.startWeight)}` : `С момента начала ${formatWeight(state.startWeight)}`}</p>
       </section>

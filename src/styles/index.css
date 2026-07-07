@@ -436,6 +436,34 @@ button {
   color: #fc820c;
 }
 
+.total-card-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  flex-wrap: nowrap;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.total-card-main-value {
+  color: #fc820c;
+}
+
+.total-card-main-unit {
+  color: #fc820c;
+  margin-left: 0.22em;
+}
+
+.total-card-main-duration {
+  color: #5f6c89;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+  margin-left: 0.28em;
+}
+
 .total-card p {
   margin: 6px 0 0;
   color: #5f6c89;
