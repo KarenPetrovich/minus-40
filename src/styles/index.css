@@ -139,10 +139,10 @@ button {
 }
 
 .main-settings {
-  padding: calc(4px + var(--safe-top)) 16px calc(64px + var(--safe-bottom));
-  overflow-y: hidden;
-  overscroll-behavior-y: none;
-  -webkit-overflow-scrolling: auto;
+  padding: calc(4px + var(--safe-top)) 16px calc(24px + var(--safe-bottom));
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .stack {
