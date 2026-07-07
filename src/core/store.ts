@@ -54,6 +54,17 @@ const emit = () => {
   listeners.forEach((listener) => listener())
 }
 
+function mergeCommentsWithLocalFallback(nextState: AppState, fallbackState: StoreState): AppState {
+  if ((nextState.comments?.length ?? 0) > 0 || fallbackState.comments.length === 0) {
+    return nextState
+  }
+
+  return {
+    ...nextState,
+    comments: fallbackState.comments,
+  }
+}
+
 function commitMilestoneProgress(previousState: StoreState, nextState: StoreState, weight: number, date: number): StoreState {
   if (currentStage(previousState, date) === 'plateau') {
     return nextState
@@ -175,7 +186,7 @@ async function bootstrapFromCloudWithInitData(initData: string, forceRefresh = f
     const response = await bootstrapCloudState(initData, forceRefresh ? null : legacyState)
 
     cloudSyncEnabled = true
-    state = withPlateauFacts(response.state, state)
+    state = withPlateauFacts(mergeCommentsWithLocalFallback(response.state, state), state)
     emit()
     clearLegacyState()
     saveCloudMeta({
