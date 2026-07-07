@@ -53,3 +53,14 @@ Lower priority:
 For current route, Plateau mode, commands, architecture, and read order, start with:
 
 - `docs/CODEX_START.md`
+
+## Current Status
+
+- route `150 -> 140 -> 130 -> 125 -> 120 -> 115 -> 110` is active and stable;
+- 125 kg is fully wired into business logic and Goals;
+- Plateau mode is active in the current release flow;
+- milestone and day comments work in the app;
+- comments now sync through cloud and are expected in `/dev-preview` after refresh;
+- Supabase `telegram-sync` is aligned with the current frontend state model;
+- weekly graph tooltip now shows delta for the first visible point when a previous real entry exists;
+- no known open tails remain for route 125, comments sync, or this graph tooltip fix.
