@@ -705,7 +705,7 @@ function GraphScreen({ state }: { state: AppState }) {
   const chartWidth = 300
   const chartHeight = 164
   const chartEdgePadding = 14
-  const [range, setRange] = useState<ChartRange>('month')
+  const [range, setRange] = useState<ChartRange>('week')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const filteredEntries = filterEntriesByRange(state.entries, range)
   const chronologicalEntries = [...filteredEntries].reverse()
@@ -725,6 +725,7 @@ function GraphScreen({ state }: { state: AppState }) {
   const journeyDays = daysInJourney(state.entries)
   const activeBubbleTop = activePoint ? clamp((activePoint.y / chartHeight) * 100 - 8, 16, 78) : 24
   const axisLabelY = chartHeight + 22
+  const graphDensityClass = range === 'week' ? 'is-week' : range === 'month' ? 'is-month' : 'is-year'
 
   return (
     <div className="graph">
@@ -763,21 +764,23 @@ function GraphScreen({ state }: { state: AppState }) {
           </strong>
         </article>
       </section>
-      <section className="big-chart big-chart-graph">
+      <section className={`big-chart big-chart-graph ${graphDensityClass}`}>
         {points.length > 1 ? (
           <>
-              <div className="graph-plot">
-                {activePoint ? (
-                  <div
-                    className="graph-popover"
-                    aria-live="polite"
-                    style={{ left: `${clamp((activePoint.x / chartWidth) * 100, 20, 80)}%`, top: `${activeBubbleTop}%` }}
-                  >
-                    <b>{formatDate(activePoint.date, true)}</b>
-                    <span>{formatWeight(activePoint.weight)}</span>
-                    <em className={activeDelta !== null && activeDelta > 0 ? 'red' : activeDelta !== null && activeDelta < 0 ? 'orange' : ''}>
-                    {activeDelta === null ? 'Старт' : `${formatDelta(activeDelta)} кг`}
-                  </em>
+            <div className="graph-plot">
+              {activePoint ? (
+                <div
+                  className="graph-popover"
+                  aria-live="polite"
+                  style={{ left: `${clamp((activePoint.x / chartWidth) * 100, 20, 80)}%`, top: `${activeBubbleTop}%` }}
+                >
+                  <b>{formatDate(activePoint.date, true)}</b>
+                  <span>{formatWeight(activeEntry?.weight ?? activePoint.weight)}</span>
+                  {activeDelta !== null ? (
+                    <em className={activeDelta > 0 ? 'red' : activeDelta < 0 ? 'orange' : ''}>
+                      {`${formatDelta(activeDelta)} кг`}
+                    </em>
+                  ) : null}
                 </div>
               ) : null}
               <svg viewBox={`0 0 ${chartWidth} ${chartHeight + 40}`} preserveAspectRatio="none">
@@ -802,11 +805,17 @@ function GraphScreen({ state }: { state: AppState }) {
                 {points.map((point, index) => (
                   <g key={point.date} className="graph-point-hit" onClick={() => setSelectedIndex(index)}>
                     <circle cx={point.x} cy={point.y} r="16" className="point-hit-area" />
-                    {index === activeIndex ? <circle cx={point.x} cy={point.y} r="12" className="point-active-ring" /> : null}
+                    {index === activeIndex ? <circle cx={point.x} cy={point.y} r={range === 'week' ? '12' : range === 'month' ? '10' : '9'} className="point-active-ring" /> : null}
                     <circle
                       cx={point.x}
                       cy={point.y}
-                      r={index === activeIndex ? '8' : '7'}
+                      r={
+                        range === 'week'
+                          ? index === activeIndex ? '8' : '7'
+                          : range === 'month'
+                            ? index === activeIndex ? '6' : '5'
+                            : index === activeIndex ? '5.5' : '4.5'
+                      }
                       className={index === activeIndex ? 'point-active' : 'point'}
                     />
                   </g>

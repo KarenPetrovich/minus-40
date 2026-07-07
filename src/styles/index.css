@@ -993,11 +993,11 @@ nav button.active {
 }
 
 .big-chart-graph .segment-orange {
-  stroke: #fc820c;
+  stroke: #f1994f;
 }
 
 .big-chart-graph .segment-red {
-  stroke: #ba1a1a;
+  stroke: #9f1212;
 }
 
 .big-chart-graph .graph-point-hit {
@@ -1081,11 +1081,34 @@ nav button.active {
 }
 
 .graph-popover em.red {
-  color: #ba1a1a;
+  color: #9f1212;
 }
 
 .graph-popover em.orange {
-  color: #fc820c;
+  color: #f1994f;
+}
+
+.big-chart-graph.is-month .segment-orange,
+.big-chart-graph.is-year .segment-orange {
+  stroke: #f2a364;
+}
+
+.big-chart-graph.is-month .segment-red,
+.big-chart-graph.is-year .segment-red {
+  stroke: #980d0d;
+}
+
+.big-chart-graph.is-month .point {
+  stroke-width: 3.2;
+}
+
+.big-chart-graph.is-month .point-active,
+.big-chart-graph.is-year .point-active {
+  stroke-width: 3.2;
+}
+
+.big-chart-graph.is-year .point {
+  stroke-width: 2.8;
 }
 .graph-insights {
   display: grid;
