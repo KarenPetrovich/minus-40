@@ -1,6 +1,7 @@
 import type { AppState, WeightEntry } from './types'
-
 export const MILESTONES = [150, 140, 130, 125, 120, 115, 110]
+export const PLATEAU_ROUTE = [150, 140, 130, 125, 120, 115, 110]
+export const PLATEAU_DURATION_DAYS = 7
 
 const DAY = 86_400_000
 
@@ -43,6 +44,161 @@ export const compareEntries = (entry: WeightEntry, older?: WeightEntry) => (olde
 
 export type HistoryRange = 'week' | 'month' | 'year'
 export type ChartRange = 'week' | 'month' | 'year'
+export type PlateauStage = 'cut' | 'plateau'
+export type MilestoneStatus = 'pending' | 'reached' | 'temporarilyLost'
+
+const plateauFacts = (state: AppState) => ({
+  plateauStartedAt: state.plateauStartedAt ?? null,
+  lastConfirmedMilestone: state.lastConfirmedMilestone ?? null,
+  plateauStartWeight: state.plateauStartWeight ?? null,
+})
+
+export function plateauEndsAt(state: AppState): number | null {
+  const { plateauStartedAt } = plateauFacts(state)
+
+  return plateauStartedAt === null ? null : plateauStartedAt + PLATEAU_DURATION_DAYS * DAY
+}
+
+export function isPlateauActive(state: AppState, now = Date.now()): boolean {
+  const endsAt = plateauEndsAt(state)
+
+  return endsAt !== null && now < endsAt
+}
+
+export function currentStage(state: AppState, now = Date.now()): PlateauStage {
+  return isPlateauActive(state, now) ? 'plateau' : 'cut'
+}
+
+export function routeMilestones(): number[] {
+  return PLATEAU_ROUTE
+}
+
+export function plateauBounds(state: AppState): { top: number | null; bottom: number | null } {
+  const { lastConfirmedMilestone, plateauStartWeight } = plateauFacts(state)
+
+  if (lastConfirmedMilestone === null) {
+    return { top: null, bottom: plateauStartWeight }
+  }
+
+  if (plateauStartWeight !== null) {
+    return {
+      top: lastConfirmedMilestone,
+      bottom: plateauStartWeight,
+    }
+  }
+
+  return {
+    top: lastConfirmedMilestone,
+    bottom: null,
+  }
+}
+
+export function plateauFillCount(state: AppState, now = Date.now(), segments = 7): number {
+  const startedAt = plateauFacts(state).plateauStartedAt
+  const endsAt = plateauEndsAt(state)
+
+  if (startedAt === null || endsAt === null || endsAt <= startedAt) {
+    return 0
+  }
+
+  const elapsedDays = Math.floor(clamp(now - startedAt, 0, endsAt - startedAt) / DAY)
+
+  return Math.max(0, Math.min(segments, elapsedDays))
+}
+
+export function currentActiveMilestone(state: AppState): number | null {
+  const current = currentWeight(state)
+  const { lastConfirmedMilestone } = plateauFacts(state)
+  const route = routeMilestones()
+
+  if (current === null) return null
+
+  if (lastConfirmedMilestone !== null) {
+    const confirmedIndex = route.indexOf(lastConfirmedMilestone)
+
+    if (confirmedIndex >= 0) {
+      return route[confirmedIndex + 1] ?? null
+    }
+  }
+
+  return route.find((milestone) => current > milestone) ?? null
+}
+
+export function nextRouteMilestone(state: AppState): number | null {
+  return currentActiveMilestone(state)
+}
+
+export function milestoneStatus(state: AppState, milestone: number): MilestoneStatus {
+  const current = currentWeight(state)
+  const { lastConfirmedMilestone } = plateauFacts(state)
+
+  if (current === null) return 'pending'
+
+  if (lastConfirmedMilestone === milestone) {
+    return current > milestone ? 'temporarilyLost' : 'reached'
+  }
+
+  const route = routeMilestones()
+  const confirmedIndex = lastConfirmedMilestone === null ? -1 : route.indexOf(lastConfirmedMilestone)
+  const milestoneIndex = route.indexOf(milestone)
+
+  if (milestoneIndex === -1) return 'pending'
+  if (confirmedIndex === -1) {
+    return current <= milestone ? 'reached' : 'pending'
+  }
+  if (milestoneIndex < confirmedIndex) return 'reached'
+  if (milestoneIndex === confirmedIndex) return current > milestone ? 'temporarilyLost' : 'reached'
+
+  return current <= milestone ? 'reached' : 'pending'
+}
+
+export function isMilestoneTemporarilyLost(state: AppState, milestone: number): boolean {
+  return milestoneStatus(state, milestone) === 'temporarilyLost'
+}
+
+export function milestoneStates(state: AppState): Array<{ milestone: number; status: MilestoneStatus }> {
+  return routeMilestones().map((milestone) => ({
+    milestone,
+    status: milestoneStatus(state, milestone),
+  }))
+}
+
+export function currentRouteProgress(state: AppState): {
+  stage: PlateauStage
+  currentMilestone: number | null
+  nextMilestone: number | null
+  plateauEndsAt: number | null
+  temporarilyLostMilestone: number | null
+  milestones: Array<{ milestone: number; status: MilestoneStatus }>
+} {
+  return currentRouteProgressAt(state, Date.now())
+}
+
+export function currentRouteProgressAt(
+  state: AppState,
+  now: number,
+): {
+  stage: PlateauStage
+  currentMilestone: number | null
+  nextMilestone: number | null
+  plateauEndsAt: number | null
+  temporarilyLostMilestone: number | null
+  milestones: Array<{ milestone: number; status: MilestoneStatus }>
+} {
+  const currentMilestone = currentActiveMilestone(state)
+  const route = routeMilestones()
+  const currentIndex = currentMilestone === null ? -1 : route.indexOf(currentMilestone)
+  const lostMilestone = milestoneStates(state).find((item) => item.status === 'temporarilyLost')?.milestone ?? null
+
+  return {
+    stage: currentStage(state, now),
+    currentMilestone,
+    nextMilestone: currentIndex >= 0 ? route[currentIndex + 1] ?? null : null,
+    plateauEndsAt: plateauEndsAt(state),
+    temporarilyLostMilestone: lostMilestone,
+    milestones: milestoneStates(state),
+  }
+}
 
 export function historyExtremes(entries: WeightEntry[], range: HistoryRange): { best: number | null; worst: number | null } {
   if (entries.length < 2) return { best: null, worst: null }
@@ -84,35 +240,27 @@ export function weeklyChange(entries: WeightEntry[]): number | null {
   return newest.weight - reference.weight
 }
 
-function averageDailyChange(entries: WeightEntry[]): number | null {
-  if (entries.length < 2) return null
-
-  const newest = entries[0]
-  const oldest = entries[entries.length - 1]
-
-  if (!oldest || newest.date === oldest.date) return null
-
-  return (newest.weight - oldest.weight) / ((newest.date - oldest.date) / DAY)
-}
-
 export function forecastDaysToMilestone(state: AppState): { days: number; basis: 'weekly' | 'provisional' } | null {
   const current = currentWeight(state)
   const milestone = nextMilestone(state)
-  const weekly = weeklyChange(state.entries)
 
   if (current === null || milestone === null) return null
 
-  if (weekly !== null && weekly < 0) {
-    const dailyRate = weekly / 7
+  const newest = state.entries[0]
+  if (!newest) return null
 
-    return { days: Math.max(1, Math.ceil((current - milestone) / -dailyRate)), basis: 'weekly' }
-  }
+  const windowStart = newest.date - 7 * DAY
+  const recentEntries = state.entries.filter((entry) => entry.date >= windowStart)
 
-  const provisionalDaily = averageDailyChange(state.entries)
+  if (recentEntries.length < 2) return null
 
-  if (provisionalDaily === null || provisionalDaily >= 0) return null
+  const oldest = recentEntries[recentEntries.length - 1]
+  const days = Math.max((newest.date - oldest.date) / DAY, 1)
+  const dailyRate = (newest.weight - oldest.weight) / days
 
-  return { days: Math.max(1, Math.ceil((current - milestone) / -provisionalDaily)), basis: 'provisional' }
+  if (dailyRate === 0) return null
+
+  return { days: Math.max(1, Math.ceil((current - milestone) / Math.abs(dailyRate))), basis: 'weekly' }
 }
 
 export const formatWeight = (weight: number) => `${weight.toFixed(1).replace('.', ',')} кг`

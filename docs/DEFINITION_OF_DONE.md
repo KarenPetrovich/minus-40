@@ -1,99 +1,86 @@
-# DEFINITION_OF_DONE.md
+# Definition Of Done
 
-## Назначение
+This document defines when a roadmap stage is genuinely complete.
 
-Этот документ определяет, когда каждый этап roadmap считается действительно завершённым.
+A stage counts as complete only if:
 
-Этап считается завершённым только если:
+- the key functions of the stage are implemented;
+- the user can get practical value from them;
+- the next stage can start without blurred boundaries.
 
-- реализованы ключевые функции этапа;
-- пользователь может получить практическую пользу;
-- следующий этап можно начинать без размытых границ.
+## Stage 1 - Weight Control MVP
 
-## Этап 1 — MVP контроля веса
+Complete when:
 
-Этап завершён, когда:
+- the user can add a new weight measurement;
+- measurements persist and re-open correctly;
+- there is a history screen;
+- there is a readable graph;
+- there is a forecast for 140 / 130 / 125 / 120 / 115 / 110 kg;
+- the user can see current position relative to the goals;
+- the scenario remains simple enough for daily use.
 
-- пользователь может вручную добавить новое измерение веса;
-- измерения сохраняются и доступны после повторного открытия приложения;
-- есть экран с историей измерений;
-- есть понятный график изменения веса;
-- есть прогноз достижения 140 / 130 / 120 / 110 кг;
-- пользователь видит текущее положение относительно целей;
-- сценарий ввода достаточно простой, чтобы не мешать регулярному использованию.
+Incomplete when:
 
-Этап не завершён, если:
+- data can be entered but not reviewed properly;
+- the graph or forecast exists only formally;
+- the interface is too heavy for routine use.
 
-- данные можно ввести, но нельзя нормально просмотреть;
-- график или прогноз есть формально, но не помогают понять прогресс;
-- интерфейс слишком тяжёлый для ежедневного сценария.
+## Stage 2 - Food Logging
 
-## Этап 2 — Учёт еды
+Complete when:
 
-Этап завершён, когда:
+- the user can record food intake;
+- simple food photos can be attached;
+- food entries are easy to classify;
+- the food history helps spot patterns;
+- food tracking does not overwhelm the weight workflow.
 
-- пользователь может зафиксировать факт приёма еды;
-- можно приложить фото еды;
-- у записей еды есть простая классификация;
-- история еды позволяет замечать опасные паттерны;
-- данные о еде не перегружают сценарий работы с весом.
+Incomplete when:
 
-Этап не завершён, если:
+- food logging exists but does not help decision-making;
+- the flow is too heavy;
+- the product drifts toward a calorie calculator.
 
-- еда фиксируется, но из записей нельзя увидеть пищевое поведение;
-- сценарий записи еды слишком тяжёлый;
-- продукт начинает смещаться в сторону калькулятора калорий.
+## Stage 3 - AI Food Analysis
 
-## Этап 3 — ИИ-анализ еды
+Complete when:
 
-Этап завершён, когда:
+- the app can use food photos as input for analysis;
+- AI returns useful, short, practical feedback;
+- the user still remains in control;
+- the analysis stays secondary to the weight goal.
 
-- приложение может использовать фото еды как вход для анализа;
-- ИИ даёт полезную предварительную классификацию;
-- анализ уменьшает ручную нагрузку пользователя;
-- выводы по еде короткие, понятные и практичные;
-- ИИ не мешает ручному контролю и не ломает основной сценарий.
+Incomplete when:
 
-Этап не завершён, если:
+- AI output is decorative only;
+- the user still has to do almost all the work manually;
+- the main product goal becomes secondary.
 
-- ИИ даёт красивый, но бесполезный вывод;
-- пользователь всё равно вынужден делать почти всю работу вручную;
-- анализ не помогает отличать безопасные и опасные пищевые сценарии.
+## Stage 4 - Training And Activity
 
-## Этап 4 — Учёт тренировок и активности
+Complete when:
 
-Этап завершён, когда:
+- the user can log workouts or active sessions;
+- activity remains visible in history;
+- the data is useful for understanding progress;
+- activity does not distract from the weight journey.
 
-- пользователь может зафиксировать тренировку;
-- можно приложить фото экрана эллипса;
-- активность сохраняется и просматривается в истории;
-- активность можно сопоставить с динамикой веса;
-- этот слой добавляет контекст, а не перегружает продукт.
+Incomplete when:
 
-Этап не завершён, если:
+- activity is collected but not useful;
+- the app starts feeling like a fitness tracker rather than a weight-control tool.
 
-- активность собирается, но не даёт новой полезной информации;
-- учёт тренировки мешает основному сценарию работы с весом;
-- данные активности существуют отдельно и не связаны с прогрессом.
+## Stage 5 - Factor Analytics
 
-## Этап 5 — Аналитика факторов
+Complete when:
 
-Этап завершён, когда:
+- the app can relate weight, food, and activity;
+- the user gets simple and understandable conclusions;
+- analytics helps behavior, not just display numbers.
 
-- приложение умеет сопоставлять вес, еду и активность;
-- выявляются хотя бы базовые закономерности;
-- пользователю показываются понятные выводы о факторах снижения и откатов;
-- аналитика помогает принимать решения, а не просто отображает данные;
-- выводы не противоречат главной цели — удержанию траектории снижения веса.
+Incomplete when:
 
-Этап не завершён, если:
-
-- аналитика есть, но она декоративна;
-- выводы сложно понять;
-- продукт стал “панелью аналитики” вместо инструмента контроля прогресса.
-
-## Preview Workflow
-
-- Use `http://127.0.0.1:5173/preview` as the primary visual laboratory for UI work.
-- Prefer direct browser verification there instead of exchanging screenshots when the goal is layout iteration.
-- Reserve screenshots for bug reports, final sign-off, or cases where a static image is genuinely necessary.
+- analytics is decorative;
+- outputs are hard to read;
+- the product turns into a panel of charts instead of a control system.

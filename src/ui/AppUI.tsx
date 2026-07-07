@@ -1,10 +1,9 @@
 ﻿import { Fragment, useEffect, useRef, useState } from 'react'
-import type { AppState, Screen } from '../core/types'
+import type { AppState, CommentTargetType, Screen } from '../core/types'
 import {
   averagePeriodChange,
   clamp,
   daysInJourney,
-  longestLossStreak,
   chartPoints,
   compareEntries,
   currentWeight,
@@ -20,13 +19,18 @@ import {
   nextMilestone,
   percentToMilestone,
   remainingToMilestone,
+  longestLossStreak,
   monthlyCalendarChange,
+  currentStage,
+  plateauBounds,
+  plateauFillCount,
   totalLost,
-  weeklyChange,
 } from '../core/progress'
-import { triggerImpact, triggerNotification, triggerSelection } from '../features/telegram/webapp'
+import { triggerImpact, triggerNotification } from '../features/telegram/webapp'
 import { animateValue, fadeIn, fadeOut, lerp, slideIn } from './motion'
+import { AppNav } from './AppNav'
 import { GoalsScreen } from './GoalsScreen'
+import { RoadmapNodeBadge } from './RoadmapNodeBadge'
 import forecastCalendarIcon from '../../forecast-calendar.png'
 
 type Props = {
@@ -34,8 +38,16 @@ type Props = {
   onAdd: (weight: number) => void
   onDelete: (id: string) => void
   onSettings: (start: number, target: number) => void
+  onGetComment: (targetType: CommentTargetType, targetKey: string) => { id: string; text: string } | null
+  onUpsertComment: (targetType: CommentTargetType, targetKey: string, text: string) => Promise<void> | void
+  onDeleteComment: (targetType: CommentTargetType, targetKey: string) => Promise<void> | void
   initialScreen?: Screen
+  stageOverride?: 'cut' | 'plateau'
+  nowOverride?: number
 }
+
+// Temporary placeholder until we pick the final brand sign.
+const BRAND_PLACEHOLDER_MARK = '?'
 
 const pluralizeDays = (value: number) => {
   const mod10 = value % 10
@@ -47,50 +59,38 @@ const pluralizeDays = (value: number) => {
   return 'дней'
 }
 
-// Temporary placeholder until we pick the final brand sign.
-const BRAND_PLACEHOLDER_MARK = '?'
+const pluralizeMonths = (value: number) => {
+  const mod10 = value % 10
+  const mod100 = value % 100
 
-function NavIcon({ screen, active }: { screen: Screen; active: boolean }) {
-  const primary = '#00328A'
-  const inactive = '#8A91A3'
-  const strongInactive = '#1A1C1E'
-  const orange = '#FC820C'
-  const red = '#BA1A1A'
+  if (mod10 === 1 && mod100 !== 11) return 'месяц'
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'месяца'
 
-  return (
-    <span className={`nav-icon nav-icon-${screen} ${active ? 'is-active' : ''}`} aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        {screen === 'overview' ? (
-          <>
-            <rect x="3" y="3" width="7" height="7" stroke={active ? primary : inactive} strokeWidth={active ? '2.5' : '2'} />
-            <rect x="14" y="3" width="7" height="7" stroke={red} strokeWidth={active ? '2.5' : '2'} />
-            <rect x="14" y="14" width="7" height="7" stroke={active ? primary : inactive} strokeWidth={active ? '2.5' : '2'} />
-            <rect x="3" y="14" width="7" height="7" stroke={orange} strokeWidth={active ? '2.5' : '2'} />
-          </>
-        ) : screen === 'history' ? (
-          <>
-            <circle cx="12" cy="12" r="10" stroke={active ? primary : '#7A8091'} strokeOpacity={active ? '1' : '0.38'} strokeWidth={active ? '2.5' : '2'} />
-            <polyline points="12 6 12 12 16 14" stroke={active ? primary : strongInactive} strokeWidth={active ? '3' : '2.5'} />
-          </>
-        ) : screen === 'graph' ? (
-          <>
-            <path d="M3 3v18h18" stroke={active ? primary : inactive} strokeWidth={active ? '2.5' : '2'} />
-            <path d="M18 9l-5 5-2-2-4 4" stroke={red} strokeWidth={active ? '3' : '2.5'} />
-          </>
-        ) : (
-          <>
-            <path
-              d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"
-              fill={orange}
-              stroke={active ? primary : inactive}
-              strokeWidth={active ? '2.5' : '2'}
-            />
-            <line x1="4" y1="22" x2="4" y2="15" stroke={active ? primary : inactive} strokeWidth={active ? '2.5' : '2'} />
-          </>
-        )}
-      </svg>
-    </span>
-  )
+  return 'месяцев'
+}
+
+function formatJourneyDuration(days: number | null) {
+  if (days === null) {
+    return '—'
+  }
+
+  if (days < 30) {
+    return `${days} ${pluralizeDays(days)}`
+  }
+
+  const months = days / 30
+  const roundedMonths = Math.round(months)
+
+  if (Math.abs(months - roundedMonths) < 0.05) {
+    return `${roundedMonths} ${pluralizeMonths(roundedMonths)}`
+  }
+
+  const formattedMonths = months.toLocaleString('ru-RU', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })
+
+  return `${formattedMonths} месяца`
 }
 
 function ScreenTransition({ screen, children }: { screen: Screen; children: React.ReactNode }) {
@@ -160,16 +160,11 @@ function renderForecastText(forecast: { days: number; basis: 'weekly' | 'provisi
     return <span className="forecast-primary">Пока рано для прогноза</span>
   }
 
-  return forecast.basis === 'weekly' ? (
-    <>
-      <span className="forecast-primary">{forecast.days} дн.</span>
+  return (
+    <span className="forecast-line">
+      <span className="forecast-primary">{forecast.days} {pluralizeDays(forecast.days)}</span>
       <span className="forecast-secondary">до {formatWeight(milestone)}</span>
-    </>
-  ) : (
-    <>
-      <span className="forecast-primary">Предварительно: {forecast.days} дн.</span>
-      <span className="forecast-secondary">до {formatWeight(milestone)}</span>
-    </>
+    </span>
   )
 }
 
@@ -220,16 +215,118 @@ function DialogFrame({
   )
 }
 
+type CommentTarget = {
+  type: 'milestone' | 'weight_entry'
+  key: string
+  title: string
+  subtitle: string
+}
+
+function CommentDialog({
+  target,
+  initialText,
+  onClose,
+  onSave,
+  onDelete,
+}: {
+  target: CommentTarget
+  initialText: string
+  onClose: () => void
+    onSave: (text: string) => Promise<void> | void
+    onDelete: () => Promise<void> | void
+  }) {
+    const [value, setValue] = useState(initialText)
+    const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    setValue(initialText)
+  }, [initialText, target.key, target.type])
+
+  const trimmed = value.trim()
+
+  return (
+    <DialogFrame className="comment-dialog" onClose={onClose}>
+      {(requestClose) => (
+        <form
+          onSubmit={async (event) => {
+            event.preventDefault()
+            if (submitting) {
+              return
+            }
+
+            setSubmitting(true)
+
+            try {
+              if (trimmed) {
+                await onSave(trimmed)
+              } else {
+                await onDelete()
+              }
+
+              requestClose()
+            } finally {
+              setSubmitting(false)
+            }
+          }}
+        >
+          <button className="close" type="button" onClick={requestClose} aria-label="Закрыть" disabled={submitting}>
+            ×
+          </button>
+          <label>КОММЕНТАРИЙ</label>
+          <h1>{target.title}</h1>
+          <p className="comment-dialog-subtitle">{target.subtitle}</p>
+          <textarea
+            autoFocus
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            placeholder="Добавьте комментарий..."
+          />
+          <div className="comment-dialog-actions">
+            <button
+                className="secondary"
+                type="button"
+                onClick={async () => {
+                  if (submitting) {
+                    return
+                  }
+
+                  setSubmitting(true)
+
+                  try {
+                    await onDelete()
+                    requestClose()
+                  } finally {
+                    setSubmitting(false)
+                  }
+                }}
+                disabled={submitting || (!trimmed && initialText.trim().length === 0)}
+              >
+                Удалить
+              </button>
+              <button className="primary" type="submit" disabled={submitting}>
+                Сохранить
+              </button>
+          </div>
+        </form>
+      )}
+    </DialogFrame>
+  )
+}
+
 function Layout({
   screen,
   setScreen,
   children,
   onAdd,
+  shellVariant = 'default',
+  headerTitle = '',
 }: {
   screen: Screen
   setScreen: (value: Screen) => void
   children: React.ReactNode
   onAdd: () => void
+  shellVariant?: 'default' | 'plateau'
+  headerTitle?: string
 }) {
   const brandedHeader = screen === 'overview'
   const mainRef = useRef<HTMLElement>(null)
@@ -267,13 +364,28 @@ function Layout({
 
   return (
     <>
-      {brandedHeader ? (
+      {brandedHeader && shellVariant === 'default' ? (
         <header className="app-header app-header-brand">
-          <img className="brand-mark brand-logo" src="/brand-logo.png" alt="?????????????? ?????????? 40" data-brand-mark={BRAND_PLACEHOLDER_MARK} />
+          <img className="brand-mark brand-logo" src="/brand-logo.png" alt="Логотип Минус 40" data-brand-mark={BRAND_PLACEHOLDER_MARK} />
+        </header>
+      ) : brandedHeader && shellVariant === 'plateau' ? (
+        <header className="app-header app-header-plateau">
+          <h1 className="app-header-title app-header-title-plateau">{headerTitle}</h1>
         </header>
       ) : null}
-      <main ref={mainRef} className={brandedHeader ? 'main-branded' : 'main-plain'}>{children}</main>
-      {screen === 'overview' && (
+      <main
+        ref={mainRef}
+        className={
+          screen === 'settings'
+            ? 'main-plain main-settings'
+            : brandedHeader
+              ? 'main-branded'
+              : 'main-plain'
+        }
+      >
+        {children}
+      </main>
+      {screen === 'overview' && shellVariant === 'default' && (
         <button
           className="fab"
           onClick={() => {
@@ -285,34 +397,14 @@ function Layout({
           +
         </button>
       )}
-      <nav>
-        {(['overview', 'history', 'graph', 'settings'] as Screen[]).map((item) => (
-          <button
-            key={item}
-            className={screen === item ? 'active' : ''}
-            aria-label={
-              {
-                overview: 'Обзор',
-                history: 'История',
-                graph: 'График',
-                settings: 'Цели',
-              }[item]
-            }
-            onClick={() => {
-              triggerSelection()
-              setScreen(item)
-            }}
-          >
-            <NavIcon screen={item} active={screen === item} />
-            {{ overview: 'Обзор', history: 'История', graph: 'График', settings: 'Цели' }[item]}
-          </button>
-        ))}
-      </nav>
+      <AppNav screen={screen} onChange={setScreen} />
     </>
   )
 }
 
-function Overview({ state }: { state: AppState }) {
+function Overview({ state, stageOverride, nowOverride }: { state: AppState; stageOverride?: 'cut' | 'plateau'; nowOverride?: number }) {
+  const now = nowOverride ?? Date.now()
+  const stage = stageOverride ?? currentStage(state, now)
   const current = currentWeight(state)
   const milestone = nextMilestone(state)
   const forecast = forecastDaysToMilestone(state)
@@ -324,6 +416,7 @@ function Overview({ state }: { state: AppState }) {
   const progressFrom = useRef(milestoneProgress)
   const progressDisplayed = useRef(milestoneProgress)
   const lostTotal = totalLost(state)
+  const journeyDays = daysInJourney(state.entries)
   const isAboveStart = lostTotal < 0
 
   useEffect(() => {
@@ -354,6 +447,55 @@ function Overview({ state }: { state: AppState }) {
       },
     })
   }, [milestoneProgress])
+
+  if (stage === 'plateau') {
+    const bounds = plateauBounds(state)
+    const fillCount = plateauFillCount(state, now)
+
+    return (
+      <div className="plateau-screen">
+        <div className="plateau-main">
+          <section className="plateau-stage">
+            <div className="plateau-composition">
+              <div className="plateau-metrics plateau-metrics-top">
+                <strong className="plateau-number plateau-number-top">
+                  <span className="plateau-approx">≈</span>
+                  {bounds.top === null ? '—' : `${bounds.top.toFixed(1)}`} <small>кг</small>
+                </strong>
+              </div>
+
+              <div className="plateau-current">
+                <span className="plateau-current-label">Сегодня</span>
+                <strong className="plateau-current-number">{current === null ? '—' : `${current.toFixed(1)} кг`}</strong>
+              </div>
+
+              <div className="plateau-rail" aria-label="Шкала плато">
+                {Array.from({ length: 7 }).map((_, index) => {
+                  const active = index < fillCount
+                  const roundedTop = index === 6
+                  const roundedBottom = index === 0
+
+                  return (
+                    <span
+                      key={index}
+                      className={`plateau-segment${active ? ' is-active' : ''}${roundedTop ? ' is-top' : ''}${roundedBottom ? ' is-bottom' : ''}`}
+                      aria-hidden="true"
+                    />
+                  )
+                })}
+              </div>
+
+              <div className="plateau-metrics plateau-metrics-bottom">
+                <strong className="plateau-number plateau-number-bottom">
+                  {bounds.bottom === null ? '—' : `${bounds.bottom.toFixed(1)}`} <small>кг</small>
+                </strong>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="stack">
@@ -388,16 +530,18 @@ function Overview({ state }: { state: AppState }) {
             <img className="forecast-icon" src={forecastCalendarIcon} alt="" />
           </span>
           <em>
-            Прогноз
-            <b>{renderForecastText(forecast, milestone)}</b>
+            <b>Прогноз</b>
+            {renderForecastText(forecast, milestone)}
           </em>
         </span>
       </section>
 
       <section className="total-card">
         <label>{isAboveStart ? 'ИЗМЕНЕНИЕ ОТ СТАРТА' : 'ВСЕГО СБРОШЕНО'}</label>
-        <strong>
-          {(isAboveStart ? Math.abs(lostTotal) : lostTotal).toFixed(1)} <small>кг</small>
+        <strong className="total-card-main">
+          <span className="total-card-main-value">{(isAboveStart ? Math.abs(lostTotal) : lostTotal).toFixed(1)}</span>
+          <small className="total-card-main-unit">кг</small>
+          <em className="total-card-main-duration">{`за ${formatJourneyDuration(journeyDays)}`}</em>
         </strong>
         <p>{isAboveStart ? `Выше стартового веса ${formatWeight(state.startWeight)}` : `С момента начала ${formatWeight(state.startWeight)}`}</p>
       </section>
@@ -405,7 +549,15 @@ function Overview({ state }: { state: AppState }) {
   )
 }
 
-function History({ state, onDelete }: { state: AppState; onDelete: (id: string) => void }) {
+function History({
+  state,
+  onDelete,
+  onOpenComment,
+}: {
+  state: AppState
+  onDelete: (id: string) => void
+  onOpenComment: (entryId: string, date: number) => void
+}) {
   const [range, setRange] = useState<HistoryRange>('week')
   const [filter, setFilter] = useState<'all' | 'loss' | 'gain'>('all')
   const extremes = historyExtremes(state.entries, range)
@@ -524,6 +676,17 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
                 <span className="history-date">
                   <b>{formatDate(entry.date, true)}</b>
                 </span>
+                <button
+                  type="button"
+                  className="history-comment-trigger"
+                  aria-label={`Комментарий к дню ${formatDate(entry.date, true)}`}
+                  onClick={() => {
+                    triggerImpact('light')
+                    onOpenComment(entry.id, entry.date)
+                  }}
+                >
+                  ...
+                </button>
                 <strong>{formatWeight(entry.weight)}</strong>
                 <em className={`history-delta ${trendClass}`} aria-label={trendLabel}>
                   <span>{delta === null ? '\u0421\u0442\u0430\u0440\u0442' : formatDelta(delta)}</span>
@@ -549,18 +712,20 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
 function Settings({
   state,
   onSave,
+  onOpenComment,
 }: {
   state: AppState
   onSave: (start: number, target: number) => void
+  onOpenComment: (targetType: CommentTargetType, targetKey: string) => void
 }) {
-  return <GoalsScreen state={state} onSave={onSave} />
+  return <GoalsScreen state={state} onSave={onSave} onOpenComment={onOpenComment} />
 }
 
 function GraphScreen({ state }: { state: AppState }) {
   const chartWidth = 300
   const chartHeight = 164
   const chartEdgePadding = 14
-  const [range, setRange] = useState<ChartRange>('month')
+  const [range, setRange] = useState<ChartRange>('week')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const filteredEntries = filterEntriesByRange(state.entries, range)
   const chronologicalEntries = [...filteredEntries].reverse()
@@ -570,48 +735,23 @@ function GraphScreen({ state }: { state: AppState }) {
   }))
   const averageChange = averagePeriodChange(filteredEntries)
   const totalChange = filteredEntries.length >= 2 ? filteredEntries[0].weight - filteredEntries[filteredEntries.length - 1].weight : null
-  const activeIndex = selectedIndex ?? Math.max(points.length - 1, 0)
-  const activePoint = points[activeIndex] ?? null
-  const activeEntry = chronologicalEntries[activeIndex]
-  const previousEntry = chronologicalEntries[activeIndex - 1]
-  const activeDelta = activeEntry ? compareEntries(activeEntry, previousEntry) : null
+  const activeIndex = selectedIndex
+  const activePoint = activeIndex !== null ? points[activeIndex] ?? null : null
+  const activeEntry = activeIndex !== null ? chronologicalEntries[activeIndex] : null
+  const activeEntryIndexInState = activeEntry ? state.entries.findIndex((entry) => entry.id === activeEntry.id) : -1
+  const previousEntry =
+    activeEntryIndexInState >= 0
+      ? state.entries[activeEntryIndexInState + 1] ?? null
+      : activeIndex !== null
+        ? chronologicalEntries[activeIndex - 1] ?? null
+        : null
+  const activeDelta = activeEntry && previousEntry ? compareEntries(activeEntry, previousEntry) : null
   const longestStreak = longestLossStreak(filteredEntries)
-  const realWeeklyRate = weeklyChange(filteredEntries)
-  const provisionalWeeklyRate = averageChange !== null ? averageChange * 7 : null
-  const weeklyRate = realWeeklyRate ?? provisionalWeeklyRate
-  const isWeeklyRateProvisional = realWeeklyRate === null && provisionalWeeklyRate !== null
   const monthChange = monthlyCalendarChange(state.entries)
   const journeyDays = daysInJourney(state.entries)
-  const activeBubbleLeft = activePoint ? clamp((activePoint.x / chartWidth) * 100, 20, 80) : 50
   const activeBubbleTop = activePoint ? clamp((activePoint.y / chartHeight) * 100 - 8, 16, 78) : 24
-  const axisItems =
-    chronologicalEntries.length <= 7
-      ? chronologicalEntries.map((entry, index) => ({
-          key: entry.id,
-          index,
-          label: formatDate(entry.date, true),
-          left: `${(index / Math.max(chronologicalEntries.length - 1, 1)) * 100}%`,
-        }))
-      : [
-          {
-            key: chronologicalEntries[0]?.id ?? 'start',
-            index: 0,
-            label: formatDate(chronologicalEntries[0].date, true),
-            left: '0%',
-          },
-          {
-            key: chronologicalEntries[Math.floor((chronologicalEntries.length - 1) / 2)]?.id ?? 'middle',
-            index: Math.floor((chronologicalEntries.length - 1) / 2),
-            label: formatDate(chronologicalEntries[Math.floor((chronologicalEntries.length - 1) / 2)].date, true),
-            left: '50%',
-          },
-          {
-            key: chronologicalEntries[chronologicalEntries.length - 1]?.id ?? 'end',
-            index: chronologicalEntries.length - 1,
-            label: formatDate(chronologicalEntries[chronologicalEntries.length - 1].date, true),
-            left: '100%',
-          },
-        ]
+  const axisLabelY = chartHeight + 22
+  const graphDensityClass = range === 'week' ? 'is-week' : range === 'month' ? 'is-month' : 'is-year'
 
   return (
     <div className="graph">
@@ -650,7 +790,7 @@ function GraphScreen({ state }: { state: AppState }) {
           </strong>
         </article>
       </section>
-      <section className="big-chart big-chart-graph">
+      <section className={`big-chart big-chart-graph ${graphDensityClass}`}>
         {points.length > 1 ? (
           <>
             <div className="graph-plot">
@@ -658,16 +798,18 @@ function GraphScreen({ state }: { state: AppState }) {
                 <div
                   className="graph-popover"
                   aria-live="polite"
-                  style={{ left: `${activeBubbleLeft}%`, top: `${activeBubbleTop}%` }}
+                  style={{ left: `${clamp((activePoint.x / chartWidth) * 100, 20, 80)}%`, top: `${activeBubbleTop}%` }}
                 >
                   <b>{formatDate(activePoint.date, true)}</b>
-                  <span>{formatWeight(activePoint.weight)}</span>
-                  <em className={activeDelta !== null && activeDelta > 0 ? 'red' : activeDelta !== null && activeDelta < 0 ? 'orange' : ''}>
-                    {activeDelta === null ? 'Старт' : `${formatDelta(activeDelta)} кг`}
-                  </em>
+                  <span>{formatWeight(activeEntry?.weight ?? activePoint.weight)}</span>
+                  {activeDelta !== null ? (
+                    <em className={activeDelta > 0 ? 'red' : activeDelta < 0 ? 'orange' : ''}>
+                      {`${formatDelta(activeDelta)} кг`}
+                    </em>
+                  ) : null}
                 </div>
               ) : null}
-              <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
+              <svg viewBox={`0 0 ${chartWidth} ${chartHeight + 40}`} preserveAspectRatio="none">
                 <line x1="0" x2={chartWidth} y1="36" y2="36" />
                 <line x1="0" x2={chartWidth} y1="90" y2="90" />
                 <line x1="0" x2={chartWidth} y1="144" y2="144" />
@@ -689,29 +831,33 @@ function GraphScreen({ state }: { state: AppState }) {
                 {points.map((point, index) => (
                   <g key={point.date} className="graph-point-hit" onClick={() => setSelectedIndex(index)}>
                     <circle cx={point.x} cy={point.y} r="16" className="point-hit-area" />
-                    {index === activeIndex ? <circle cx={point.x} cy={point.y} r="12" className="point-active-ring" /> : null}
+                    {index === activeIndex ? <circle cx={point.x} cy={point.y} r={range === 'week' ? '12' : range === 'month' ? '10' : '9'} className="point-active-ring" /> : null}
                     <circle
                       cx={point.x}
                       cy={point.y}
-                      r={index === activeIndex ? '8' : '7'}
+                      r={
+                        range === 'week'
+                          ? index === activeIndex ? '8' : '7'
+                          : range === 'month'
+                            ? index === activeIndex ? '6' : '5'
+                            : index === activeIndex ? '5.5' : '4.5'
+                      }
                       className={index === activeIndex ? 'point-active' : 'point'}
                     />
                   </g>
                 ))}
+                {points.map((point, index) => (
+                  <g
+                    key={`label-${point.date}`}
+                    className={`graph-axis-label${index === activeIndex ? ' active' : ''}`}
+                    onClick={() => setSelectedIndex(index)}
+                  >
+                    <text x={point.x} y={axisLabelY} textAnchor="middle">
+                      {new Intl.DateTimeFormat('ru-RU', { day: 'numeric' }).format(new Date(point.date))}
+                    </text>
+                  </g>
+                ))}
               </svg>
-            </div>
-            <div className="graph-axis-labels" role="list" aria-label={'Даты замеров на графике'}>
-              {axisItems.map((item) => (
-                <button
-                  key={item.key}
-                  type="button"
-                  className={item.index === activeIndex ? 'active' : ''}
-                  style={{ left: item.left }}
-                  onClick={() => setSelectedIndex(item.index)}
-                >
-                  {item.label}
-                </button>
-              ))}
             </div>
           </>
         ) : (
@@ -721,22 +867,26 @@ function GraphScreen({ state }: { state: AppState }) {
       <section className="graph-insights" aria-label={'Аналитика периода'}>
         <article>
           <small>{'Серия снижения'}</small>
-          <strong>{longestStreak === null ? '—' : `${longestStreak} ${pluralizeDays(longestStreak)}`}</strong>
+          <strong>
+            {longestStreak === null ? '—' : `${longestStreak} ${pluralizeDays(longestStreak)}`}
+          </strong>
           <p>{longestStreak === null ? 'Нужно больше данных' : 'Подряд без набора'}</p>
         </article>
         <article>
-          <small>{'Средняя скорость'}</small>
-          <strong className={weeklyRate !== null && weeklyRate > 0 ? 'red' : 'orange'}>
-            {weeklyRate === null ? '—' : `${formatDelta(weeklyRate)} кг`}
+          <small>{'Средний темп'}</small>
+          <strong className={averageChange !== null && averageChange > 0 ? 'red' : 'orange'}>
+            {averageChange === null ? '—' : `${formatDelta(averageChange)} кг/д`}
           </strong>
-          <p>{isWeeklyRateProvisional ? 'Предварительно за неделю' : 'За неделю в среднем'}</p>
+          <p>{averageChange === null ? 'Нужно больше данных' : 'В среднем за период'}</p>
         </article>
         <article>
           <small>{'За месяц'}</small>
-          <strong className={monthChange !== null && monthChange > 0 ? 'red' : 'orange'}>
+          <strong className={monthChange !== null && monthChange > 0 ? 'red' : monthChange !== null && monthChange < 0 ? 'orange' : ''}>
             {monthChange === null ? '—' : `${formatDelta(monthChange)} кг`}
           </strong>
-          <p>{monthChange === null ? 'Нужно больше данных' : monthChange > 0 ? 'Регресс' : 'Прогресс'}</p>
+          <p className={monthChange !== null && monthChange < 0 ? 'orange' : monthChange !== null && monthChange > 0 ? 'red' : ''}>
+            {monthChange === null ? 'Нужно больше данных' : monthChange > 0 ? 'Регресс' : 'Прогресс'}
+          </p>
         </article>
         <article>
           <small>{'Дней в пути'}</small>
@@ -768,8 +918,8 @@ function AddDialog({ onClose, onAdd }: { onClose: () => void; onAdd: (value: num
             save(requestClose)
           }}
         >
-          <button className="close" type="button" onClick={requestClose}>
-            ?
+          <button className="close" type="button" onClick={requestClose} aria-label="Закрыть">
+            ×
           </button>
           <label>НОВЫЙ ЗАМЕР</label>
           <input
@@ -796,7 +946,9 @@ function MilestoneDialog({ value, onClose }: { value: number; onClose: () => voi
     <DialogFrame className="milestone-dialog" onClose={onClose}>
       {(requestClose) => (
         <>
-          <b>?</b>
+          <div className="milestone-dialog-badge">
+            <RoadmapNodeBadge kind="start" status="reached" icon="flag" />
+          </div>
           <label>РУБЕЖ ДОСТИГНУТ</label>
           <h1>{formatWeight(value)}</h1>
           <p>Отличная работа. Продолжайте в том же ритме.</p>
@@ -815,10 +967,22 @@ function MilestoneDialog({ value, onClose }: { value: number; onClose: () => voi
   )
 }
 
-export function AppUI({ state, onAdd, onDelete, onSettings, initialScreen = 'overview' }: Props) {
+export function AppUI({
+  state,
+  onAdd,
+  onDelete,
+  onSettings,
+  onGetComment,
+  onUpsertComment,
+  onDeleteComment,
+  initialScreen = 'overview',
+  stageOverride,
+  nowOverride,
+}: Props) {
   const [screen, setScreen] = useState<Screen>(initialScreen)
   const [adding, setAdding] = useState(false)
   const [reached, setReached] = useState<number | null>(null)
+  const [commentTarget, setCommentTarget] = useState<CommentTarget | null>(null)
 
   const add = (weight: number) => {
     const before = nextMilestone(state)
@@ -829,22 +993,57 @@ export function AppUI({ state, onAdd, onDelete, onSettings, initialScreen = 'ove
 
   const openAdd = () => setAdding(true)
 
+  const openMilestoneComment = (_targetType: CommentTargetType, targetKey: string) => {
+    const milestoneWeight = Number.parseFloat(targetKey)
+
+    setCommentTarget({
+      type: 'milestone',
+      key: targetKey,
+      title: Number.isFinite(milestoneWeight) ? `Рубеж ${formatWeight(milestoneWeight)}` : 'Рубеж',
+      subtitle: 'Нажмите, чтобы добавить или изменить комментарий.',
+    })
+  }
+
+  const openEntryComment = (entryId: string, date: number) => {
+    setCommentTarget({
+      type: 'weight_entry',
+      key: entryId,
+      title: 'Комментарий дня',
+      subtitle: formatDate(date, true),
+    })
+  }
+
   const view =
     screen === 'overview' ? (
-      <Overview state={state} />
+      <Overview state={state} stageOverride={stageOverride} nowOverride={nowOverride} />
     ) : screen === 'history' ? (
-      <History state={state} onDelete={onDelete} />
+      <History state={state} onDelete={onDelete} onOpenComment={openEntryComment} />
     ) : screen === 'graph' ? (
       <GraphScreen state={state} />
     ) : (
-      <Settings state={state} onSave={onSettings} />
+      <Settings state={state} onSave={onSettings} onOpenComment={openMilestoneComment} />
     )
 
   return (
-    <Layout screen={screen} setScreen={setScreen} onAdd={openAdd}>
+    <Layout
+      screen={screen}
+      setScreen={setScreen}
+      onAdd={openAdd}
+      shellVariant={stageOverride === 'plateau' && screen === 'overview' ? 'plateau' : 'default'}
+      headerTitle="Плато"
+    >
       <ScreenTransition screen={screen}>{view}</ScreenTransition>
       {adding && <AddDialog onClose={() => setAdding(false)} onAdd={add} />}
       {reached !== null && <MilestoneDialog value={reached} onClose={() => setReached(null)} />}
+      {commentTarget !== null ? (
+        <CommentDialog
+          target={commentTarget}
+          initialText={onGetComment(commentTarget.type, commentTarget.key)?.text ?? ''}
+          onClose={() => setCommentTarget(null)}
+          onSave={(text) => onUpsertComment(commentTarget.type, commentTarget.key, text)}
+          onDelete={() => onDeleteComment(commentTarget.type, commentTarget.key)}
+        />
+      ) : null}
     </Layout>
   )
 }

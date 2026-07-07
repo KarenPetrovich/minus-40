@@ -6,10 +6,24 @@ type WeightEntry = {
   weight: number
 }
 
+type Comment = {
+  id: string
+  userId: string
+  targetType: 'milestone' | 'weight_entry'
+  targetKey: string
+  text: string
+  createdAt: number
+  updatedAt: number
+}
+
 type AppState = {
   startWeight: number
   targetWeight: number
   entries: WeightEntry[]
+  comments?: Comment[]
+  plateauStartedAt?: number | null
+  lastConfirmedMilestone?: number | null
+  plateauStartWeight?: number | null
 }
 
 type BootstrapPayload = {
@@ -61,6 +75,25 @@ function normalizeState(value: AppState): AppState {
   return {
     startWeight: Number(value.startWeight),
     targetWeight: Number(value.targetWeight),
+    plateauStartedAt: Number.isFinite(value.plateauStartedAt) ? Number(value.plateauStartedAt) : null,
+    lastConfirmedMilestone: Number.isFinite(value.lastConfirmedMilestone) ? Number(value.lastConfirmedMilestone) : null,
+    plateauStartWeight: Number.isFinite(value.plateauStartWeight) ? Number(value.plateauStartWeight) : null,
+    comments: [...(value.comments ?? [])]
+      .filter(
+        (comment) =>
+          typeof comment.id === 'string' &&
+          typeof comment.userId === 'string' &&
+          (comment.targetType === 'milestone' || comment.targetType === 'weight_entry') &&
+          typeof comment.targetKey === 'string' &&
+          typeof comment.text === 'string' &&
+          Number.isFinite(comment.createdAt) &&
+          Number.isFinite(comment.updatedAt),
+      )
+      .map((comment) => ({
+        ...comment,
+        text: comment.text.trim(),
+      }))
+      .filter((comment) => comment.text.length > 0),
     entries: [...value.entries]
       .filter((entry) => typeof entry.id === 'string' && Number.isFinite(entry.date) && Number.isFinite(entry.weight))
       .sort((left, right) => right.date - left.date)
@@ -164,14 +197,39 @@ async function validateTelegramInitData(initData: string, botToken: string): Pro
 function mapDbState(user: {
   start_weight: number
   target_weight: number
+  plateau_started_at: number | null
+  last_confirmed_milestone: number | null
+  plateau_start_weight: number | null
 }, entries: Array<{
   id: string
   measured_at: string
   weight: number
+}>, comments: Array<{
+  id: string
+  user_id: string
+  target_type: 'milestone' | 'weight_entry'
+  target_key: string
+  text: string
+  created_at: string
+  updated_at: string
 }>): AppState {
   return {
     startWeight: Number(user.start_weight),
     targetWeight: Number(user.target_weight),
+    plateauStartedAt: Number.isFinite(user.plateau_started_at) ? Number(user.plateau_started_at) : null,
+    lastConfirmedMilestone: Number.isFinite(user.last_confirmed_milestone) ? Number(user.last_confirmed_milestone) : null,
+    plateauStartWeight: Number.isFinite(user.plateau_start_weight) ? Number(user.plateau_start_weight) : null,
+    comments: comments
+      .map((comment) => ({
+        id: comment.id,
+        userId: comment.user_id,
+        targetType: comment.target_type,
+        targetKey: comment.target_key,
+        text: comment.text.trim(),
+        createdAt: new Date(comment.created_at).getTime(),
+        updatedAt: new Date(comment.updated_at).getTime(),
+      }))
+      .filter((comment) => Number.isFinite(comment.createdAt) && Number.isFinite(comment.updatedAt) && comment.text.length > 0),
     entries: entries
       .map((entry) => ({
         id: entry.id,
@@ -199,6 +257,51 @@ async function replaceEntries(
   })
 
   if (error) {
+    throw error
+  }
+}
+
+async function replaceComments(
+  db: ReturnType<typeof createClient>,
+  userId: string,
+  comments: Comment[],
+): Promise<void> {
+  const { error: deleteError } = await db
+    .from('comments')
+    .delete()
+    .eq('user_id', userId)
+
+  if (deleteError) {
+    if (deleteError.code === '42P01') {
+      return
+    }
+
+    throw deleteError
+  }
+
+  if (comments.length === 0) {
+    return
+  }
+
+  const payload = comments.map((comment) => ({
+    id: comment.id,
+    user_id: userId,
+    target_type: comment.targetType,
+    target_key: comment.targetKey,
+    text: comment.text.trim(),
+    created_at: new Date(comment.createdAt).toISOString(),
+    updated_at: new Date(comment.updatedAt).toISOString(),
+  }))
+
+  const { error } = await db
+    .from('comments')
+    .insert(payload)
+
+  if (error) {
+    if (error.code === '42P01') {
+      return
+    }
+
     throw error
   }
 }
@@ -231,9 +334,33 @@ async function loadCloudState(
     throw entriesError
   }
 
+  let comments: Array<{
+    id: string
+    user_id: string
+    target_type: 'milestone' | 'weight_entry'
+    target_key: string
+    text: string
+    created_at: string
+    updated_at: string
+  }> = []
+
+  const { data: commentRows, error: commentsError } = await db
+    .from('comments')
+    .select('id, user_id, target_type, target_key, text, created_at, updated_at')
+    .eq('user_id', user.id)
+    .order('updated_at', { ascending: false })
+
+  if (commentsError) {
+    if (commentsError.code !== '42P01') {
+      throw commentsError
+    }
+  } else {
+    comments = commentRows ?? []
+  }
+
   return {
     user,
-    state: mapDbState(user, entries ?? []),
+    state: mapDbState(user, entries ?? [], comments),
   }
 }
 
@@ -242,7 +369,15 @@ async function upsertUserProfile(
   telegramUser: TelegramUser,
   state: AppState,
   markMigrated: boolean,
-): Promise<{ id: string; start_weight: number; target_weight: number; migrated_at: string | null }> {
+): Promise<{
+  id: string
+  start_weight: number
+  target_weight: number
+  plateau_started_at: number | null
+  last_confirmed_milestone: number | null
+  plateau_start_weight: number | null
+  migrated_at: string | null
+}> {
   const payload = {
     telegram_user_id: telegramUser.id,
     telegram_username: telegramUser.username ?? null,
@@ -250,6 +385,9 @@ async function upsertUserProfile(
     telegram_last_name: telegramUser.last_name ?? null,
     start_weight: state.startWeight,
     target_weight: state.targetWeight,
+    plateau_started_at: state.plateauStartedAt ?? null,
+    last_confirmed_milestone: state.lastConfirmedMilestone ?? null,
+    plateau_start_weight: state.plateauStartWeight ?? null,
     last_seen_at: new Date().toISOString(),
   }
 
@@ -261,7 +399,7 @@ async function upsertUserProfile(
     }, {
       onConflict: 'telegram_user_id',
     })
-    .select('id, start_weight, target_weight, migrated_at')
+    .select('id, start_weight, target_weight, plateau_started_at, last_confirmed_milestone, plateau_start_weight, migrated_at')
     .single()
 
   if (error) {
@@ -297,8 +435,9 @@ async function handleBootstrap(
   }
 
   if (normalizedLegacy) {
-    const user = await upsertUserProfile(db, telegramUser, normalizedLegacy, true)
-    await replaceEntries(db, user.id, normalizedLegacy.entries, 'migration')
+  const user = await upsertUserProfile(db, telegramUser, normalizedLegacy, true)
+  await replaceEntries(db, user.id, normalizedLegacy.entries, 'migration')
+  await replaceComments(db, user.id, normalizedLegacy.comments ?? [])
 
     return {
       state: normalizedLegacy,
@@ -316,6 +455,9 @@ async function handleBootstrap(
   const seededState: AppState = {
     ...DEFAULT_SETTINGS,
     entries: [],
+    plateauStartedAt: null,
+    lastConfirmedMilestone: null,
+    plateauStartWeight: null,
   }
 
   const user = await upsertUserProfile(db, telegramUser, seededState, false)
@@ -339,6 +481,7 @@ async function handleReplaceState(
   const normalizedState = normalizeState(nextState)
   const user = await upsertUserProfile(db, telegramUser, normalizedState, false)
   await replaceEntries(db, user.id, normalizedState.entries, 'manual')
+  await replaceComments(db, user.id, normalizedState.comments ?? [])
 
   return {
     state: normalizedState,

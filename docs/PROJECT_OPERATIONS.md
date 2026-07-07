@@ -1,133 +1,162 @@
 # Project Operations
 
-## Purpose
+## Start Point
 
-This is the main operational document for day-to-day work.
+Read `docs/CODEX_START.md` before this file.
 
-If the goal is to quickly understand:
+This document is for commands, local environment, deployment, and repository hygiene.
 
-- what stage the project is in;
-- what we are doing right now;
-- how deployment works;
-- what is intentionally postponed;
-- how to keep the repository clean;
+## Local Run
 
-start here.
+```bash
+npm run dev
+```
 
-## Current Stage
+Open:
 
-- Active roadmap stage: Stage 1
-- Product scope: MVP for weight tracking inside Telegram Mini App
-- Current implementation: Supabase-backed cloud sync with local cache and legacy migration support
+```text
+http://127.0.0.1:5173/dev-preview
+```
 
-## Current Focus
+Use `/dev-preview` as the first visual workspace for UI work. The normal loop is:
 
-As of June 27, 2026, the active focus is:
+```text
+change -> F5 -> evaluate
+```
 
-1. stabilizing the shipped Supabase sync baseline;
-2. keeping Telegram-validated cloud access host-independent;
-3. keeping the local database backup mirror in sync with schema changes;
-4. removing temporary diagnostics and duplicate sources of truth after verification.
+Do not deploy Vercel for `/dev-preview` work unless the user explicitly asks.
 
-## Working Efficiency Rules
+## Build
 
-Keep work narrow, search before reading, and verify at the right scale.
+```bash
+npm run build
+```
 
-- search first, then open only the relevant fragment;
-- do not reread long docs or skills if the needed context is already gathered;
-- bundle small UI tweaks into one pass;
-- use reload/spot checks for tiny style changes;
-- reserve full builds for behavior, asset, structure, or release changes.
-- prefer the local preview laboratory at `http://127.0.0.1:5173/preview` for UI iteration;
-- avoid exchanging screenshots unless they are strictly needed for a bug report or final verification;
-- treat the preview page as the primary visual feedback loop to save time and token budget.
+Run this after documentation changes requested by the user, shared logic changes, UI changes, env/config changes, or before deploy.
 
-## Explicitly Deferred
+## Dev Preview Data Refresh
 
-These items are important, but are not the current implementation focus:
+`/dev-preview` reads local browser cache first:
 
-1. realtime push sync beyond refresh/reload based cloud reconciliation;
-2. final logo selection and replacement of the temporary square-in-square mark;
-3. broader architecture expansion beyond the current MVP needs.
+```text
+minus40.cloud-cache
+```
 
-## Current Product State
+The `Обновить данные` button can use a local dev-only Vite endpoint:
 
-Already working:
+```text
+GET /__dev/cloud-snapshot
+```
 
-- adding weight entries;
-- storing entries locally as legacy/cache state;
-- Supabase cloud bootstrap and refresh;
-- overview screen;
-- history screen;
-- graph screen;
-- goals/settings screen;
-- Telegram Web App initialization;
-- mobile launch path through Netlify + Telegram.
+That endpoint assembles a read-only snapshot from:
 
-In progress:
+```text
+Supabase app_users + weight_entries + comments
+```
 
-- keeping the local database backup artifacts under `C:\Future\Минус40_архив\database\minus-40` aligned with schema changes;
-- cleaning up temporary diagnostics after verification passes.
+Then the app writes:
 
-## Deployment Workflow
+- `minus40.cloud-cache`;
+- `minus40.cloud-meta`.
 
-- Primary deployment is Vercel.
-- Backup deployment remains Netlify.
-- Vercel should auto-build from GitHub on each push to `main`.
-- This project is a Vite SPA, so `vercel.json` keeps all routes rewritten to `index.html`.
+Rules:
 
-### Host Transition Notes
+- refresh only by button;
+- no polling;
+- no auto-refresh;
+- no refresh on route render;
+- no Supabase writes from dev-preview refresh.
 
-- Telegram WebView is sensitive to root-page overscroll, so scrolling must stay inside the app container, not at the `body` level.
-- Different hosts still mean different browser origins, so browser local storage is not automatically shared between Netlify and Vercel.
-- Cloud sync stays independent from the frontend host and relies only on Supabase plus Telegram identity validation.
+## Local Env
 
-## Repository Hygiene Rule
+`.env.local` is required only for local dev snapshot refresh.
 
-Temporary and obsolete files must not stay in the main project root.
+Expected keys:
 
-Archive location:
+```env
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_PUBLISHABLE_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+DEV_SNAPSHOT_TOKEN=...
+```
 
-- `C:\Future\Минус40_архив`
+Safety:
 
-Move there:
+- never print secret values;
+- never commit `.env`, `.env.local`, `.env.vercel.production`, or any `.env*` secret file;
+- future project archives must exclude `.env*`;
+- `.env.example` is allowed because it contains placeholders only.
 
-- temporary screenshots;
+## CLI Checks
+
+CLI access is usually available in this project, but verify the current session before using a tool:
+
+```bash
+git status
+gh --version
+vercel --version
+supabase --version
+```
+
+After checking, use the tools that are available. If a tool is missing or unauthenticated, say exactly what is missing and use the next safe path.
+
+## Git Workflow
+
+Before commit or deploy:
+
+```bash
+git status
+git diff --stat
+npm run build
+```
+
+Do not commit broad accidental changes. Keep commits scoped to user-approved work.
+
+## Vercel Deploy
+
+Production host:
+
+```text
+https://minus-40.vercel.app
+```
+
+Deploy only when the user asks.
+
+Recommended preflight:
+
+```bash
+git status
+npm run build
+vercel --version
+```
+
+If GitHub/Vercel integration is expected, verify instead of assuming it. If CLI deploy is needed, use the project's current Vercel setup and report the published URL and commit hash.
+
+After deploy, verify:
+
+- production URL loads;
+- ordinary app opens, not dev-preview;
+- core screens render;
+- no build or publish errors;
+- Telegram Mini App URL still points to the intended production URL.
+
+## Repository Hygiene
+
+Keep the project root clean.
+
+Do not keep these in active project folders:
+
+- temporary archives;
+- screenshots;
+- raw external exports after decisions are integrated;
 - logs;
-- raw external exports not used as the current source of truth;
-- imported design/export folders after their decisions are integrated into code;
-- generated artifacts that can be rebuilt;
-- obsolete project documents that were replaced by newer canonical docs.
+- build output;
+- obsolete research dumps.
 
-## Source Of Truth Priority
+Archive location for temporary material:
 
-If there is a conflict, use this order:
+```text
+C:\Future\Минус40_архив
+```
 
-1. current user instructions;
-2. `docs/DECISION_LOG.md`;
-3. `docs/PROJECT_CONTEXT.md`;
-4. `docs/PROJECT_OPERATIONS.md`;
-5. `docs/CURRENT_DESIGN_SYSTEM.md`;
-6. `docs/SKILLS_GUIDE.md`;
-7. `docs/ROADMAP.md`.
-
-## Read Order For New Sessions
-
-1. `docs/PROJECT_MAP.md`
-2. `docs/PROJECT_OPERATIONS.md`
-3. `docs/PROJECT_CONTEXT.md`
-4. `docs/CURRENT_DESIGN_SYSTEM.md`
-5. `docs/SKILLS_GUIDE.md`
-
-When starting work, treat the efficiency rules in this file as active default operating rules, not optional advice.
-
-## Cleanup Trigger
-
-When the user says "проведи чистку", it means:
-
-1. move temporary and obsolete files out of the project root and active folders into `C:\Future\Минус40_архив`;
-2. check whether active documents still reflect reality;
-3. reduce duplicate sources of truth;
-4. leave only live project files in `C:\Future\Минус 40`.
-- use `http://127.0.0.1:5173/preview` as the first-stop visual lab for UI changes;
-- avoid screenshot ping-pong unless a bug specifically requires it.
+Never include `node_modules`, `dist`, `.git`, `.vercel`, `.env*`, logs, or screenshots in handoff archives unless the user explicitly asks for one of them.

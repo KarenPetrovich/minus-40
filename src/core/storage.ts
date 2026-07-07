@@ -1,4 +1,4 @@
-import type { AppState } from './types'
+import type { AppState, Comment, CommentTargetType } from './types'
 
 const LEGACY_KEY = 'minus40.app-state'
 const LEGACY_BACKUP_KEY = 'minus40.app-backup'
@@ -11,15 +11,49 @@ export type CloudMeta = {
   lastSyncedAt: number | null
 }
 
+export type CloudSnapshot = {
+  cache: AppState
+  meta: CloudMeta
+}
+
 export const DEFAULT_STATE: AppState = {
   startWeight: 150.5,
   targetWeight: 110,
+  comments: [],
   entries: [
     { id: 'restore-2026-06-27', date: Date.parse('2026-06-27T12:00:00+03:00'), weight: 145.7 },
     { id: 'restore-2026-06-26', date: Date.parse('2026-06-26T12:00:00+03:00'), weight: 146.4 },
     { id: 'restore-2026-06-25', date: Date.parse('2026-06-25T12:00:00+03:00'), weight: 148.2 },
     { id: 'restore-2026-06-24', date: Date.parse('2026-06-24T12:00:00+03:00'), weight: 150.5 },
   ],
+}
+
+function normalizeComments(value: unknown): Comment[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value
+    .filter(
+      (comment: unknown) =>
+        typeof (comment as { id?: unknown })?.id === 'string' &&
+        typeof (comment as { userId?: unknown })?.userId === 'string' &&
+        ((comment as { targetType?: unknown })?.targetType === 'milestone' || (comment as { targetType?: unknown })?.targetType === 'weight_entry') &&
+        typeof (comment as { targetKey?: unknown })?.targetKey === 'string' &&
+        typeof (comment as { text?: unknown })?.text === 'string' &&
+        Number.isFinite((comment as { createdAt?: unknown }).createdAt) &&
+        Number.isFinite((comment as { updatedAt?: unknown }).updatedAt),
+    )
+    .map((comment) => ({
+      id: comment.id,
+      userId: comment.userId,
+      targetType: comment.targetType as CommentTargetType,
+      targetKey: comment.targetKey,
+      text: comment.text.trim(),
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt,
+    }))
+    .filter((comment) => comment.text.length > 0)
 }
 
 const DEFAULT_META: CloudMeta = {
@@ -67,6 +101,16 @@ export function normalizeState(value: unknown): AppState {
   return {
     startWeight: (value as AppState).startWeight,
     targetWeight: (value as AppState).targetWeight,
+    comments: normalizeComments((value as AppState).comments),
+    plateauStartedAt: Number.isFinite((value as { plateauStartedAt?: unknown }).plateauStartedAt)
+      ? (value as { plateauStartedAt?: number }).plateauStartedAt ?? null
+      : null,
+    lastConfirmedMilestone: Number.isFinite((value as { lastConfirmedMilestone?: unknown }).lastConfirmedMilestone)
+      ? (value as { lastConfirmedMilestone?: number }).lastConfirmedMilestone ?? null
+      : null,
+    plateauStartWeight: Number.isFinite((value as { plateauStartWeight?: unknown }).plateauStartWeight)
+      ? (value as { plateauStartWeight?: number }).plateauStartWeight ?? null
+      : null,
     entries: hasJune27
       ? normalizedEntries
       : [{ id: 'restore-2026-06-27', date: Date.parse('2026-06-27T12:00:00+03:00'), weight: 145.7 }, ...normalizedEntries].sort(
@@ -127,6 +171,44 @@ export function saveCloudMeta(meta: Partial<CloudMeta>): CloudMeta {
   writeJson(CLOUD_META_KEY, next)
 
   return next
+}
+
+export function exportCloudSnapshot(): CloudSnapshot {
+  return {
+    cache: loadCachedState() ?? loadInitialState(),
+    meta: loadCloudMeta(),
+  }
+}
+
+export function importCloudSnapshot(value: unknown): CloudSnapshot {
+  const snapshot = typeof value === 'string' ? JSON.parse(value) as CloudSnapshot : value as CloudSnapshot
+
+  if (!snapshot || typeof snapshot !== 'object') {
+    throw new Error('Cloud snapshot is invalid.')
+  }
+
+  const cache = normalizeState((snapshot as CloudSnapshot).cache)
+  const meta = {
+    ...DEFAULT_META,
+    ...loadCloudMeta(),
+    ...(snapshot as CloudSnapshot).meta,
+  }
+
+  saveCachedState(cache)
+  writeJson(CLOUD_META_KEY, {
+    cloudMode: Boolean(meta.cloudMode),
+    legacyMigrated: Boolean(meta.legacyMigrated),
+    lastSyncedAt: Number.isFinite(meta.lastSyncedAt) ? meta.lastSyncedAt : null,
+  })
+
+  return {
+    cache,
+    meta: {
+      cloudMode: Boolean(meta.cloudMode),
+      legacyMigrated: Boolean(meta.legacyMigrated),
+      lastSyncedAt: Number.isFinite(meta.lastSyncedAt) ? meta.lastSyncedAt : null,
+    },
+  }
 }
 
 export function loadInitialState(): AppState {

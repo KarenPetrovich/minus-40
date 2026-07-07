@@ -1,37 +1,64 @@
-import type { AppState } from '../core/types'
-import { formatWeight } from '../core/progress'
+﻿import type { AppState, CommentTargetType } from '../core/types'
+import { currentWeight, formatWeight, milestoneStatus } from '../core/progress'
+import { RoadmapNodeBadge } from './RoadmapNodeBadge'
 
-const ROADMAP_NODES = [
-  { key: 'start', x: 72, y: 52, kind: 'start', value: '150,5', caption: '\u0421\u0422\u0410\u0420\u0422', tone: 'secondary', icon: 'flag' },
-  { key: '140', x: 228, y: 52, kind: 'done', value: '140', caption: '', tone: 'secondary', icon: 'check' },
-  { key: '130', x: 72, y: 152, kind: 'current', value: '130', caption: '', tone: 'secondary', icon: 'check' },
-  { key: '120', x: 228, y: 252, kind: 'locked', value: '120', caption: '', tone: 'error', icon: 'lock' },
-  { key: '115', x: 72, y: 352, kind: 'locked', value: '115', caption: '', tone: 'error', icon: 'lock' },
-  { key: '110', x: 228, y: 452, kind: 'finish', value: '110', caption: '\u0424\u0418\u041d\u0418\u0428', tone: 'error', icon: 'flag' },
-] as const
+type RoadmapNode = {
+  key: string
+  x: number
+  y: number
+  weight: number
+  kind: 'start' | 'milestone' | 'finish'
+  value: string
+  caption: string
+  icon: string
+}
+
+type RoadmapPath = {
+  from: number
+  to: number
+  d: string
+}
+
+const ROADMAP_NODES: readonly RoadmapNode[] = [
+  { key: 'start', x: 72, y: 52, weight: 150.5, kind: 'start', value: '150,5', caption: 'СТАРТ', icon: 'flag' },
+  { key: '140', x: 228, y: 52, weight: 140, kind: 'milestone', value: '140', caption: '', icon: 'check' },
+  { key: '130', x: 72, y: 152, weight: 130, kind: 'milestone', value: '130', caption: '', icon: 'check' },
+  { key: '125', x: 110, y: 252, weight: 125, kind: 'milestone', value: '125', caption: '', icon: 'check' },
+  { key: '120', x: 228, y: 252, weight: 120, kind: 'milestone', value: '120', caption: '', icon: 'lock' },
+  { key: '115', x: 72, y: 352, weight: 115, kind: 'milestone', value: '115', caption: '', icon: 'lock' },
+  { key: '110', x: 228, y: 452, weight: 110, kind: 'finish', value: '110', caption: 'ФИНИШ', icon: 'flag' },
+]
+
+const ROADMAP_PATHS: readonly RoadmapPath[] = [
+  { from: 150.5, to: 140, d: 'M 72 52 L 228 52' },
+  { from: 140, to: 130, d: 'M 228 52 C 306 52, 306 152, 228 152 L 72 152' },
+  { from: 130, to: 125, d: 'M 72 152 C -6 152, -6 252, 72 252 L 110 252' },
+  { from: 125, to: 120, d: 'M 110 252 L 228 252' },
+  { from: 120, to: 115, d: 'M 228 252 C 306 252, 306 352, 228 352 L 72 352' },
+  { from: 115, to: 110, d: 'M 72 352 C -6 352, -6 452, 72 452 L 228 452' },
+]
+
+function iconForNode(kind: 'start' | 'milestone' | 'finish', isReached: boolean) {
+  if (kind === 'start') return 'flag'
+  if (kind === 'finish') return isReached ? 'flag' : 'lock'
+  return isReached ? 'check' : 'lock'
+}
 
 type Props = {
   state: AppState
   onSave: (start: number, target: number) => void
+  onOpenComment: (targetType: CommentTargetType, targetKey: string) => void
 }
 
-export function GoalsScreen({ state, onSave }: Props) {
+export function GoalsScreen({ state, onSave, onOpenComment }: Props) {
+  const current = currentWeight(state)
+  const statuses = current !== null
+    ? ROADMAP_NODES.map((node) => milestoneStatus(state, node.weight))
+    : ROADMAP_NODES.map(() => 'pending' as const)
+
   return (
     <div className="settings settings-roadmap-screen">
-      <header className="goals-topbar">
-        <div className="goals-topbar-left">
-          <span className="material-symbols-outlined goals-topbar-icon" aria-hidden="true">
-            close
-          </span>
-          <h1>{'\u041c\u0438\u043d\u0443\u0441 40'}</h1>
-        </div>
-        <div className="goals-topbar-right">
-          <span className="material-symbols-outlined goals-topbar-icon" aria-hidden="true">
-            more_vert
-          </span>
-        </div>
-      </header>
-      <h2 className="goals-title">{'\u041f\u0443\u0442\u044c'}</h2>
+      <h2 className="goals-title">Таков Путь</h2>
       <section className="settings-card goals-summary-card">
         <div className="goals-summary-lines" aria-label="Сводка целей">
           <div className="goals-summary-line">
@@ -47,36 +74,56 @@ export function GoalsScreen({ state, onSave }: Props) {
             </span>
           </div>
         </div>
-        <button
-          className="primary settings-edit"
-          onClick={() => onSave(state.startWeight, state.targetWeight)}
-        >
-          {'\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c'}
+        <button className="primary settings-edit" onClick={() => onSave(state.startWeight, state.targetWeight)}>
+          Изменить
         </button>
       </section>
       <section className="settings-card settings-roadmap">
         <div className="settings-roadmap-frame">
           <svg className="settings-roadmap-path" viewBox="0 0 300 600" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-            <path d="M 72 52 L 228 52" fill="none" stroke="#fc820c" strokeLinecap="round" strokeWidth="3" />
-            <path d="M 228 52 C 306 52, 306 152, 228 152 L 72 152" fill="none" stroke="#fc820c" strokeLinecap="round" strokeWidth="3" />
-            <path d="M 72 152 C -6 152, -6 252, 72 252 L 228 252" fill="none" stroke="#ba1a1a" strokeDasharray="6 6" strokeLinecap="round" strokeWidth="3" />
-            <path d="M 228 252 C 306 252, 306 352, 228 352 L 72 352" fill="none" stroke="#ba1a1a" strokeDasharray="6 6" strokeLinecap="round" strokeWidth="3" />
-            <path d="M 72 352 C -6 352, -6 452, 72 452 L 228 452" fill="none" stroke="#ba1a1a" strokeDasharray="6 6" strokeLinecap="round" strokeWidth="3" />
+            {ROADMAP_PATHS.map((path) => {
+              const isActive = current !== null && current <= path.to
+
+              return (
+                <path
+                  key={`${path.from}-${path.to}`}
+                  d={path.d}
+                  fill="none"
+                  stroke={isActive ? '#fc820c' : '#ba1a1a'}
+                  strokeDasharray={isActive ? undefined : '6 6'}
+                  strokeLinecap="round"
+                  strokeWidth="3"
+                />
+              )
+            })}
           </svg>
-          {ROADMAP_NODES.map((node) => (
-            <div
+          {ROADMAP_NODES.map((node, index) => (
+            <button
               key={`${node.key}-label`}
-              className={`roadmap-label roadmap-label-${node.kind}`}
-              style={{ left: `${(node.x / 300) * 100}%`, top: `${(node.y / 600) * 100}%` }}
+              type="button"
+              className={`roadmap-label roadmap-label-${node.kind} ${statuses[index] === 'reached' ? 'is-reached' : 'is-unreached'} ${statuses[index] === 'temporarilyLost' ? 'is-temporarily-lost' : ''} ${node.kind === 'start' ? 'is-start' : ''} ${node.key === '125' ? 'is-compact' : ''} roadmap-label-interactive`}
+              style={{ left: `${(node.x / 300) * 100}%`, top: `calc(${(node.y / 600) * 100}% - 26px)` }}
+              onClick={() => onOpenComment('milestone', String(node.weight))}
+              aria-label={`Комментарий к рубежу ${formatWeight(node.weight)}`}
             >
-              <div className={`roadmap-node ${node.kind}`}>
-                <span className="roadmap-node-icon material-symbols-outlined" aria-hidden="true">
-                  {node.icon}
-                </span>
-              </div>
-              <p className={node.tone === 'secondary' ? 'roadmap-label-value roadmap-label-value-secondary' : 'roadmap-label-value roadmap-label-value-error'}>{node.value}</p>
+              <RoadmapNodeBadge
+                kind={node.kind}
+                status={statuses[index] === 'reached' ? 'reached' : statuses[index] === 'temporarilyLost' ? 'temporarilyLost' : 'pending'}
+                icon={node.kind === 'milestone' && statuses[index] === 'temporarilyLost' ? 'lock' : iconForNode(node.kind, statuses[index] === 'reached')}
+              />
+              <p
+                className={
+                  statuses[index] === 'temporarilyLost'
+                    ? 'roadmap-label-value roadmap-label-value-error'
+                    : statuses[index] === 'reached'
+                      ? 'roadmap-label-value roadmap-label-value-secondary'
+                      : 'roadmap-label-value roadmap-label-value-error'
+                }
+              >
+                {node.value}
+              </p>
               {node.caption ? <p className="roadmap-label-text">{node.caption}</p> : null}
-            </div>
+            </button>
           ))}
         </div>
       </section>

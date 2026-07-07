@@ -2,66 +2,47 @@
 
 ## Start Here
 
-If you need quick orientation, read in this order:
+Read first:
 
-1. `docs/PROJECT_OPERATIONS.md`
-2. `docs/PROJECT_CONTEXT.md`
-3. `docs/CURRENT_DESIGN_SYSTEM.md`
-4. `docs/SKILLS_GUIDE.md`
-5. `docs/ROADMAP.md`
+- `docs/CODEX_START.md`
 
-Important:
-`docs/PROJECT_OPERATIONS.md` also contains the active working-efficiency rules that should be followed at the start of each session.
+Then open only the document needed for the task.
 
-## Live Documentation
+## Current Docs
 
-### Operations
+- `docs/CODEX_START.md`: main entry point for new Codex branches.
+- `docs/ARCHITECTURE.md`: actual code and data architecture.
+- `docs/PROJECT_OPERATIONS.md`: commands, env, deploy, CLI checks, repository hygiene.
+- `docs/PROJECT_CONTEXT.md`: product/user context.
+- `docs/ROADMAP.md`: current and future product stages.
+- `docs/PLATEAU_MODE.md`: canonical Plateau model.
+- `docs/CURRENT_DESIGN_SYSTEM.md`: visual system and UI tokens.
+- `docs/SKILLS_GUIDE.md`: project-local skill usage.
+- `docs/DECISION_LOG.md`: active decisions that still matter.
+- `docs/DEFINITION_OF_DONE.md`: completion criteria.
+- `docs/DEPLOY_VERCEL.md`: Vercel-specific notes.
 
-- `docs/PROJECT_OPERATIONS.md` - current stage, focus, deploy path, cleanup rule, working-efficiency rules
-- `docs/ARCHITECTURE.md` - actual code architecture and source tree
-- `docs/PROJECT_MAP.md` - this navigation file
+## Domain Knowledge
 
-### Product And Design
+Read only when the task needs product/behavioral context:
 
-- `docs/PROJECT_CONTEXT.md` - product intent and user context
-- `docs/CURRENT_DESIGN_SYSTEM.md` - active visual system
-- `docs/ROADMAP.md` - stage plan
-- `docs/DECISION_LOG.md` - accepted product decisions
-- `docs/DEFINITION_OF_DONE.md` - completion criteria
-
-### Skills
-
-- `docs/SKILLS_GUIDE.md` - when skills should auto-activate and which ones matter now
-- `Skills/` - local project skill packages
-
-### Domain Knowledge
-
-- `knowledge/WEIGHT_LOSS_MODEL.md`
-- `knowledge/COACHING_RULES.md`
-
-### Design Artifacts
-
-- `design/stitch/` - curated active Stitch-related source material
+- `knowledge/WEIGHT_LOSS_MODEL.md`;
+- `knowledge/COACHING_RULES.md`.
 
 ## Code Layout
 
-- `src/core/` - types, storage, store, calculations
-- `src/features/sync/` - cloud bootstrap and replace-state sync calls
-- `src/features/telegram/` - Telegram integration
-- `src/lib/supabase/` - Supabase client setup
-- `src/ui/` - screens and motion helpers
-- `src/styles/` - global styling and UI tokens
-- `public/` - static assets
-- `supabase/` - migrations, Edge Function, generated database docs
+- `src/core/`: types, storage, store, calculations.
+- `src/features/sync/`: cloud sync calls.
+- `src/features/telegram/`: Telegram WebApp integration.
+- `src/lib/supabase/`: Supabase client setup.
+- `src/ui/`: screens and preview shell.
+- `src/styles/`: app and preview styles.
+- `public/`: static assets.
+- `supabase/`: migrations, Edge Function, database docs.
+- `Skills/`: project-local skills.
 
-## Root Rule
+## Archive Rule
 
-The project root should contain only live project files.
+Temporary exports, screenshots, logs, raw research, and obsolete docs belong outside the active working set.
 
-Temporary screenshots, logs, raw exports, outdated docs, and other disposable artifacts belong in:
-
-- `C:\Future\Минус40_архив`
-
-## Path Rule
-
-Treat `C:\Future\Минус 40` as the project root.
+Never include `.env*`, `node_modules`, `dist`, `.git`, `.vercel`, logs, or screenshots in handoff archives unless explicitly requested.
