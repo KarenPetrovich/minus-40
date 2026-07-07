@@ -88,7 +88,7 @@ Real cloud data lives in Supabase tables:
 
 There is no separate snapshot object/table in Supabase.
 
-For `/dev-preview`, the local dev server assembles a snapshot from `app_users + weight_entries`, writes it into browser `localStorage` as `minus40.cloud-cache`, and writes metadata into `minus40.cloud-meta`.
+For `/dev-preview`, the local dev server assembles a snapshot from `app_users + weight_entries + comments`, writes it into browser `localStorage` as `minus40.cloud-cache`, and writes metadata into `minus40.cloud-meta`.
 
 Plateau fields in the app state:
 

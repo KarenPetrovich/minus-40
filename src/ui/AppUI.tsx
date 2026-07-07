@@ -1,5 +1,5 @@
 ﻿import { Fragment, useEffect, useRef, useState } from 'react'
-import type { AppState, Screen } from '../core/types'
+import type { AppState, CommentTargetType, Screen } from '../core/types'
 import {
   averagePeriodChange,
   clamp,
@@ -38,6 +38,9 @@ type Props = {
   onAdd: (weight: number) => void
   onDelete: (id: string) => void
   onSettings: (start: number, target: number) => void
+  onGetComment: (targetType: CommentTargetType, targetKey: string) => { id: string; text: string } | null
+  onUpsertComment: (targetType: CommentTargetType, targetKey: string, text: string) => void
+  onDeleteComment: (targetType: CommentTargetType, targetKey: string) => void
   initialScreen?: Screen
   stageOverride?: 'cut' | 'plateau'
   nowOverride?: number
@@ -212,6 +215,84 @@ function DialogFrame({
   )
 }
 
+type CommentTarget = {
+  type: 'milestone' | 'weight_entry'
+  key: string
+  title: string
+  subtitle: string
+}
+
+function CommentDialog({
+  target,
+  initialText,
+  onClose,
+  onSave,
+  onDelete,
+}: {
+  target: CommentTarget
+  initialText: string
+  onClose: () => void
+  onSave: (text: string) => void
+  onDelete: () => void
+}) {
+  const [value, setValue] = useState(initialText)
+
+  useEffect(() => {
+    setValue(initialText)
+  }, [initialText, target.key, target.type])
+
+  const trimmed = value.trim()
+
+  return (
+    <DialogFrame className="comment-dialog" onClose={onClose}>
+      {(requestClose) => (
+        <form
+          onSubmit={(event) => {
+            event.preventDefault()
+
+            if (trimmed) {
+              onSave(trimmed)
+            } else {
+              onDelete()
+            }
+
+            requestClose()
+          }}
+        >
+          <button className="close" type="button" onClick={requestClose} aria-label="Закрыть">
+            ×
+          </button>
+          <label>КОММЕНТАРИЙ</label>
+          <h1>{target.title}</h1>
+          <p className="comment-dialog-subtitle">{target.subtitle}</p>
+          <textarea
+            autoFocus
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            placeholder="Добавьте комментарий..."
+          />
+          <div className="comment-dialog-actions">
+            <button
+              className="secondary"
+              type="button"
+              onClick={() => {
+                onDelete()
+                requestClose()
+              }}
+              disabled={!trimmed && initialText.trim().length === 0}
+            >
+              Удалить
+            </button>
+            <button className="primary" type="submit">
+              Сохранить
+            </button>
+          </div>
+        </form>
+      )}
+    </DialogFrame>
+  )
+}
+
 function Layout({
   screen,
   setScreen,
@@ -265,7 +346,7 @@ function Layout({
     <>
       {brandedHeader && shellVariant === 'default' ? (
         <header className="app-header app-header-brand">
-          <img className="brand-mark brand-logo" src="/brand-logo.png" alt="?????????????? ?????????? 40" data-brand-mark={BRAND_PLACEHOLDER_MARK} />
+          <img className="brand-mark brand-logo" src="/brand-logo.png" alt="Логотип Минус 40" data-brand-mark={BRAND_PLACEHOLDER_MARK} />
         </header>
       ) : brandedHeader && shellVariant === 'plateau' ? (
         <header className="app-header app-header-plateau">
@@ -448,7 +529,15 @@ function Overview({ state, stageOverride, nowOverride }: { state: AppState; stag
   )
 }
 
-function History({ state, onDelete }: { state: AppState; onDelete: (id: string) => void }) {
+function History({
+  state,
+  onDelete,
+  onOpenComment,
+}: {
+  state: AppState
+  onDelete: (id: string) => void
+  onOpenComment: (entryId: string, date: number) => void
+}) {
   const [range, setRange] = useState<HistoryRange>('week')
   const [filter, setFilter] = useState<'all' | 'loss' | 'gain'>('all')
   const extremes = historyExtremes(state.entries, range)
@@ -567,6 +656,17 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
                 <span className="history-date">
                   <b>{formatDate(entry.date, true)}</b>
                 </span>
+                <button
+                  type="button"
+                  className="history-comment-trigger"
+                  aria-label={`Комментарий к дню ${formatDate(entry.date, true)}`}
+                  onClick={() => {
+                    triggerImpact('light')
+                    onOpenComment(entry.id, entry.date)
+                  }}
+                >
+                  ...
+                </button>
                 <strong>{formatWeight(entry.weight)}</strong>
                 <em className={`history-delta ${trendClass}`} aria-label={trendLabel}>
                   <span>{delta === null ? '\u0421\u0442\u0430\u0440\u0442' : formatDelta(delta)}</span>
@@ -592,11 +692,13 @@ function History({ state, onDelete }: { state: AppState; onDelete: (id: string) 
 function Settings({
   state,
   onSave,
+  onOpenComment,
 }: {
   state: AppState
   onSave: (start: number, target: number) => void
+  onOpenComment: (targetType: CommentTargetType, targetKey: string) => void
 }) {
-  return <GoalsScreen state={state} onSave={onSave} />
+  return <GoalsScreen state={state} onSave={onSave} onOpenComment={onOpenComment} />
 }
 
 function GraphScreen({ state }: { state: AppState }) {
@@ -781,8 +883,8 @@ function AddDialog({ onClose, onAdd }: { onClose: () => void; onAdd: (value: num
             save(requestClose)
           }}
         >
-          <button className="close" type="button" onClick={requestClose}>
-            ?
+          <button className="close" type="button" onClick={requestClose} aria-label="Закрыть">
+            ×
           </button>
           <label>НОВЫЙ ЗАМЕР</label>
           <input
@@ -830,10 +932,22 @@ function MilestoneDialog({ value, onClose }: { value: number; onClose: () => voi
   )
 }
 
-export function AppUI({ state, onAdd, onDelete, onSettings, initialScreen = 'overview', stageOverride, nowOverride }: Props) {
+export function AppUI({
+  state,
+  onAdd,
+  onDelete,
+  onSettings,
+  onGetComment,
+  onUpsertComment,
+  onDeleteComment,
+  initialScreen = 'overview',
+  stageOverride,
+  nowOverride,
+}: Props) {
   const [screen, setScreen] = useState<Screen>(initialScreen)
   const [adding, setAdding] = useState(false)
   const [reached, setReached] = useState<number | null>(null)
+  const [commentTarget, setCommentTarget] = useState<CommentTarget | null>(null)
 
   const add = (weight: number) => {
     const before = nextMilestone(state)
@@ -844,15 +958,35 @@ export function AppUI({ state, onAdd, onDelete, onSettings, initialScreen = 'ove
 
   const openAdd = () => setAdding(true)
 
+  const openMilestoneComment = (_targetType: CommentTargetType, targetKey: string) => {
+    const milestoneWeight = Number.parseFloat(targetKey)
+
+    setCommentTarget({
+      type: 'milestone',
+      key: targetKey,
+      title: Number.isFinite(milestoneWeight) ? `Рубеж ${formatWeight(milestoneWeight)}` : 'Рубеж',
+      subtitle: 'Нажмите, чтобы добавить или изменить комментарий.',
+    })
+  }
+
+  const openEntryComment = (entryId: string, date: number) => {
+    setCommentTarget({
+      type: 'weight_entry',
+      key: entryId,
+      title: 'Комментарий дня',
+      subtitle: formatDate(date, true),
+    })
+  }
+
   const view =
     screen === 'overview' ? (
       <Overview state={state} stageOverride={stageOverride} nowOverride={nowOverride} />
     ) : screen === 'history' ? (
-      <History state={state} onDelete={onDelete} />
+      <History state={state} onDelete={onDelete} onOpenComment={openEntryComment} />
     ) : screen === 'graph' ? (
       <GraphScreen state={state} />
     ) : (
-      <Settings state={state} onSave={onSettings} />
+      <Settings state={state} onSave={onSettings} onOpenComment={openMilestoneComment} />
     )
 
   return (
@@ -866,6 +1000,15 @@ export function AppUI({ state, onAdd, onDelete, onSettings, initialScreen = 'ove
       <ScreenTransition screen={screen}>{view}</ScreenTransition>
       {adding && <AddDialog onClose={() => setAdding(false)} onAdd={add} />}
       {reached !== null && <MilestoneDialog value={reached} onClose={() => setReached(null)} />}
+      {commentTarget !== null ? (
+        <CommentDialog
+          target={commentTarget}
+          initialText={onGetComment(commentTarget.type, commentTarget.key)?.text ?? ''}
+          onClose={() => setCommentTarget(null)}
+          onSave={(text) => onUpsertComment(commentTarget.type, commentTarget.key, text)}
+          onDelete={() => onDeleteComment(commentTarget.type, commentTarget.key)}
+        />
+      ) : null}
     </Layout>
   )
 }

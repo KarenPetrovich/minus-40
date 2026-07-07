@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { AppState, Screen } from '../core/types'
+import type { AppState, CommentTargetType, Screen } from '../core/types'
 import type { CloudMeta } from '../core/storage'
 import type { RefreshOutcome } from '../core/store'
 import { AppUI } from './AppUI'
@@ -12,6 +12,9 @@ type Props = {
   onAdd: (weight: number) => void
   onDelete: (id: string) => void
   onSettings: (start: number, target: number) => void
+  onGetComment: (targetType: CommentTargetType, targetKey: string) => { id: string; text: string } | null
+  onUpsertComment: (targetType: CommentTargetType, targetKey: string, text: string) => void
+  onDeleteComment: (targetType: CommentTargetType, targetKey: string) => void
 }
 
 function formatSyncedAt(value: number | null): string {
@@ -25,7 +28,18 @@ function formatSyncedAt(value: number | null): string {
   }).format(new Date(value))
 }
 
-export function DeveloperPreviewPage({ state, initialScreen, cloudMeta, onRefresh, onAdd, onDelete, onSettings }: Props) {
+export function DeveloperPreviewPage({
+  state,
+  initialScreen,
+  cloudMeta,
+  onRefresh,
+  onAdd,
+  onDelete,
+  onSettings,
+  onGetComment,
+  onUpsertComment,
+  onDeleteComment,
+}: Props) {
   const [stageOverride, setStageOverride] = useState<'cut' | 'plateau' | null>('cut')
   const [dayOffset, setDayOffset] = useState(0)
   const [refreshStatus, setRefreshStatus] = useState<RefreshOutcome | 'idle' | 'pending'>('idle')
@@ -121,6 +135,9 @@ export function DeveloperPreviewPage({ state, initialScreen, cloudMeta, onRefres
             onAdd={onAdd}
             onDelete={onDelete}
             onSettings={onSettings}
+            onGetComment={onGetComment}
+            onUpsertComment={onUpsertComment}
+            onDeleteComment={onDeleteComment}
             initialScreen={initialScreen}
             stageOverride={stageOverride ?? undefined}
             nowOverride={nowOverride}

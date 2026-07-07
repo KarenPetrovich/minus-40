@@ -60,7 +60,7 @@ Production sync uses Telegram identity:
 ```text
 Telegram WebApp initData
 -> Supabase Edge Function telegram-sync
--> app_users + weight_entries
+-> app_users + weight_entries + comments
 -> AppState
 -> minus40.cloud-cache
 -> React UI
@@ -73,7 +73,7 @@ The Edge Function validates raw Telegram `initData` server-side before reading o
 Developer Preview uses a local read-only snapshot path:
 
 ```text
-Supabase app_users + weight_entries
+Supabase app_users + weight_entries + comments
 -> assembled snapshot
 -> minus40.cloud-cache
 -> /dev-preview
@@ -82,7 +82,7 @@ Supabase app_users + weight_entries
 Important details:
 
 - there is no separate snapshot object/table in Supabase;
-- the snapshot is assembled from `app_users` and `weight_entries`;
+- the snapshot is assembled from `app_users`, `weight_entries`, and `comments`;
 - `minus40.cloud-cache` is browser `localStorage`;
 - `minus40.cloud-meta` stores snapshot metadata such as `lastSyncedAt`;
 - `/dev-preview` refreshes Supabase data only when the user presses `Обновить данные`;
@@ -131,6 +131,13 @@ Current AppState plateau facts:
 These are stored facts. Stage, fill count, active milestone, temporarily lost milestone, and Goals statuses are derived in `progress.ts`.
 
 If a live Supabase schema does not yet expose plateau columns, dev snapshot assembly may use `null` fallback values for these fields. The app must still render safely.
+
+App comments:
+
+- comments are stored as a separate cloud entity, not inside weight entries;
+- comments are attached to either a milestone or a weight entry;
+- `comments` is included in AppState snapshots so local cache and dev preview can round-trip it safely;
+- missing comments data falls back to an empty list.
 
 ## Single UI Tree Rule
 

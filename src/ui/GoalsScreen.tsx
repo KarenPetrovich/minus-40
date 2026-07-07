@@ -1,4 +1,4 @@
-import type { AppState } from '../core/types'
+﻿import type { AppState, CommentTargetType } from '../core/types'
 import { currentWeight, formatWeight, milestoneStatus } from '../core/progress'
 import { RoadmapNodeBadge } from './RoadmapNodeBadge'
 
@@ -47,9 +47,10 @@ function iconForNode(kind: 'start' | 'milestone' | 'finish', isReached: boolean)
 type Props = {
   state: AppState
   onSave: (start: number, target: number) => void
+  onOpenComment: (targetType: CommentTargetType, targetKey: string) => void
 }
 
-export function GoalsScreen({ state, onSave }: Props) {
+export function GoalsScreen({ state, onSave, onOpenComment }: Props) {
   const current = currentWeight(state)
   const statuses = current !== null
     ? ROADMAP_NODES.map((node) => milestoneStatus(state, node.weight))
@@ -97,10 +98,13 @@ export function GoalsScreen({ state, onSave }: Props) {
             })}
           </svg>
           {ROADMAP_NODES.map((node, index) => (
-            <div
+            <button
               key={`${node.key}-label`}
-              className={`roadmap-label roadmap-label-${node.kind} ${statuses[index] === 'reached' ? 'is-reached' : 'is-unreached'} ${statuses[index] === 'temporarilyLost' ? 'is-temporarily-lost' : ''} ${node.kind === 'start' ? 'is-start' : ''} ${node.key === '125' ? 'is-compact' : ''}`}
+              type="button"
+              className={`roadmap-label roadmap-label-${node.kind} ${statuses[index] === 'reached' ? 'is-reached' : 'is-unreached'} ${statuses[index] === 'temporarilyLost' ? 'is-temporarily-lost' : ''} ${node.kind === 'start' ? 'is-start' : ''} ${node.key === '125' ? 'is-compact' : ''} roadmap-label-interactive`}
               style={{ left: `${(node.x / 300) * 100}%`, top: `calc(${(node.y / 600) * 100}% - 26px)` }}
+              onClick={() => onOpenComment('milestone', String(node.weight))}
+              aria-label={`Комментарий к рубежу ${formatWeight(node.weight)}`}
             >
               <RoadmapNodeBadge
                 kind={node.kind}
@@ -119,7 +123,7 @@ export function GoalsScreen({ state, onSave }: Props) {
                 {node.value}
               </p>
               {node.caption ? <p className="roadmap-label-text">{node.caption}</p> : null}
-            </div>
+            </button>
           ))}
         </div>
       </section>

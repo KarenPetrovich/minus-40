@@ -787,9 +787,9 @@ nav button.active {
 
 .history article {
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr) minmax(52px, 68px) 24px;
+  grid-template-columns: 88px 28px minmax(0, 1fr) minmax(52px, 68px) 24px;
   align-items: center;
-  column-gap: 10px;
+  column-gap: 8px;
   padding: 12px 4px 12px 0;
   border-width: 0 0 1px;
 }
@@ -807,6 +807,33 @@ nav button.active {
   font-weight: 700;
   letter-spacing: -.01em;
   text-align: right;
+}
+
+.history-comment-trigger {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #a9c0ff;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #edf3ff 0%, #dfe9ff 100%);
+  color: #1a1c1e;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 3px 8px rgba(0, 50, 138, 0.12);
+}
+
+.history article .history-comment-trigger {
+  color: #111111;
+  font-size: 16px;
+  opacity: 1;
+}
+
+.history-comment-trigger:active {
+  transform: scale(.96);
 }
 
 .history-delta {
@@ -1358,6 +1385,19 @@ nav button.active {
   z-index: 1;
 }
 
+.roadmap-label-interactive {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.roadmap-label-interactive:focus-visible {
+  outline: 2px solid #00328a;
+  outline-offset: 4px;
+  border-radius: 16px;
+}
+
 .roadmap-node {
   width: 54px;
   height: 54px;
@@ -1613,6 +1653,10 @@ nav button.active {
   text-align: center;
 }
 
+.comment-dialog section {
+  text-align: left;
+}
+
 .dialog label {
   color: #737685;
   font-size: 11px;
@@ -1637,14 +1681,95 @@ nav button.active {
   color: #737685;
 }
 
+.comment-dialog textarea {
+  display: block;
+  width: 100%;
+  min-height: 126px;
+  margin: 16px 0 0;
+  padding: 14px 16px;
+  border: 1px solid #dbe0ef;
+  border-radius: 16px;
+  outline: 0;
+  resize: none;
+  color: #1a1c1e;
+  font: inherit;
+  line-height: 1.4;
+  background: #f8f9ff;
+}
+
+.comment-dialog textarea:focus {
+  border-color: #00328a;
+  box-shadow: 0 0 0 3px rgba(0, 50, 138, 0.08);
+}
+
+.comment-dialog h1 {
+  margin: 8px 0 4px;
+  color: #00328a;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.comment-dialog-subtitle {
+  margin: 0;
+  color: #737685;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.comment-dialog-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.comment-dialog-actions .secondary,
+.comment-dialog-actions .primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  flex: 1;
+  height: 46px;
+  border-radius: 14px;
+  padding-inline: 16px;
+  margin-top: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.comment-dialog-actions .secondary {
+  border: 1px solid #d8def0;
+  background: #f8f9ff;
+  color: #00328a;
+  box-shadow: 0 1px 2px rgba(0, 50, 138, 0.04);
+}
+
+.comment-dialog-actions .secondary:active,
+.comment-dialog-actions .primary:active {
+  transform: scale(.99);
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 999px;
+}
+
 .close {
   position: absolute;
-  top: 14px;
-  right: 18px;
+  top: 4px;
+  right: 6px;
   border: 0;
   background: none;
-  color: #737685;
-  font-size: 28px;
+  color: #00328a;
+  font-size: 42px;
+  font-weight: 700;
 }
 
 .milestone-dialog section {
@@ -1740,7 +1865,7 @@ nav button:active,
 
   .history article {
     column-gap: 8px;
-    grid-template-columns: 76px minmax(0, 1fr) minmax(48px, 60px) 22px;
+    grid-template-columns: 76px 26px minmax(0, 1fr) minmax(48px, 60px) 22px;
   }
 
   .settings-metrics {

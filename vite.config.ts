@@ -23,6 +23,16 @@ type WeightEntry = {
   weight: number
 }
 
+type CommentRow = {
+  id: string
+  user_id: string
+  target_type: 'milestone' | 'weight_entry'
+  target_key: string
+  text: string
+  created_at: string
+  updated_at: string
+}
+
 type UserRow = {
   id: string
   start_weight: number
@@ -103,6 +113,22 @@ export default defineConfig(({ mode }) => {
                 return
               }
 
+              let comments: CommentRow[] = []
+              const { data: commentRows, error: commentsError } = await supabase
+                .from('comments')
+                .select('id, user_id, target_type, target_key, text, created_at, updated_at')
+                .eq('user_id', user.id)
+                .order('updated_at', { ascending: false })
+
+              if (commentsError && commentsError.code !== '42P01') {
+                res.statusCode = 500
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({ error: commentsError.message }))
+                return
+              }
+
+              comments = commentRows ?? []
+
               const payload = {
                 cache: {
                   startWeight: Number(user.start_weight),
@@ -110,6 +136,15 @@ export default defineConfig(({ mode }) => {
                   plateauStartedAt: null,
                   lastConfirmedMilestone: null,
                   plateauStartWeight: null,
+                  comments: comments.map((comment) => ({
+                    id: comment.id,
+                    userId: comment.user_id,
+                    targetType: comment.target_type,
+                    targetKey: comment.target_key,
+                    text: comment.text,
+                    createdAt: new Date(comment.created_at).getTime(),
+                    updatedAt: new Date(comment.updated_at).getTime(),
+                  })),
                   entries: (entries ?? []).map((entry: WeightEntry) => ({
                     id: entry.id,
                     date: new Date(entry.measured_at).getTime(),

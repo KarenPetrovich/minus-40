@@ -51,7 +51,7 @@ GET /__dev/cloud-snapshot
 That endpoint assembles a read-only snapshot from:
 
 ```text
-Supabase app_users + weight_entries
+Supabase app_users + weight_entries + comments
 ```
 
 Then the app writes:

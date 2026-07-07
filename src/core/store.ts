@@ -7,7 +7,7 @@ import {
   saveCachedState,
   saveCloudMeta,
 } from './storage'
-import type { AppState } from './types'
+import type { AppState, Comment, CommentTargetType } from './types'
 import { bootstrapCloudState, canUseCloudSync, replaceCloudState } from '../features/sync/cloud'
 import { getTelegramInitData } from '../features/telegram/webapp'
 import { currentStage, routeMilestones } from './progress'
@@ -26,6 +26,12 @@ export type RefreshOutcome = {
 }
 
 type StoreState = AppState & PlateauFacts
+
+export type CommentDraft = {
+  targetType: CommentTargetType
+  targetKey: string
+  text: string
+}
 
 const withPlateauFacts = (
   nextState: AppState,
@@ -67,6 +73,59 @@ function commitMilestoneProgress(previousState: StoreState, nextState: StoreStat
     plateauStartedAt: date,
     lastConfirmedMilestone: milestone,
     plateauStartWeight: weight,
+  }
+}
+
+function normalizeCommentText(text: string): string {
+  return text.trim()
+}
+
+function upsertCommentInState(currentState: StoreState, draft: CommentDraft): StoreState {
+  const text = normalizeCommentText(draft.text)
+  const nextComments = currentState.comments.filter(
+    (comment) => !(comment.targetType === draft.targetType && comment.targetKey === draft.targetKey),
+  )
+
+  if (!text) {
+    return {
+      ...currentState,
+      comments: nextComments,
+    }
+  }
+
+  const existing = currentState.comments.find(
+    (comment) => comment.targetType === draft.targetType && comment.targetKey === draft.targetKey,
+  )
+  const now = Date.now()
+
+  const nextComment: Comment = existing
+    ? {
+        ...existing,
+        text,
+        updatedAt: now,
+      }
+    : {
+        id: crypto.randomUUID(),
+        userId: 'local',
+        targetType: draft.targetType,
+        targetKey: draft.targetKey,
+        text,
+        createdAt: now,
+        updatedAt: now,
+      }
+
+  return {
+    ...currentState,
+    comments: [...nextComments, nextComment],
+  }
+}
+
+function deleteCommentInState(currentState: StoreState, targetType: CommentTargetType, targetKey: string): StoreState {
+  return {
+    ...currentState,
+    comments: currentState.comments.filter(
+      (comment) => !(comment.targetType === targetType && comment.targetKey === targetKey),
+    ),
   }
 }
 
@@ -199,6 +258,27 @@ export const weightStore = {
   },
   importState(nextState: AppState) {
     state = withPlateauFacts(nextState, state)
+    emit()
+    queueCloudReplace(state)
+  },
+  getCommentByTarget(targetType: CommentTargetType, targetKey: string) {
+    return state.comments.find((comment) => comment.targetType === targetType && comment.targetKey === targetKey) ?? null
+  },
+  upsertComment(draft: CommentDraft) {
+    state = withPlateauFacts(upsertCommentInState(state, draft), state)
+    emit()
+    queueCloudReplace(state)
+  },
+  deleteComment(targetType: CommentTargetType, targetKey: string) {
+    state = withPlateauFacts(deleteCommentInState(state, targetType, targetKey), state)
+    emit()
+    queueCloudReplace(state)
+  },
+  trimEmptyComments() {
+    state = withPlateauFacts({
+      ...state,
+      comments: state.comments.filter((comment) => comment.text.trim().length > 0),
+    }, state)
     emit()
     queueCloudReplace(state)
   },

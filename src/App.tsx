@@ -111,6 +111,17 @@ export default function App() {
         onAdd={weightStore.addWeight}
         onDelete={weightStore.deleteEntry}
         onSettings={weightStore.updateSettings}
+        onGetComment={(targetType, targetKey) => {
+          const comment = weightStore.getCommentByTarget(targetType, targetKey)
+
+          return comment ? { id: comment.id, text: comment.text } : null
+        }}
+        onUpsertComment={(targetType, targetKey, text) => {
+          weightStore.upsertComment({ targetType, targetKey, text })
+        }}
+        onDeleteComment={(targetType, targetKey) => {
+          weightStore.deleteComment(targetType, targetKey)
+        }}
       />
     )
   }
@@ -121,6 +132,17 @@ export default function App() {
       onAdd={weightStore.addWeight}
       onDelete={weightStore.deleteEntry}
       onSettings={weightStore.updateSettings}
+      onGetComment={(targetType, targetKey) => {
+        const comment = weightStore.getCommentByTarget(targetType, targetKey)
+
+        return comment ? { id: comment.id, text: comment.text } : null
+      }}
+      onUpsertComment={(targetType, targetKey, text) => {
+        weightStore.upsertComment({ targetType, targetKey, text })
+      }}
+      onDeleteComment={(targetType, targetKey) => {
+        weightStore.deleteComment(targetType, targetKey)
+      }}
     />
   )
 }
