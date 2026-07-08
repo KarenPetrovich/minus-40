@@ -560,11 +560,23 @@ function History({
 }) {
   const [range, setRange] = useState<HistoryRange>('week')
   const [filter, setFilter] = useState<'all' | 'loss' | 'gain'>('all')
+  const [commentsOnly, setCommentsOnly] = useState(false)
   const extremes = historyExtremes(state.entries, range)
-  const visibleEntries = state.entries.filter((entry, index) => {
-    if (filter === 'all') return true
+  const commentEntryIds = new Set(
+    state.comments
+      .filter((comment) => comment.targetType === 'weight_entry')
+      .map((comment) => comment.targetKey),
+  )
+  const rangeEntries = filterEntriesByRange(state.entries, range)
+  const visibleEntries = rangeEntries.filter((entry) => {
+    const originalIndex = state.entries.findIndex((item) => item.id === entry.id)
+    const delta = compareEntries(entry, state.entries[originalIndex + 1])
 
-    const delta = compareEntries(entry, state.entries[index + 1])
+    if (commentsOnly && !commentEntryIds.has(entry.id)) {
+      return false
+    }
+
+    if (filter === 'all') return true
 
     if (delta === null) return false
 
@@ -574,8 +586,13 @@ function History({
     const originalIndex = state.entries.findIndex((item) => item.id === entry.id)
     const delta = compareEntries(entry, state.entries[originalIndex + 1])
 
-    return { entry, delta }
+    return { entry, delta, hasComment: commentEntryIds.has(entry.id) }
   })
+  const currentPeriodMonthLabel = rangeEntries[0]
+    ? formatMonth(rangeEntries[0].date)
+    : state.entries[0]
+      ? formatMonth(state.entries[0].date)
+      : null
 
   return (
     <div className="history">
@@ -651,12 +668,30 @@ function History({
           ))}
         </div>
       </section>
+      {state.entries.length > 0 && currentPeriodMonthLabel ? (
+        <div className="history-month-row">
+          <div className="history-month">{currentPeriodMonthLabel}</div>
+          <button
+            type="button"
+            className={`history-comment-filter-toggle${commentsOnly ? ' is-active' : ''}`}
+            aria-pressed={commentsOnly}
+            aria-label={commentsOnly ? 'Показать все дни' : 'Показать только дни с комментариями'}
+            onClick={() => setCommentsOnly((value) => !value)}
+          >
+            ...
+          </button>
+        </div>
+      ) : null}
       {state.entries.length === 0 ? (
         <p className="empty">{'\u041f\u043e\u043a\u0430 \u043d\u0435\u0442 \u0437\u0430\u043c\u0435\u0440\u043e\u0432.'}</p>
       ) : visibleEntries.length === 0 ? (
-        <p className="empty">{'\u0414\u043b\u044f \u044d\u0442\u043e\u0433\u043e \u0444\u0438\u043b\u044c\u0442\u0440\u0430 \u043f\u043e\u043a\u0430 \u043d\u0435\u0442 \u0437\u0430\u043c\u0435\u0440\u043e\u0432.'}</p>
+        <p className="empty">
+          {commentsOnly
+            ? 'В этом периоде пока нет дней с комментариями.'
+            : '\u0414\u043b\u044f \u044d\u0442\u043e\u0433\u043e \u0444\u0438\u043b\u044c\u0442\u0440\u0430 \u043f\u043e\u043a\u0430 \u043d\u0435\u0442 \u0437\u0430\u043c\u0435\u0440\u043e\u0432.'}
+        </p>
       ) : (
-        visibleRows.map(({ entry, delta }, index) => {
+        visibleRows.map(({ entry, delta, hasComment }, index) => {
           const trendClass = delta === null ? 'is-neutral' : delta > 0 ? 'is-gain' : delta < 0 ? 'is-loss' : 'is-neutral'
           const trendLabel =
             delta === null
@@ -670,7 +705,7 @@ function History({
           return (
             <Fragment key={entry.id}>
               {(index === 0 || formatMonth(visibleRows[index - 1].entry.date) !== formatMonth(entry.date)) && (
-                <div className="history-month">{formatMonth(entry.date)}</div>
+                index > 0 ? <div className="history-month">{formatMonth(entry.date)}</div> : null
               )}
               <article>
                 <span className="history-date">
@@ -678,7 +713,7 @@ function History({
                 </span>
                 <button
                   type="button"
-                  className="history-comment-trigger"
+                  className={`history-comment-trigger${hasComment ? ' has-comment' : ''}`}
                   aria-label={`Комментарий к дню ${formatDate(entry.date, true)}`}
                   onClick={() => {
                     triggerImpact('light')

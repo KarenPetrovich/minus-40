@@ -776,8 +776,53 @@ nav button.active {
   color: #8d4242;
 }
 
-.history-month {
+.history-comment-filter-toggle {
+  width: 34px;
+  height: 20px;
+  padding: 0;
+  flex: 0 0 auto;
+  position: relative;
+  border: 1px solid #b9caff;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #f9fbff 0%, #edf3ff 100%);
+  color: transparent;
+  box-shadow: 0 2px 6px rgba(0, 50, 138, 0.10);
+}
+
+.history-comment-filter-toggle::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #0f1115;
+  box-shadow: -6px 0 0 #0f1115, 6px 0 0 #0f1115;
+  transform: translate(-50%, -50%);
+}
+
+.history-comment-filter-toggle.is-active {
+  background: #00328a;
+  border-color: #00328a;
+  box-shadow: 0 4px 10px rgba(0, 50, 138, 0.18);
+}
+
+.history-comment-filter-toggle.is-active::before {
+  background: #ffffff;
+  box-shadow: -6px 0 0 #ffffff, 6px 0 0 #ffffff;
+}
+
+.history-month-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 14px 0 6px;
+}
+
+.history-month {
+  margin: 0;
   color: #737685;
   font-size: 11px;
   font-weight: 800;
@@ -810,7 +855,7 @@ nav button.active {
 }
 
 .history article .history-comment-trigger {
-  width: 24px;
+  width: 28px;
   height: 16px;
   padding: 0;
   display: inline-flex;
@@ -840,6 +885,17 @@ nav button.active {
   background: #101114;
   box-shadow: -5px 0 0 #101114, 5px 0 0 #101114;
   transform: translate(-50%, -50%);
+}
+
+.history article .history-comment-trigger.has-comment {
+  background: #00328a;
+  border-color: #00328a;
+  box-shadow: 0 2px 6px rgba(0, 50, 138, 0.16);
+}
+
+.history article .history-comment-trigger.has-comment::before {
+  background: #ffffff;
+  box-shadow: -5px 0 0 #ffffff, 5px 0 0 #ffffff;
 }
 
 .history article .history-comment-trigger:active {
@@ -1898,7 +1954,7 @@ nav button:active,
 
   .history article {
     column-gap: 8px;
-    grid-template-columns: 76px 26px minmax(0, 1fr) minmax(48px, 60px) 22px;
+    grid-template-columns: 76px 30px minmax(0, 1fr) minmax(48px, 60px) 22px;
   }
 
   .settings-metrics {
