@@ -810,24 +810,24 @@ nav button.active {
 }
 
 .history article .history-comment-trigger {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 18px;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 1px solid #b2c6ff;
-  border-radius: 9px;
-  background: linear-gradient(180deg, #f7f9ff 0%, #e8efff 100%);
-  color: #111111;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #f9fbff 0%, #ecf2ff 100%);
+  color: #0f1115;
   font-size: 15px;
-  font-weight: 800;
-  letter-spacing: .02em;
-  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .06em;
+  line-height: .9;
   vertical-align: middle;
-  box-shadow: 0 3px 10px rgba(0, 50, 138, 0.14);
+  box-shadow: 0 1px 4px rgba(0, 50, 138, 0.10);
   opacity: 1;
-  line-height: 1;
+  transform: none;
 }
 
 .history article .history-comment-trigger:active {
