@@ -809,30 +809,28 @@ nav button.active {
   text-align: right;
 }
 
-.history-comment-trigger {
+.history article .history-comment-trigger {
   width: 28px;
   height: 28px;
   padding: 0;
-  border: 1px solid #a9c0ff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #b2c6ff;
   border-radius: 9px;
-  background: linear-gradient(180deg, #edf3ff 0%, #dfe9ff 100%);
-  color: #1a1c1e;
+  background: linear-gradient(180deg, #f7f9ff 0%, #e8efff 100%);
+  color: #111111;
   font-size: 15px;
   font-weight: 800;
-  letter-spacing: .1em;
+  letter-spacing: .02em;
   line-height: 1;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 3px 8px rgba(0, 50, 138, 0.12);
-}
-
-.history article .history-comment-trigger {
-  color: #111111;
-  font-size: 16px;
+  vertical-align: middle;
+  box-shadow: 0 3px 10px rgba(0, 50, 138, 0.14);
   opacity: 1;
+  line-height: 1;
 }
 
-.history-comment-trigger:active {
+.history article .history-comment-trigger:active {
   transform: scale(.96);
 }
 
