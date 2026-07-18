@@ -7,6 +7,12 @@ const DAY = 86_400_000
 
 export const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
 
+const startOfLocalDay = (value: number) => {
+  const date = new Date(value)
+
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+}
+
 export const currentWeight = (state: AppState) => state.entries[0]?.weight ?? null
 
 export const totalLost = (state: AppState) => {
@@ -101,7 +107,9 @@ export function plateauFillCount(state: AppState, now = Date.now(), segments = 7
     return 0
   }
 
-  const elapsedDays = Math.floor(clamp(now - startedAt, 0, endsAt - startedAt) / DAY)
+  const elapsedDays = Math.floor(
+    clamp(startOfLocalDay(now) - startOfLocalDay(startedAt), 0, PLATEAU_DURATION_DAYS * DAY) / DAY,
+  )
 
   return Math.max(0, Math.min(segments, elapsedDays))
 }
