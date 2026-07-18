@@ -1504,7 +1504,7 @@ nav button.active {
 }
 
 .roadmap-node.is-reached {
-  color: #964900;
+  color: #fc820c;
 }
 
 .roadmap-node.is-unreached {
@@ -1555,7 +1555,7 @@ nav button.active {
 }
 
 .roadmap-label-value-secondary {
-  color: #964900;
+  color: #fc820c;
 }
 
 .roadmap-label-value-error {
